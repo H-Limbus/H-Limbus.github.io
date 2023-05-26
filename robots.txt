@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /posts/
+Allow: /archives/
+Allow: /categories/
+Allow: /2023/
+Allow: /tags/
+Allow: /medias/
+Allow: /photography/
+
+Disallow: /js/
+Disallow: /css/
+Disallow: /libs/

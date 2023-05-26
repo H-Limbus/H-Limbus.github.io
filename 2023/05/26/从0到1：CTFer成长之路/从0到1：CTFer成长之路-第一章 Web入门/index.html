@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+
+
+<html lang="zh_CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="Limbus的个人博客" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>从0到1：CTFer成长之路-第一章 Web入门 |  Limbus&#39; Blog</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/favicon.png" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+<script>
+var _hmt = _hmt || [];
+(function() {
+	var hm = document.createElement("script");
+	hm.src = "https://hm.baidu.com/hm.js?afbc0b35e48d80d18aee387ad0d30121";
+	var s = document.getElementsByTagName("script")[0]; 
+	s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Limbus' Blog" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-从0到1：CTFer成长之路/从0到1：CTFer成长之路-第一章 Web入门"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  从0到1：CTFer成长之路-第一章 Web入门
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/05/26/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF-%E7%AC%AC%E4%B8%80%E7%AB%A0%20Web%E5%85%A5%E9%97%A8/" class="article-date">
+  <time datetime="2023-05-26T08:35:45.096Z" itemprop="datePublished">2023-05-26</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a> / <a class="article-category-link" href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF/">从0到1：CTFer成长之路</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">18 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h3 id="0x00-信息收集"><a href="#0x00-信息收集" class="headerlink" title="0x00 信息收集"></a>0x00 信息收集</h3><h4 id="1-分类"><a href="#1-分类" class="headerlink" title="1. 分类"></a>1. 分类</h4><h6 id="1-1敏感目录泄露"><a href="#1-1敏感目录泄露" class="headerlink" title="1.1敏感目录泄露"></a>1.1敏感目录泄露</h6><p>（1）git泄露</p>
+<ol>
+<li>常规git 泄露<br> 参赛者通过运用现成工具或者编写的脚本即可获取网站源码或flag</li>
+<li>git回滚<br> 当题目存在git 泄露时，flag（敏感）文件可能在修改中被删除或覆盖了，利用git reset命令来恢复到以前的版本。除了使用 git reset，更简单的方式是通过 git log-stat 命令查看每个commit修改了哪些文件，再用git diff HEAD commit-id 比较在当前版本与想查看的commit 之间的变化。</li>
+<li>git 分支<br> 可以使用git log 查看在当前分支上的修改，现在大多数现成的git泄露工具都不支持分支，有一款叫GitHacker的工具可以使用，链接是：<img src="https://github.com/WangYihang/GitHacker" alt="https://github.com/WangYihang/GitHacker">。使用时执行命令<code>python GitHacker.py http://127.0.0.1:8000/.git/</code>。运行后，我们在本地可以看到生成的文件夹，进入后执行git log –all 或者git branch -v ，只能看到master分支的信息。如果执行git reflog 命令，就可以看到一些checkout 的记录。</li>
+<li>git 泄露的其他利用<br> 如.git&#x2F;config 文件夹中可能含有access_token信息，从而访问这个用户的其他仓库。<br> （2） SVN泄露<br> SVN也是源代码版本管理软件，造成SVN源代码漏洞的主要原因是管理员操作不规范将SVN隐藏文件夹暴露在外网环境，可以利用.svn&#x2F;entries或者wc.db文件获取服务器源码等信息。推荐工具：<a target="_blank" rel="noopener" href="https://github.com/kost/dvcs-ripper,Seay-svn%E3%80%82">https://github.com/kost/dvcs-ripper,Seay-svn。</a><br> （3）HG泄露<br> 在初始化项目时，HG会在当前文件夹下创建一个.hg隐藏文件夹，其中包含代码和分支修改记录等信息。推荐工具: <a target="_blank" rel="noopener" href="https://github.com/kost/dvcs-ripper%E3%80%82">https://github.com/kost/dvcs-ripper。</a><br> （4)总结经验<br> CTF线上比赛往往会有重定向问题，只要访问.git，便会返回403，此时试探访问.git&#x2F;config，如果有文件内容返回，就说明存在git泄露，反之不存在。</li>
+</ol>
+<h6 id="1-2-敏感备份文件"><a href="#1-2-敏感备份文件" class="headerlink" title="1.2 敏感备份文件"></a>1.2 敏感备份文件</h6><p>（1）gedit备份文件<br>    在linux中，用gedit编辑器保存后，当前目录下会生成一个后缀为“<del>”的文件，其内容就是刚编辑的内容，假设刚才保存的文件名为flag，则该文件名为flag</del>，通过浏览器访问即可得到源码。<br>（2）vim 备份文件<br>    当用户使用vim编辑时，如果意外退出，会在当前目录下生成一个备份文件，文件格式为 .文件名.swp，该文件用来备份缓冲区中的内容即退出时的文件内容，针对这个备份文件，我们可以使用 vim -r 命令恢复文件的内容。<br>（3）常规文件<br>    包括 <code>robots.txt ，readme.md ，www.zip/rar/tar.gz</code> 等文件，主要要依靠字典的强度。<br>（4）总结经验<br>    在CTF线上比赛中，出题人往往会在线运维题目，有时会因为各种情况导致SWP备份文件的生成，所以在比赛过程中可以编写实时监控脚本，对题目服务进行监控。<br>    vim 在第一次意外退出时生成备份文件*.swp，第二次为*.swo，第三次为*.swn，以此类推，vim官方文档中还有*.un.文件名.swp类型的备份文件。<br>    在实际环境中，网站的备份往往是网站域名的压缩包。</p>
+<h6 id="1-3-Banner识别"><a href="#1-3-Banner识别" class="headerlink" title="1.3 Banner识别"></a>1.3 Banner识别</h6><p> 一个网站的banner信息（服务器对外显示的一些基础信息）对解题有很重要的作用，也可以叫指纹，包括一些CMS框架的漏洞，可以网上直接搜索利用。<br>（1）自行搜集指纹库<br>    Github中有大量成型公开的CMS指纹库，包括一些扫描的工具。<br>（2）使用已有的工具<br>    例如 Wappalyer工具，不仅有python版，还有浏览器插件<br>（3）总结经验<br>    在进行服务器的Banner信息探测时，除了通过上述两种常见的识别方式，可以尝试随意输入一些URL，有时可以通过错误信息显示更多的信息。</p>
+<h3 id="0x01-CTF中的SQL注入"><a href="#0x01-CTF中的SQL注入" class="headerlink" title="0x01 CTF中的SQL注入"></a>0x01 CTF中的SQL注入</h3><p> SQL 注入之前专门写过，请移步到 <a target="_blank" rel="noopener" href="http://limbus.top/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/SQL%E6%B3%A8%E5%85%A5/">http://limbus.top/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/SQL%E6%B3%A8%E5%85%A5/</a></p>
+<h3 id="0x02-任意文件读取漏洞"><a href="#0x02-任意文件读取漏洞" class="headerlink" title="0x02 任意文件读取漏洞"></a>0x02 任意文件读取漏洞</h3><p> 所谓文件读取漏洞，就是攻击者通过一些手段可以读取服务器上开发者不允许读到的文件。从整个攻击过程看，是信息收集的补充。</p>
+<h4 id="1-文件读取漏洞常见触发点"><a href="#1-文件读取漏洞常见触发点" class="headerlink" title="1. 文件读取漏洞常见触发点"></a>1. 文件读取漏洞常见触发点</h4><h6 id="1-1Web语言"><a href="#1-1Web语言" class="headerlink" title="1.1Web语言"></a>1.1Web语言</h6><p>（1）PHP<br> PHP中有关文件读的文件包括但不限于：file_get_contents()、file()、fopen()函数（及其文件指针操作函数fread()、fgets()等），与文件包含相关的函数（include()、require()、include_once()、require_once()等），以及通过PHP读文件的执行系统命令(system()、exec()等)。<br> 除了上面提到的标准库函数，很多常见的PHP扩展也提供了一些可以读取文件的函数，例如，php-curl扩展（文件内容作为HTTP body）涉及文件存取的库（如数据库相关扩展、图片相关扩展）、XML模块造成的XXE等。<br> 与其他语言不同，PHP向用户提供的指定待打开文件的方式不是简单的一个路径，而是一个文件流。我们可以将其简单理解成PHP提供的一套协议。在PHP中有很多功能不同但形式相似的协议，统称为Wrapper，其中最具特色的协议便是php:&#x2F;&#x2F;协议，而且PHP提供了接口供开发者编写自定义的wrapper。除了wrapper，PHP中另一个具有特色的机制是Filter，其作用是对目前的wrapper进行一定的处理（如把当前文件流的内容全部变为大写）。<br> 假设服务端的include 函数的路径参数可控，正常情况下它会将目标文件当作PHP文件去解析，如果解析文件存在<code>&lt;?php</code>等PHP的相关标签，那么标签内就会被当作PHP代码执行。<br> 如果将这种含有PHP代码的文件的文件名传入include函数，那么由于PHP代码被执行而无法通过可视文本的形式泄露，但这时可以通过使用Filter避免这种情况的发生。<br> 例如比较常见的Base64相关的Filter可将文件流编码成Base64的形式，这样读取的文件内容中就不会存在PHP标签，而更严重的是，如果服务端开启了远程文件包含选项allow_url_include，我们就可以直接执行远程PHP代码。PHP默认的Wrapper和Filter都可以通过php.ini禁用。<br> 在遇到的有关PHP文件包含的实际问题中，我们可能遇到三种情况<br>     1. 文件路径前面可控，后面不可控：在较低的PHP版本及容器版本中可以使用“\x00”截断，对应的URL编码是%00.当服务端存在文件上传功能时，也可尝试利用zip或phar协议直接进行文件包含进而执行PHP代码。<br>     2. 文件路径后面可控，前面不可控：可以通过符号“..&#x2F;”进行目录穿越来直接读取文件，但这种情况无法使用wrapper，如果服务端是利用include等文件包含类的函数，我们将无法读取php文件中的PHP代码。<br>     3. 文件路径中间可控：和第一种情况类似，但是无法利用wrapper进行文件包含。<br>（2）Python<br> 与PHP不同的是，Python的Web应用更多地倾向于通过其自身的模块启动服务，同时搭配中间件、代理服务将整个Web应用呈现给用户。<br> 漏洞经常出现在框架请求静态资源文件部分，也就是最后读取文件内容的open函数，但直接导致漏洞的成因往往是框架开发者忽略了Python函数的feature，如os.path.join()。很多开发者会判断用户传入的路径不包含.来保证在读取资源时不会发生目录穿越，随后用户的输入代入os.path.join()的第二个参数，但如果用户传入“&#x2F;”，则依然可以穿越到根目录，导致任意文件读取。 CTF中，python开发者调用不安全的解压模块进行文件压缩，而导致文件解压后可进行目录穿越，可以覆盖服务器已有文件。  还有一种情况是攻击者构造软链接放入压缩包，解压后的内容会直接指向服务器相应文件。<br>（3）Java<br> 除了Java本身的文件读取函数FileInputStream、XXE导致的文件读取，Java的一些模块也支持file:&#x2F;&#x2F;协议，这是Java应用中出现任意文件读取最多的地方，如Spring Cloud Config Server路径穿越与任意文件读取漏洞（CVE-2019-3799）、Jenkins任意文件读取漏洞（CVE-2018-199902）等。<br>（4）Ruby<br> CTF中，Ruby的任意文件读取漏洞通常与Rails 框架相关，到目前为止，我们已知的通用漏洞为 Ruby On Rails远程代码执行漏洞（CVE-2016-0752）、Ruby On Rails路径穿越与任意文件读取漏洞（CVE-2018-3760）、(CVE-2019-5418)。<br>（5）Node<br> 目前已知的Node.js的express模块曾存在任意文件读取漏洞（CVE-2017-14849）,CTF中Node的文件读取漏洞通常为模板注入、代码注入等。</p>
+<h6 id="1-2-中间件-x2F-服务器相关"><a href="#1-2-中间件-x2F-服务器相关" class="headerlink" title="1.2 中间件&#x2F;服务器相关"></a>1.2 中间件&#x2F;服务器相关</h6><p>（1）Nginx错误配置<br> 常与Python-Web应用一起出现，因为Nginx一般被视为Python-Web反向代理的最佳实现。如果它的配置文件粗偶，就容易造成严重问题，例如<br> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location /static&#123;</span><br><span class="line"> alias /home/myapp/static/;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br> 如果配置文件包含上面这段话，很可能是运维或开发人员想让用户可以访问static目录。但是如果用户请求的web路径是&#x2F;static..&#x2F;，拼接到alias上就变成了&#x2F;home&#x2F;myapp&#x2F;static&#x2F;..&#x2F;，此时便会产生目录穿越漏洞，并且穿越到了myapp目录。这时，攻击者可以任意下载python源代码和字节码文件。漏洞的成因是location最后没有加“&#x2F;”限制。<br>（2）数据库<br> 可以对文件进行读取操作的数据库很多，以MySQL为例。<br> MySQL的load_file()函数可以文件读取，但是要首先数据库配置FILE权限（root用户一般有），其次需要执行load_file()函数的MySQL用户对于目标文件具有可读权限，主流Linux系统还需Apparmor配置目录白名单。<br> 还有一种方式，这种方式需要执行完整的SQL语句，即load data infile。需要FILE权限，比较少见。<br>（3）软连接<br> bash 命令 ln -s 可以创建一个指向文件的软链接文件，然后将这个软链接文件上传至服务器，当我们再次请求访问这个链接文件时，实际上是请求在服务端它指向的文件。<br>（4）FFmpeg<br> FFmpeg被爆出存在任意文件读取漏洞。<br>（5）Docker-API<br> Docker-API可以控制Docker的行为，Docker-API通过UNIX Socket通信，也可以通过HTTP直接通信，当我们遇见SSRF漏洞时，尤其是可以通过SSRF漏洞进行UNIX Socket通信时，就可以通过操纵Docker-API把本地文件载入Docker新容器进行读取。</p>
+<h6 id="1-3-客户端相关"><a href="#1-3-客户端相关" class="headerlink" title="1.3 客户端相关"></a>1.3 客户端相关</h6><p>  客户端也存在文件读取漏洞，大多数是基于XSS漏洞读取本地文件。<br>（1）浏览器&#x2F;Flash XSS<br> 一般来说，很多浏览器会禁止JavaScript代码读取本地文件相关操作，如请求一个远程网站，如果它的JS代码中使用File协议读取客户的本地文件，那么此时会由于同源策略导致读取失败。但有例外，Safari浏览器有一个客户端的本地文件读取漏洞。<br>（2）MarkDown语法解析器XSS<br> 与XSS相似，MarkDown解析器也具有一定的解析JS的能力，但是这些解析器大多没有像浏览器一样本地文件读取的操作进行限制，很少有与同源策略类似的防护措施。</p>
+<h4 id="2-文件读取漏洞常见读取路径"><a href="#2-文件读取漏洞常见读取路径" class="headerlink" title="2.文件读取漏洞常见读取路径"></a>2.文件读取漏洞常见读取路径</h4><h6 id="2-1-Linux"><a href="#2-1-Linux" class="headerlink" title="2.1 Linux"></a>2.1 Linux</h6><p>（1）flag名称（相对路径）<br> 比赛过程中，有时爆破一下flag名称便可得到答案<br><img src="https://cdn.jsdelivr.net/gh/H-Limbus/myBlogImage@LoadImg/img/202305211938966.png" alt="image.png"><br>（2）服务器信息（绝对路径）<br> 下面列出CTF线上赛中常见的部分需知目录和文件。<br>    1. &#x2F;etc目录：多是各种应用或系统配置文件，所以其下的文件是进行文件读取的首要目标。<br>    2. &#x2F;etc&#x2F;passwd：是Linux系统保存用户信息及其工作目录的文件，权限是所有用户&#x2F;组可读。<br>    3. &#x2F;etc&#x2F;shadow：是Linux系统保存用户信息及（可能存在）的密码（hash）的文件，权限是root用户可读写、shadow组可读，一般不可读。<br>    4. &#x2F;etc&#x2F;apache2&#x2F;*：是Apache配置文件，可以获取Web目录、服务端口等信息。<br>    5. &#x2F;etc&#x2F;nginx&#x2F;*：是Nginx配置文件（Ubuntu等系统），可以获知Web目录、服务端口等信息。<br>    6. &#x2F;etc&#x2F;apparmor(.d)&#x2F;*：是Apparmor配置文件，可以获知各应用系统调用的白名单、黑名单。例如通过读配置文件查看MySQL是否禁止了系统调用，从而确定是否可以使用UDF(User Denfined Functions)执行系统命令。<br>    7. &#x2F;etc&#x2F;(cron.d&#x2F;*|crontab)：是定时任务文件，有些CTF题目会设置一些定时任务，读取这些配置文件就可以发现隐藏的目录或其他文件。<br>    8. &#x2F;etc&#x2F;environment：是环境变量配置文件之一。环境变量可能存在大量目录信息的泄露，甚至可能出现secret key泄露情况。<br>    9. &#x2F;etc&#x2F;hostname：表示主机名<br>    10. &#x2F;etc&#x2F;hosts：是主机名查询静态表，包含指定域名解析IP的成对信息。可以探测网卡信息和内网IP&#x2F;域名。<br>    11. &#x2F;etc&#x2F;issue：指明系统版本<br>    12. &#x2F;etc&#x2F;mysql&#x2F;*：是MySQL配置文件。<br>    13. &#x2F;etc&#x2F;php&#x2F;*：是PHP配置文件。<br>    14. &#x2F;proc目录：通常存储进程动态运行的各种信息，本质上是一种虚拟目录。如果要查看非当前进程的信息，pid是可以进行暴力破解的，如果要查看当前进程，只需&#x2F;proc&#x2F;self代替&#x2F;proc&#x2F;[pid]&#x2F; 即可。对应目录下的cmdline可读出比较敏感的信息，如使用mysql-uxxx-pxxxx登录MySQL，会在cmdline中显示明文密码。有时我们无法获取当前应用所在的目录，通过cwd命令可以直接跳转到当前目录：&#x2F;proc&#x2F;[pid]&#x2F;cwd&#x2F;，环境变量中可能存在secret_key，这时也可以通过environ进行读取：&#x2F;proc&#x2F;[pid]&#x2F;environ<br>    15. 其他目录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Nginx配置文件可能存在其他路径:  /usr/local/nginx/conf/*</span><br><span class="line">日志文件:  var/log/\*</span><br><span class="line">Apache默认Web根目录: /var/www/html/</span><br><span class="line">PHP session目录：/var/lib/php(5)/sessions/</span><br><span class="line">用户目录：</span><br><span class="line">  ~/.bash_history(泄露历史执行命令)</span><br><span class="line">  ~/.bashrc（部分环境变量）</span><br><span class="line">  ~/.ssh/id_rsa(.pub)(ssh登录私钥/公钥)</span><br><span class="line">  ~/.viminfo （vim使用记录）。</span><br></pre></td></tr></table></figure>
+
+<h6 id="2-2-Windows"><a href="#2-2-Windows" class="headerlink" title="2.2 Windows"></a>2.2 Windows</h6><p>windows 系统下的web应用任意文件读取漏洞在CTF赛题中不常见，但windows与PHP搭配使用有个问题：可以使用<code>&lt;</code>等符号作为通配符，从而在不知道完整名的情况下进行文件读取。<br>补充：include()，和 include_once()、require()、require_once()函数，当访问到的php文件中包含这两个函数时，可能会有文件包含漏洞，file:&#x2F;&#x2F;文件协议，访问  <a target="_blank" rel="noopener" href="https://www.xxxxx.com/upload.php?show=file://D:/WWW/123.txt">https://www.xxxxx.com/upload.php?show=file://D:/WWW/123.txt</a>  这种形式，只要知道准确路径，就可以任意读取文件。file:&#x2F;&#x2F;协议在读取本地文件时不需要allow_url_fopen和allow_url_include参数开启，如果读取网络文件需要开启。<code>file://http:xxx/a.php</code>。这几个函数也会将不是php的文件当作php执行。<br>php伪协议。作用是访问各个输入输出流，常用的是php:&#x2F;&#x2F;filter 和php:&#x2F;&#x2F;input，前者用来读取源码，后者用来执行代码。当enctype&#x3D;”multipart&#x2F;form-data”的时候，php:&#x2F;&#x2F;input是无效的。php:&#x2F;&#x2F;filter各个参数：<br><img src="https://cdn.jsdelivr.net/gh/H-Limbus/myBlogImage@LoadImg/img/202305241139095.png" alt="image.png"><br><a target="_blank" rel="noopener" href="https://localhost/update.php?file=php://filter/convert.base64-encode/resource=./shell.txt">https://localhost/update.php?file=php://filter/convert.base64-encode/resource=./shell.txt</a>          –例子，将shell.txt中的内容用base64编码输出，如果shell.txt中已经是base64编码，可以使用php:&#x2F;&#x2F;filter&#x2F;convert.base64-decode&#x2F;resource&#x3D;.&#x2F;shell.txt将文件解码并将以php执行。<br>php:&#x2F;&#x2F;input，是当Content-Type不等于multipart&#x2F;form-data的时候可以获取原始请求数据的方法。经过测试，发现还需要开启allow_url_include开关，allow_url_fopen开不开启无所谓。请求方式是GET和POST都可以。include()，和 include_once()、require()、require_once()四种函数都可以执行，执行形式看表：<br><img src="https://cdn.jsdelivr.net/gh/H-Limbus/myBlogImage@LoadImg/img/202305250815984.png" alt="image.png"><br>在show参数后面写入php:&#x2F;&#x2F;input，表明读取原始数据，在data数据出写入想要执行的php代码，例如<code>&lt;?php phpinfo();?&gt;</code>查看phpinfo界面，或者<code>&lt;?php fputs(fopen(&quot;1.php&quot;, &quot;w&quot;), &quot;&lt;?php @eval($_GET[cmd]);?&gt;&quot;);?&gt;</code>写入一句话木马。<br>还有一种方法，例如函数中不是include()等函数，而是有<code>eval(file_get_contents(&#39;php://input&#39;));</code>的函数，可以自己创造，在data处直接写php代码即可。如图：<br><img src="https://cdn.jsdelivr.net/gh/H-Limbus/myBlogImage@LoadImg/img/202305250932545.png" alt="image.png"><br>zip:&#x2F;&#x2F;伪协议，这个方法不需要开启allow_url_fopen和allow_url_include参数，我们先向服务器上传一个zip文件，zip文件中包含一个一句话小马，如果服务器不支持上传zip文件，可以将后缀名改成别的，例如jpg这些，在解析的时候还是会当作zip解析的。整个文件的目录结构为upload.zip中有一个shell.php文件，文件中写入一句话：<code>&lt;?php @eval($_GET[&#39;cmd&#39;]);?&gt;</code>，访问方式为：<a target="_blank" rel="noopener" href="http://localhost/send.php?show=zip://upload.zip%23shell&cmd=phpinfo()">http://localhost/send.php?show=zip://upload.zip%23shell&amp;cmd=phpinfo()</a>; 其中zip:&#x2F;&#x2F;后面跟着上传的zip文件路径，然后使用%23隔开，%23也就是#号，再后面跟上其中的文件名，使用&amp;获取文件中的参数cmd，输入想要的命令。<br>data: &#x2F;&#x2F;伪协议，这个协议需要同时开启allow_url_fopen和allow_url_include这两个参数，原理是允许将字符串传递给包含函数，使用方法很简单：<code>http://localhost/send.php?show=data:text/plain,&lt;?php phpinfo();?&gt;</code>会返回phpinfo页面。include()，和 include_once()、require()、require_once()四种函数都可以执行。<br>python (Django)静态资源逻辑配置错误导致的文件读取漏洞，php配置的网站目录是按照文件夹的路径访问网站的，但是Django的网站路径可以自己配置，在项目文件夹下面的urls.py文件中，<code>urlpatterns=[re_path(&#39;^login/$&#39;, views.LoginView.as_view(), name=&#39;login&#39;)]</code>在url后面输入&#x2F;login&#x2F;就可访问，但是要访问一些js,css文件的话，自定义又很麻烦， 于是在网站配置的时候可以创建一个static文件夹，将静态文件放到这个文件夹中，而视图界面python文件中views.py中要是配置不得当，不对输入的文件名做检测的话，就会产生漏洞。利用规则<code>path=/static/../../../../../etc/passwd</code>但是如果对文件后缀名进行了过滤，可以访问__pycache__这个文件夹，其中pyc字节码 文件的命名规则是：<code>[module_name]+&quot;.cpython-3+[\d](python3小版本号)+&quot;.pyc&quot;</code>这是原本文件的缓存，获取了pyc字节码文件后，对这个文件进行反编译，审计代码是否存在漏洞。反编译推荐工具uncompyle6，github地址为：<a target="_blank" rel="noopener" href="https://github.com/rocky/python-uncompyle6%E3%80%82">https://github.com/rocky/python-uncompyle6。</a></p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          Donate
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://h-limbus.github.io/2023/05/26/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF-%E7%AC%AC%E4%B8%80%E7%AB%A0%20Web%E5%85%A5%E9%97%A8/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" rel="tag">网络安全</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="tag">读书笔记</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+    
+      <a href="/2023/05/17/Metasploit%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Metasploit渗透测试指南</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.staticfile.org/valine/1.4.16/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "ypvGgRhcfezE3aedvYAO6oYo-gzGzoHsz",
+    app_key: "K7VGmo5vDtIxdtx0uAelYpSN",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "秀儿请上座~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+  
+    
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2023
+        <i class="ri-heart-fill heart_icon"></i> Limbus
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/logo.png" alt="Limbus&#39; Blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/photography">摄影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2023/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

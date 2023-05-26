@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+
+
+<html lang="zh_CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="Limbus的个人博客" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>Sqli-Labs-master 注入训练(Page-2) |  Limbus&#39; Blog</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/favicon.png" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+<script>
+var _hmt = _hmt || [];
+(function() {
+	var hm = document.createElement("script");
+	hm.src = "https://hm.baidu.com/hm.js?afbc0b35e48d80d18aee387ad0d30121";
+	var s = document.getElementsByTagName("script")[0]; 
+	s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Limbus' Blog" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-Sqli-Labs注入训练/Sqli-Labs-master 注入训练（Page-2）"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  Sqli-Labs-master 注入训练(Page-2)
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-2%EF%BC%89/" class="article-date">
+  <time datetime="2023-05-15T07:45:34.180Z" itemprop="datePublished">2023-05-15</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/">网络安全</a> / <a class="article-category-link" href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/SQL%E6%B3%A8%E5%85%A5/">SQL注入</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">2.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">9 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>欧克，我们来到了第二大关，让我们开始吧！</p>
+<h2 id="Less-23："><a href="#Less-23：" class="headerlink" title="Less-23："></a>Less-23：</h2><p>这一关和第一大关的前面一些题比较像，首先输入？id&#x3D;1，我们尝试输入单引号，发现报错了，这儿有注入，我输入一个双引号，后面加上–+ ，不报错了，经过多次尝试发现，报错的不明不白，于是就看了一下源码，好家伙，原来是过滤了–+和#，也就是注释符，那好办，直接字符注入 <code>?id=1&#39; and &#39;1&#39;=&#39;1</code>，在中间加上盲注，举个例子：<code>?id=1&#39; and length(database())&gt;1 and &#39;1&#39;=&#39;1</code>，其他的就和page1一样就行。</p>
+<p>还有一种方法，是利用后面的单引号闭合，使用联合查询。</p>
+<p><code>?id=1&#39; union select &#39;1&#39;,version(),&#39;3</code>，在这里因为我们不能使用order by 语句来查询数据，所以我们只能慢慢猜，当我们的字段查询到第四个的时候，报错，说明字段只有三个。然后只要修改version()那里的语句，换成查询语句就可以了。</p>
+<span id="more"></span>
+
+<h2 id="Less-24："><a href="#Less-24：" class="headerlink" title="Less-24："></a>Less-24：</h2><p>这一关主要是利用二次注入，就是在最开始的时候使用正常的途径来将含有注入的信息存储到数据库中，在第二次的时候读取这个数据，便会执行想要的结果。</p>
+<p>查看页面源代码，发现在登录的地方和创建新用户的地方都有过滤，但是在更新密码的地方没有字符过滤，那我们就从这里入手，首先点击创建一个新的用户名，这时候我们要知道在这个数据库中有哪些用户名，好针对这个用户名进入二阶注入，咋们已经知道这个数据库中有一个用户名叫Dumb （我认为这个在实战的时候用处应该不是很大，不过如果那些粗心的人用户名是admin 可能会好一点，本案例中也有admin，咋们换一个）,在创建新用户名那里写  Dumb’#，密码就随便，123456，注册好之后登录进去，就是修改界面，输入新密码000000，当点击更新之后，因为我们的用户名在作怪，所以更新的是Dumb的密码，然后就可以用这个账号密码登录。 </p>
+<h2 id="Less-25："><a href="#Less-25：" class="headerlink" title="Less-25："></a>Less-25：</h2><p>这一关是过滤了and 和or ，当我们输入这两个的时候，会替换成空，遇到这种情况的时候，我们大致有四种方法：</p>
+<ol>
+<li>使用大小写绕过，因为MySQL对大小写不敏感，例如写成ANd , AnD , Or , OR 等等。但是在这一关不行也会被过滤掉。</li>
+<li>编码，hex, urlencode   and 的hex编码（%61%6e%64）or  的hex编码（%6f%72）但是这一关也不行，因为会自动解码</li>
+<li>添加注释&#x2F;<em>and, or</em>&#x2F;这一关也行不通</li>
+<li>多次注入，也就是多写几遍或者把过滤的字符过滤后可以组成新的and ,or，例如 anandd, oorr, 可以和大小写结合使用，这一关是欧克的，可以使用。</li>
+<li>还有就是利用符号代替  and &#x3D;&#x3D; &amp;&amp; , or &#x3D;&#x3D; || ,但是在这一关中，&amp;&amp; 也是不行的，||这个但是可以，，然后其他的就和之前的一样，联合查询注入还是报错注入就任你选择了， 这里选择报错注入  <code>?id=1&#39; || extractvalue(1,concat(&#39;~&#39;,database()))--+</code>就欧克了。</li>
+</ol>
+<h2 id="Less-25a："><a href="#Less-25a：" class="headerlink" title="Less-25a："></a>Less-25a：</h2><p>这一关和上一关不同的是没有报错，id处没有‘’,其他和上一关一样，所以我们可以使用联合注入或者延时注入。</p>
+<p>联合注入就很简单了，咋们来看一下延时注入。</p>
+<p><code>?id=1 anandd if(ascii(substr(database(),1,1))&gt;1,0,sleep(5))--+</code>其他的自行构造。</p>
+<h2 id="Less-26："><a href="#Less-26：" class="headerlink" title="Less-26："></a>Less-26：</h2><p>这一关难度暴增啊，，直接把字符给过滤完了，查看源代码，发现过滤了 and or 空格，–, # ,后面的过滤–+和# 我们可以用闭合去绕过，但是空格咋办嘞，网上查了一下，发现对于空格的绕过有这么几种办法</p>
+<ol>
+<li>%09   TAB键（水平的）</li>
+<li>%0a   新建一行</li>
+<li>%0c   新的一页</li>
+<li>%0d   return功能</li>
+<li>%0b   TAB键（垂直的）</li>
+<li>%a0   空格</li>
+<li>()        用括号代替  例如 select database()  &#x3D;&#x3D; select(database())</li>
+</ol>
+<p>暂时就这么多，但是上面这些大多不能用，因为我是windows系统，好像是因为apache 的解析，这些编码不能用,linux 可以用一些。（）是可以用的，我这里使用的报错注入，也没用空格，在||后面直接可以加入字符</p>
+<p><code>?id=1&#39;||extractvalue(1,concat(&#39;~&#39;,database()))||&#39;1&#39;=&#39;1</code>这样是可行的</p>
+<p>在Linux中的话%0b %a0是可以用的，就可以用联合查询。</p>
+<h2 id="Less-26a："><a href="#Less-26a：" class="headerlink" title="Less-26a："></a>Less-26a：</h2><p>这一关和上面差不多，但是在id处是‘），还有就是没有回显，所以我们不能使用报错注入，只要是没回显，优先考虑时间注入，构造payload</p>
+<p><code>?id=1&#39;)anandd(if(ascii(substr(database(),1,1)),sleep(5),0))anandd(&#39;1</code>欧克，解决！</p>
+<h2 id="Less-27："><a href="#Less-27：" class="headerlink" title="Less-27："></a>Less-27：</h2><p>这一关是过滤了union select  还有之前的一些，但是把and or 放出来了，不知道为什么，order by 不行，所以我们直接查询<code>?id=434534&#39;%0AUnIon%0ASElect%0A1,2,3||&#39;1</code>空格可以用%0a 绕过，惭愧，我也是在这一关发现可以使用的，估计之前也可以用，但是看了大佬的文章以为不能用就没有尝试，以此警示！</p>
+<p>其他查询语句自行构造。</p>
+<h2 id="Less-27a："><a href="#Less-27a：" class="headerlink" title="Less-27a："></a>Less-27a：</h2><p>和上关一样，只是id处是“，其他没有不同。</p>
+<h2 id="Less-28："><a href="#Less-28：" class="headerlink" title="Less-28："></a>Less-28：</h2><p>这一关和上面的基本一样，除了id处是’），还有就是之前的大小写过滤是可行的，但是两个中间用%0a 的话就会被过滤，尝试用%a0就行了。</p>
+<p><code>?id=434534%27)%0AUnIon%a0SElect%0A1,2,3||(%271</code></p>
+<h2 id="Less-28a："><a href="#Less-28a：" class="headerlink" title="Less-28a："></a>Less-28a：</h2><p>和上关一样。</p>
+<h2 id="Less-29："><a href="#Less-29：" class="headerlink" title="Less-29："></a>Less-29：</h2><p>重点： index.php?id&#x3D;1&amp;id&#x3D;2， 你猜猜到底是显示 id&#x3D;1 的数据还是显示 id&#x3D;2 的？<br>Explain： apache（php） 解析最后一个参数， 即显示 id&#x3D;2 的内容。 Tomcat（jsp） 解析第一个参数， 即显示 id&#x3D;1 的内容。<br>此处我们想一个问题： index.jsp?id&#x3D;1&amp;id&#x3D;2 请求， 针对第一张图中的服务器配置情况，客户端请求首先过 tomcat， tomcat 解析第一个参数， 接下来 tomcat 去请求 apache（php）服务器， apache 解析最后一个参数。 那最终返回客户端的应该是哪个参数？<br>Answer： 此处应该是 id&#x3D;2 的内容， 应为时间上提供服务的是 apache（ php） 服务器，返回的数据也应该是 apache 处理的数据。 而在我们实际应用中， 也是有两层服务器的情况，那为什么要这么做？ 是因为我们往往在 tomcat 服务器处做数据过滤和处理， 功能类似为一个 WAF。 而正因为解析参数的不同， 我们此处可以利用该原理绕过 WAF 的检测。 该用法就是 HPP（ HTTP Parameter Pollution） ， http 参数污染攻击的一个应用。 HPP 可对服务器和客户端都能够造成一定的威胁。</p>
+<p>现在我们来看这一关，查看tomcat 的index.jsp，发现对第一个参数是过滤了的，那我们就在第二个参数处构造，因为这个参数是不会经过jsp的，直接会通过php ，构造payload <code>?id=1&amp;id=-2&#39; union select 1,database(),version()--+ </code>，用联合注入和报错注入都可以。   </p>
+<h2 id="Less-30："><a href="#Less-30：" class="headerlink" title="Less-30："></a>Less-30：</h2><p>这一关和上一关一样，id处是”。</p>
+<h2 id="Less-31："><a href="#Less-31：" class="headerlink" title="Less-31："></a>Less-31：</h2><p>同上所述，id处是“）。</p>
+<h3 id="宽字节注入："><a href="#宽字节注入：" class="headerlink" title="宽字节注入："></a>宽字节注入：</h3><p>这个注入的原理是针对语句中过滤了单引号和斜杠的注入方法。</p>
+<p>MySQL在使用GBK编码的时候，会认为两个字符是一个汉字，而在过滤的时候往往会在单引号前面加上&#x2F;来过滤</p>
+<p>方法：</p>
+<ol>
+<li>使用%df吃掉&#x2F;，&#x2F;‘的转码为%5c%27，如果在前面加上一个%df ，那么就会变成%df%5c%27，刚好，前面的%df%5c组成就是一个汉字，于是就变成了一个汉字后面有个单引号，就成功了</li>
+<li>将&#x2F;‘过滤掉，例如构造%**%5c%5c%27的方法，后面的%5c会被前面的%5c过滤掉。</li>
+</ol>
+<h2 id="Less-32："><a href="#Less-32：" class="headerlink" title="Less-32："></a>Less-32：</h2><p>这一关我们按找上面讲的，先输入单引号，发现果然被过滤了，输入\也是被过滤了，构造宽字节注入，<code>?id=1%df&#39;--+</code>发现直接绕过，然后就可以使用联合查询或者报错注入。</p>
+<h2 id="Less-33："><a href="#Less-33：" class="headerlink" title="Less-33："></a>Less-33：</h2><p>和上一关一样，只是查看源码，发现是使用了addslashes()函数，他会在预定义字符前面加上反斜杠，单引号，双引号。斜杠。</p>
+<h2 id="Less-34："><a href="#Less-34：" class="headerlink" title="Less-34："></a>Less-34：</h2><p>前面几关是ge的注入，现在开始是post的注入，post注入和get不太一样，%df 这个直接输行不通，使用bp可以实现，修改post语句。在书上是还有一种方法，将’使用utf-16或者utf-32编码，但是我没有找到可以转换的地方，就不了了之了。</p>
+<h2 id="Less-35"><a href="#Less-35" class="headerlink" title="Less-35:"></a>Less-35:</h2><p>这一关没有什么特别的，不用考虑addslashes（）函数，直接联合查询。</p>
+<h2 id="Less-36："><a href="#Less-36：" class="headerlink" title="Less-36："></a>Less-36：</h2><p>这一关我们查看源代码，发现使用是mysql_real_escape_string()函数过滤的，这个函数会转义一些特殊字符，单双引号，\n \r  \x00 这些。因为没有设置gbk，所以我们可以绕过，用%EF%BF%BD这个，然后构造payload就可以了。</p>
+<p><code>?id=-1%EF%BF%BD%27 union select 1,database(),3--+</code>，其他的自行构造。</p>
+<h2 id="Less-37"><a href="#Less-37" class="headerlink" title="Less-37:"></a>Less-37:</h2><p>和34关类似，通过万能密码登录</p>
+<p><code>uname=1%EF%BF%BD%27 or 1=1#</code></p>
+<h2 id="Less-38"><a href="#Less-38" class="headerlink" title="Less-38:"></a>Less-38:</h2><p>这一关很离谱哈，和之前一摸一样，第一关。</p>
+<p>至此，page-2已经全部完全，练习中学习，加油，进击下一关！！！</p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          Donate
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://h-limbus.github.io/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-2%EF%BC%89/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" rel="tag">网络安全</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-3%EF%BC%89/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            Sqli-labs注入训练（page-3）
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2023/05/15/Sqli-Labs%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83/Sqli-Labs-master%20%E6%B3%A8%E5%85%A5%E8%AE%AD%E7%BB%83%EF%BC%88Page-1%EF%BC%89/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">Sqli-Labs-master 注入训练(Page-1)</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.staticfile.org/valine/1.4.16/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "ypvGgRhcfezE3aedvYAO6oYo-gzGzoHsz",
+    app_key: "K7VGmo5vDtIxdtx0uAelYpSN",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "秀儿请上座~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+  
+    
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2023
+        <i class="ri-heart-fill heart_icon"></i> Limbus
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/logo.png" alt="Limbus&#39; Blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/photography">摄影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2023/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>

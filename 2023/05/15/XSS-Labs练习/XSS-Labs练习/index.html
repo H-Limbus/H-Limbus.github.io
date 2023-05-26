@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+
+
+<html lang="zh_CN">
+  
+
+    <head>
+      <meta charset="utf-8" />
+        
+      <meta name="description" content="Limbus的个人博客" />
+      
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1"
+      />
+      <title>xss-labs漏洞练习 |  Limbus&#39; Blog</title>
+  <meta name="generator" content="hexo-theme-ayer">
+      
+      <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/favicon.png" />
+       
+<link rel="stylesheet" href="/dist/main.css">
+
+      
+<link rel="stylesheet" href="/css/fonts/remixicon.css">
+
+      
+<link rel="stylesheet" href="/css/custom.css">
+ 
+      <script src="https://cdn.staticfile.org/pace/1.2.4/pace.min.js"></script>
+       
+ 
+<script>
+var _hmt = _hmt || [];
+(function() {
+	var hm = document.createElement("script");
+	hm.src = "https://hm.baidu.com/hm.js?afbc0b35e48d80d18aee387ad0d30121";
+	var s = document.getElementsByTagName("script")[0]; 
+	s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bulma@5.0.1/bulma.min.css"
+      />
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.19/dist/sweetalert2.min.js"></script>
+
+      <!-- mermaid -->
+      
+      <style>
+        .swal2-styled.swal2-confirm {
+          font-size: 1.6rem;
+        }
+      </style>
+    <link rel="alternate" href="/atom.xml" title="Limbus' Blog" type="application/atom+xml">
+</head>
+  </html>
+</html>
+
+
+<body>
+  <div id="app">
+    
+      
+      <canvas width="1777" height="841"
+        style="position: fixed; left: 0px; top: 0px; z-index: 99999; pointer-events: none;"></canvas>
+      
+    <main class="content on">
+      <section class="outer">
+  <article
+  id="post-XSS-Labs练习/XSS-Labs练习"
+  class="article article-type-post"
+  itemscope
+  itemprop="blogPost"
+  data-scroll-reveal
+>
+  <div class="article-inner">
+    
+    <header class="article-header">
+       
+<h1 class="article-title sea-center" style="border-left:0" itemprop="name">
+  xss-labs漏洞练习
+</h1>
+ 
+
+      
+    </header>
+     
+    <div class="article-meta">
+      <a href="/2023/05/15/XSS-Labs%E7%BB%83%E4%B9%A0/XSS-Labs%E7%BB%83%E4%B9%A0/" class="article-date">
+  <time datetime="2023-05-15T07:45:38.140Z" itemprop="datePublished">2023-05-15</time>
+</a> 
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/">网络安全</a> / <a class="article-category-link" href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/XSS%E6%BC%8F%E6%B4%9E%E7%BB%83%E4%B9%A0/">XSS漏洞练习</a>
+  </div>
+  
+<div class="word_count">
+    <span class="post-time">
+        <span class="post-meta-item-icon">
+            <i class="ri-quill-pen-line"></i>
+            <span class="post-meta-item-text"> Word count:</span>
+            <span class="post-count">3.5k</span>
+        </span>
+    </span>
+
+    <span class="post-time">
+        &nbsp; | &nbsp;
+        <span class="post-meta-item-icon">
+            <i class="ri-book-open-line"></i>
+            <span class="post-meta-item-text"> Reading time≈</span>
+            <span class="post-count">13 min</span>
+        </span>
+    </span>
+</div>
+ 
+    </div>
+      
+    <div class="tocbot"></div>
+
+
+
+
+  
+    <div class="article-entry" itemprop="articleBody">
+       
+  <p>上一次我们练习了文件上传的漏洞，今天我们来看看这个xss跨站攻击漏洞，这个漏洞的作用就是通过在web 站点，向客户端交付恶意脚本代码，实现对客户端的攻击。</p>
+<p>xss漏洞分为反射型，存储型，DOM型</p>
+<h2 id="第一关："><a href="#第一关：" class="headerlink" title="第一关："></a>第一关：</h2><p>我们先来查看这一关，看到链接后面有一个name&#x3D;test，当我们改变后面的值，发现页面里面的值也改变了，所以页面的值是由get的链接后面的name值来控制的。我们尝试在name后面输入最简单的xss,  <code>&lt;script&gt;alert(1);&lt;/script&gt;</code>，发现直接过关了。说明已经触发了xss漏洞。这个是在get链接里面控制的，所以这是个反射性漏洞。</p>
+<span id="more"></span>
+
+<h2 id="第二关："><a href="#第二关：" class="headerlink" title="第二关："></a>第二关：</h2><p>这一关我们发现有一个输入框，那肯定是在输入框这儿有xss漏洞，我们尝试输入<code>&lt;script&gt;alert(1);&lt;/script&gt;</code>发现没有成功，那说明格式不对，我们查看源代码，发现可以使用闭合，我们输入的值被赋予给了value：<code>&lt;input name=&quot;keyword&quot; value=&quot;1&quot;&gt;</code> 所以我们可以闭合<code>&lt;input&gt;</code>这个标签，使script语句可以执行，可以构造  <code>&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;</code>，发现成功绕过。</p>
+<p>我查看了一下源代码，发现这个函数，htmlspecialchars()，这个函数的作用是把预定义字符，包括&amp;，“ ,‘ ,&lt;,&gt;这些。这两个符号转化为html实例，不会当成标签来执行。所以我们不能在h2标签的地方闭合。</p>
+<h2 id="第三关："><a href="#第三关：" class="headerlink" title="第三关："></a>第三关：</h2><p>我们来到这一关，尝试输入之前的js语句，发现没有用，于是我们查看一下源代码，发现在value的地方也使用了  htmlspecialchars() 这个函数，也就是说会把&lt;&gt;变成实例来执行，不会当成脚本来执行，所以我们不能出现&lt;&gt;，所以我们可以使用下面的方法。</p>
+<p>使用onfocus，onfocus是javascript中在对象获得焦点时发生的事件,最简单的实例就是网页上的一个输入框,当使用鼠标点击该输入框时输入框被选中可以输入内容的时候就是该输入框获得焦点的时候,此时输入框就会触发onfocus事件.因此点击当前页面的输入框就可以完成弹框了。所以我们构造的语句是  <code>’onfocus=javascript:alert(1)&#39;</code>，前后面的引号是为了闭合value的引号。</p>
+<p>使用onclick，这个和上面的函数一样，只是需要点击一下才会触发，构造语句<code>&#39;onclick=javascript:alert(1);&#39;</code></p>
+<p>使用onmousemove ， 和上面的一样，只是需要将鼠标移到对应的地方，构造语句<code>&#39;onmouseover=&#39;alert(1);</code>还有很多函数都有效果，这里不一一列举了。</p>
+<h2 id="第四关："><a href="#第四关：" class="headerlink" title="第四关："></a>第四关：</h2><p>这个和上关有些类似，上一关的闭合是用的单引号，而这一关闭合用的是双引号，直接使用上面的语句，成功绕过。</p>
+<p>看来一眼有源代码，发现和上一关并不一样，这一关是将&lt;&gt;这两个符号给替换掉了所以只要没有&lt;&gt;就行了，上面个的语句依旧适用。</p>
+<h2 id="第五关："><a href="#第五关：" class="headerlink" title="第五关："></a>第五关：</h2><p>在这一关我们照旧输入最原始的<code>&lt;script&gt;alert(1);&lt;/script&gt;</code>，查看网页代码，发现在from表单中，input的value值中，script变成了sc_ript所以说这里对于script做了过滤，那我们尝试其他方法，使用oncilck来构造，”onclick&#x3D;”alert(1);，结果还是没有成功，发现对于on也是做了过滤，将on变成了o_n，查看页面的源代码，发现果然是这样，将&lt;script，和on做了过滤。</p>
+<p>那我们就可以构造一个链接的形式来触发js脚本，这样构造语句，<code>&quot;&gt;&lt;a href=javascript:alert(1);</code>，只要我们点击这个链接，我们就成功过关了。</p>
+<h2 id="第六关："><a href="#第六关：" class="headerlink" title="第六关："></a>第六关：</h2><p>这一关我们尝试了之前的一些方法，发现不仅过滤了script ,on, 还有，href, src , 和data,于是我们查看源代码，发现对于输入的值没有做大小写的过滤，而在第五关的时候是把所有的大写转换为小写了的，所以我们不能利用大小写来突破，但是这一关可以，不管是href, src ,&lt;script，都可以，但是利用data这个我不是很清楚，花了点时间在网上搞清楚了。</p>
+<p>首先我们来看利用href，构造语句，<code>&quot;&gt;&lt;a Href=&quot;javascript:alert(1)&quot;</code>便可以达到效果。</p>
+<p>我们来看使用src 的方法：因为src是标签img中的参数，所以我们构造语句，<code>&quot;&gt;&lt;img Src=&quot;#&quot; Onerror=&quot;alert(1)&quot;</code>便可以达到效果，这里这个src是图片的地址，一个#就表明是返回到本页面，而后面的Onerror 表示的是当图片加载失败的时候，就执行这个脚本代码。</p>
+<p>我们来看使用<code>&lt;script&gt;alert(1);&lt;/script&gt;</code>但是script 要大小写混用，方便绕过。</p>
+<p>还可以使用svg&#x2F;onload&#x3D;setTimeout(‘alert(1)’,0)，这个是加载svg文件的一个函数，当这个函数被加载的时候，就会执行这个时间，settimeout()这个函数的意思是在多少毫秒之后在执行这个语句。</p>
+<p>data这个形式的语句是这样写的，<code>&lt;iframe src=&#39;data:text/html;base64,JTNDc2NyaXB0JTNFYWxlcnQlMjgxJTI5JTNDL3NjcmlwdCUzRQ==&#39;&gt;&lt;/iframe&gt;</code>src加载data和执行<code>&lt;script&gt;alert(1);&lt;/script&gt;</code>是一样的。base64表明使用的是base64编码，后面是内容。这个data除了在iframe中可以执行，还有这些：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">object</span> <span class="attr">data</span>=<span class="string">data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg</span>&gt;</span><span class="tag">&lt;/<span class="name">object</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">embed</span> <span class="attr">src</span>=<span class="string">data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg</span>&gt;</span><span class="tag">&lt;/<span class="name">embed</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">data:%26comma;alert(1)</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="第七关："><a href="#第七关：" class="headerlink" title="第七关："></a>第七关：</h2><p>这一关首先我输入&lt;script,href,src,data,SRC，然后看一下回显怎么样，判断这一关的限制是什么，结果发现都不见了，说明对于这些都直接过滤了，包括大小写。我们查看源代码，发现对于上面的这些，都是用空字符代替了，我们发现这个只是执行了一遍，所以我们可以使用双写绕过。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&quot;&gt;<span class="tag">&lt;<span class="name">scriscriptpt</span>&gt;</span>alert(1);<span class="tag">&lt;/<span class="name">scriscriptpt</span>&gt;</span></span><br><span class="line">&quot;&gt;<span class="tag">&lt;<span class="name">a</span> <span class="attr">hrehreff</span>=<span class="string">&#x27;javascrscriptipt:alert(1);&#x27;</span>&gt;</span></span><br><span class="line">&quot;&gt;<span class="tag">&lt;<span class="name">iframe</span> <span class="attr">srsrcc</span>=<span class="string">&#x27;dadatata:text/html;base64,JTNDc2NyaXB0JTNFYWxlcnQlMjgxJTI5JTNDL3NjcmlwdCUzRQ==&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span>     //不知道为什么执行不成功</span><br><span class="line">&quot;&gt;<span class="tag">&lt;<span class="name">object</span> <span class="attr">dadatata</span>=<span class="string">dadatata:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg</span>&gt;</span><span class="tag">&lt;/<span class="name">object</span>&gt;</span>    //不知道为什么执行不成功</span><br><span class="line">&quot;&gt;<span class="tag">&lt;<span class="name">img</span> <span class="attr">srsrcc</span>=<span class="string">&#x27;#&#x27;</span> <span class="attr">oonnerror</span>=<span class="string">&#x27;alert(1)&#x27;</span>&gt;</span><span class="tag">&lt;/<span class="name">img</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>双写大部分都可以绕过。</p>
+<h2 id="第八关："><a href="#第八关：" class="headerlink" title="第八关："></a>第八关：</h2><p>这一关我们尝试之前的值，然后查看源代码，发现是往href中添加链接，当我们直接使用<code>javascript:alert(1)</code>发现script被限制了，然后我们使用data流来尝试，发现data,src,href都被过滤了。</p>
+<p>那我们来尝试一下编码，将<code>javascript:alert(1)</code>进行unicode的编码，</p>
+<p>python把语句转换一下，一定要转换成  &amp;#x    ;这种格式的。成功绕过。</p>
+<h2 id="第九关："><a href="#第九关：" class="headerlink" title="第九关："></a>第九关：</h2><p>这一关我们直接查看源代码，发现这个是和上关一样的，唯一不一样的是在对于输入的地方有一个检测，检测里面有没有http:&#x2F;&#x2F;，也就是检测输入的是不是一个链接，那么我们就可以在javascript的语句后面加上一个http:&#x2F;&#x2F;，但是这个语句一定要被注释掉，确保它不会影响我们的js语句，js中的注释是&#x2F;&#x2F;，哦，对了，既然和上关一样的话，我们还是要用编码的方式来插入我们的j语句。所以整体的语句是<code>&amp;#x6a;&amp;#x61;&amp;#x76;&amp;#x61;&amp;#x73;&amp;#x63;&amp;#x72;&amp;#x69;&amp;#x70;&amp;#x74;&amp;#x3a;&amp;#x61;&amp;#x6c;&amp;#x65;&amp;#x72;&amp;#x74;&amp;#x28;&amp;#x31;&amp;#x29;//http://</code>，然后完美插入语句。或者用另一种注释&#x2F;**&#x2F;</p>
+<p><code>&amp;#x6a;&amp;#x61;&amp;#x76;&amp;#x61;&amp;#x73;&amp;#x63;&amp;#x72;&amp;#x69;&amp;#x70;&amp;#x74;&amp;#x3a;&amp;#x61;&amp;#x6c;&amp;#x65;&amp;#x72;&amp;#x74;&amp;#x28;&amp;#x31;&amp;#x29;/*http://*/</code></p>
+<h2 id="第十关："><a href="#第十关：" class="headerlink" title="第十关："></a>第十关：</h2><p>这一关我们打开，映入眼帘的没有需要输入的框框，所以我还以为是get提交参数的xss，但是当我输入之后，却没有什么变化，按F12查看网页代码，发现表单里面有三个input标签被隐藏了，我们尝试在get中输入这三个参数，看看哪个参数是有效的，测试发现t_sort这个参数会把输入的值加入到value中，那么这个就是一个突破点，我们尝试输入<code>&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;</code>，结果发现提交的参数会把&lt;&gt;过滤掉，那我们就使用点击触动，<code>&quot; onclick=javascript:alert(1); type=&quot;text&quot;</code>，后面的type是为了把type&#x3D;hidden这个参数给取消掉，因为在html中，如果在一个标签里面有两个参数的话，后面的参数不会被执行，把这个<code>&lt;input&gt;</code>标签给显示出来，因为我们要点击它呀。当我们输入这个之后，页面出现一个输入框，点击它，成功过关。</p>
+<p>这一关还可以用onmousemove，onmouseover，onfocus等这些都是可以的。</p>
+<h2 id="第十一关："><a href="#第十一关：" class="headerlink" title="第十一关："></a>第十一关：</h2><p>这一关我们查看网页代码，发现这一关多了一个被隐藏的标签，叫做t_ref ，当我们从上一关进来之后，发现t_ref的value是上一关的网址，所以我们猜测这个t_ref是获取网页的referer。但是我们尝试其他三个标签，发现t_sort还是有值的，我尝试了之前的payload，但是都没有用，一查看源代码，发现t_sort这儿的值也被htmlspecialchars()了，相反，在referer这里，倒是没有什么过滤，所以我们要从这里下手，我们使用hackbar工具来访问，可以添加referer，把referer的语句写为：<code>&quot; onclick=javascript:alert(1); type=&quot;text</code>这时候的type也是来取消这个隐藏。发现成功绕过。</p>
+<p>用onmousemove，onmouseover，onfocus等这些也都是可以的。</p>
+<h2 id="第十二关："><a href="#第十二关：" class="headerlink" title="第十二关："></a>第十二关：</h2><p>这一关和上一关一样，但是不是来自referer，而是user_agent，所以我们在ua这里构造语句，语句和上一关一样，而且onmousemove，onmouseover，onfocus这些都是可以的。</p>
+<h2 id="第十三关："><a href="#第十三关：" class="headerlink" title="第十三关："></a>第十三关：</h2><p>这一关和上面的一样，不同的是来自cookie的，使用hackbar来添加cookie ，但是这儿有一个要注意的，在javascript:alert(1)后面不能加上;号，加上后面的type执行不成功，所以添加的cookie语句是<code>user=&quot; onclick=&quot;javascript:alert(1)&quot; type=&quot;text</code>。</p>
+<h2 id="第十四关："><a href="#第十四关：" class="headerlink" title="第十四关："></a>第十四关：</h2><p>这一关的网页调用上好像有问题，但是估计是关于iframe的xss漏洞，在第七关的时候我们提到过，所以我们就略过。</p>
+<h2 id="第十五关："><a href="#第十五关：" class="headerlink" title="第十五关："></a>第十五关：</h2><p>这一关我确实没有什么头绪，看源代码也没有想法，于是只能网上找writeup，看来一圈，发现突破点在ng-include指令，这个指令的作用是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1、ng-include 指令用于包含外部的 HTML文件。</span><br><span class="line"></span><br><span class="line">2、包含的内容将作为指定元素的子节点。</span><br><span class="line"></span><br><span class="line">3、ng-include 属性的值可以是一个表达式，返回一个文件名。</span><br><span class="line"></span><br><span class="line">4、默认情况下，包含的文件需要包含在同一个域名下。</span><br></pre></td></tr></table></figure>
+
+<p>而src输入的值是添加到ng-include中去了。我们只需要包含一个之前有过漏洞的文件，所以语句为<code>src=&#39;level1.php?name=&lt;img src=1 onerror=alert(1);&gt;&lt;/img&gt;&#39;</code>文件要用引号引起来，就成功执行了。但是不知道为什么<code>src=&#39;level1.php?name=&lt;script&gt;alert(1)&lt;/script&gt;&#39;</code>执行不了。文件是加载出来了。</p>
+<h2 id="第十六关："><a href="#第十六关：" class="headerlink" title="第十六关："></a>第十六关：</h2><p>当我们在keyword后面输入语句的时候，发现在网页中直接显现出来了，当我们查看页面源代码的时候，发下我们输入的语句被放到了<code>&lt;center&gt;</code>中，那我们直接输入<code>&lt;script&gt;alert(1)&lt;/script&gt;</code>看能不能执行，结果发现script和斜杠被过滤了，那我们在里面加上一个<code>&lt;a&gt;&lt;/a&gt;</code>标签，加入一个链接，<code>&lt;a href=&#39;javascript:alert(1)&#39;&gt;&lt;/a&gt;</code>但是我们发现空格也被过滤了，那我们该如何绕过呢？在html中，%0a可以当作空格来用，因为script被过滤了，可以在script中加一个%0a，所以最后的语句是<code>&lt;a%0ahref=&quot;javas%0acript:alert(1)&quot;&gt;111&lt;/a&gt;</code>成功绕过。因为&#x2F;被过滤了，所以我们也可以找一个单标签，<code>&lt;img%0asrc=1%0aonerror=alert(1)&gt;</code>也可以绕过。</p>
+<h2 id="第十七关："><a href="#第十七关：" class="headerlink" title="第十七关："></a>第十七关：</h2><p>这一关有两个参数，这两个参数会拼接到一起，最后访问到swf文件上了，我们可以给第一个参数前面加一个空格，这样参数一就会变成一个参数，但是我们又看不到这个<code>&lt;embed&gt;&lt;/embed&gt;</code>标签，所以我们不能聚焦，点击，所以只能使用鼠标移动这个事件，所以构造的语句是：<code>arg01= onmousemove&amp;arg02=javascript:alert(2)</code>由于这关没有自动跳转，但是我们看代码发现是欧克的，所以直接点击下一关。</p>
+<h2 id="第十八关："><a href="#第十八关：" class="headerlink" title="第十八关："></a>第十八关：</h2><p>这一关和上一关一模一样，呃呃呃。</p>
+<h2 id="第十九关："><a href="#第十九关：" class="headerlink" title="第十九关："></a>第十九关：</h2><p>这第十九关和第二十关是关于反编译的问题，现在我还是不太懂，所以先放在这里，以后学会了在做。</p>
+ 
+      <!-- reward -->
+      
+      <div id="reword-out">
+        <div id="reward-btn">
+          Donate
+        </div>
+      </div>
+      
+    </div>
+    
+
+    <!-- copyright -->
+    
+    <div class="declare">
+      <ul class="post-copyright">
+        <li>
+          <i class="ri-copyright-line"></i>
+          <strong>Copyright： </strong>
+          
+          Copyright is owned by the author. For commercial reprints, please contact the author for authorization. For non-commercial reprints, please indicate the source.
+          
+        </li>
+      </ul>
+    </div>
+    
+    <footer class="article-footer">
+       
+<div class="share-btn">
+      <span class="share-sns share-outer">
+        <i class="ri-share-forward-line"></i>
+        分享
+      </span>
+      <div class="share-wrap">
+        <i class="arrow"></i>
+        <div class="share-icons">
+          
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="ri-weibo-fill"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="ri-wechat-fill"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="ri-qq-fill"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="ri-douban-line"></i>
+          </a>
+          <!-- <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a> -->
+          
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="ri-facebook-circle-fill"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="ri-twitter-fill"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="ri-google-fill"></i>
+          </a>
+        </div>
+      </div>
+</div>
+
+<div class="wx-share-modal">
+    <a class="modal-close" href="javascript:;"><i class="ri-close-circle-line"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://h-limbus.github.io/2023/05/15/XSS-Labs%E7%BB%83%E4%B9%A0/XSS-Labs%E7%BB%83%E4%B9%A0/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div id="share-mask"></div>  
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%A6%E4%B9%A0/" rel="tag">学习</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" rel="tag">网络安全</a></li></ul>
+
+    </footer>
+  </div>
+
+   
+  <nav class="article-nav">
+    
+      <a href="/2023/05/15/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/web%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%EF%BC%9A%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E5%AE%9E%E6%88%98%E6%8C%87%E5%8D%97--%E7%AC%AC%E4%B8%80%E7%AB%A0%EF%BC%88%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86%EF%BC%89/" class="article-nav-link">
+        <strong class="article-nav-caption">上一篇</strong>
+        <div class="article-nav-title">
+          
+            0x00 信息收集
+          
+        </div>
+      </a>
+    
+    
+      <a href="/2023/05/15/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/Upload-Labs%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E8%AE%AD%E7%BB%83/" class="article-nav-link">
+        <strong class="article-nav-caption">下一篇</strong>
+        <div class="article-nav-title">文件上传训练</div>
+      </a>
+    
+  </nav>
+
+   
+<!-- valine评论 -->
+<div id="vcomments-box">
+  <div id="vcomments"></div>
+</div>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="https://cdn.staticfile.org/valine/1.4.16/Valine.min.js"></script>
+<script>
+  new Valine({
+    el: "#vcomments",
+    app_id: "ypvGgRhcfezE3aedvYAO6oYo-gzGzoHsz",
+    app_key: "K7VGmo5vDtIxdtx0uAelYpSN",
+    path: window.location.pathname,
+    avatar: "monsterid",
+    placeholder: "秀儿请上座~",
+    recordIP: true,
+  });
+  const infoEle = document.querySelector("#vcomments .info");
+  if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0) {
+    infoEle.childNodes.forEach(function (item) {
+      item.parentNode.removeChild(item);
+    });
+  }
+</script>
+<style>
+  #vcomments-box {
+    padding: 5px 30px;
+  }
+
+  @media screen and (max-width: 800px) {
+    #vcomments-box {
+      padding: 5px 0px;
+    }
+  }
+
+  #vcomments-box #vcomments {
+    background-color: #fff;
+  }
+
+  .v .vlist .vcard .vh {
+    padding-right: 20px;
+  }
+
+  .v .vlist .vcard {
+    padding-left: 10px;
+  }
+</style>
+
+ 
+   
+  
+    
+</article>
+
+</section>
+      <footer class="footer">
+  <div class="outer">
+    <ul>
+      <li>
+        Copyrights &copy;
+        2023
+        <i class="ri-heart-fill heart_icon"></i> Limbus
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+      </li>
+    </ul>
+    <ul>
+      <li>
+        
+        
+        <span>
+  <span><i class="ri-user-3-fill"></i>Visitors:<span id="busuanzi_value_site_uv"></span></span>
+  <span class="division">|</span>
+  <span><i class="ri-eye-fill"></i>Views:<span id="busuanzi_value_page_pv"></span></span>
+</span>
+        
+      </li>
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      
+    </ul>
+    <ul>
+      <li>
+        <!-- cnzz统计 -->
+        
+        <script type="text/javascript" src='https://s9.cnzz.com/z_stat.php?id=1278069914&amp;web_id=1278069914'></script>
+        
+      </li>
+    </ul>
+  </div>
+</footer>    
+    </main>
+    <div class="float_btns">
+      <div class="totop" id="totop">
+  <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="todark" id="todark">
+  <i class="ri-moon-line"></i>
+</div>
+
+    </div>
+    <aside class="sidebar on">
+      <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/logo.png" alt="Limbus&#39; Blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/categories">分类</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/tags">标签</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/photography">摄影</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/friends">友链</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/2023/about">关于我</a>
+    </li>
+    
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      
+      <a class="nav-item-link nav-item-search"  title="Search">
+        <i class="ri-search-line"></i>
+      </a>
+      
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="ri-rss-line"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+    </aside>
+    <div id="mask"></div>
+
+<!-- #reward -->
+<div id="reward">
+  <span class="close"><i class="ri-close-line"></i></span>
+  <p class="reward-p"><i class="ri-cup-line"></i>请我喝杯茶吧~</p>
+  <div class="reward-box">
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/alipay.jpg">
+      <span class="reward-type">支付宝</span>
+    </div>
+    
+    
+    <div class="reward-item">
+      <img class="reward-img" src="https://cdn.jsdelivr.net/gh/H-Limbus/h-limbus.github.io@latest/images/wechat.png">
+      <span class="reward-type">微信</span>
+    </div>
+    
+  </div>
+</div>
+    
+<script src="/js/jquery-3.6.0.min.js"></script>
+ 
+<script src="/js/lazyload.min.js"></script>
+
+<!-- Tocbot -->
+ 
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  tocbot.init({
+    tocSelector: ".tocbot",
+    contentSelector: ".article-entry",
+    headingSelector: "h1, h2, h3, h4, h5, h6",
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    scrollContainer: "main",
+    positionFixedSelector: ".tocbot",
+    positionFixedClass: "is-position-fixed",
+    fixedSidebarOffset: "auto",
+  });
+</script>
+
+<script src="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.staticfile.org/jquery-modal/0.9.2/jquery.modal.min.css"
+/>
+<script src="https://cdn.staticfile.org/justifiedGallery/3.8.1/js/jquery.justifiedGallery.min.js"></script>
+
+<script src="/dist/main.js"></script>
+
+<!-- ImageViewer -->
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.css">
+<link rel="stylesheet" href="https://cdn.staticfile.org/photoswipe/4.1.3/default-skin/default-skin.min.css">
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe.min.js"></script>
+<script src="https://cdn.staticfile.org/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
+
+<script>
+    function viewer_init() {
+        let pswpElement = document.querySelectorAll('.pswp')[0];
+        let $imgArr = document.querySelectorAll(('.article-entry img:not(.reward-img)'))
+
+        $imgArr.forEach(($em, i) => {
+            $em.onclick = () => {
+                // slider展开状态
+                // todo: 这样不好，后面改成状态
+                if (document.querySelector('.left-col.show')) return
+                let items = []
+                $imgArr.forEach(($em2, i2) => {
+                    let img = $em2.getAttribute('data-idx', i2)
+                    let src = $em2.getAttribute('data-target') || $em2.getAttribute('src')
+                    let title = $em2.getAttribute('alt')
+                    // 获得原图尺寸
+                    const image = new Image()
+                    image.src = src
+                    items.push({
+                        src: src,
+                        w: image.width || $em2.width,
+                        h: image.height || $em2.height,
+                        title: title
+                    })
+                })
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
+                    index: parseInt(i)
+                });
+                gallery.init()
+            }
+        })
+    }
+    viewer_init()
+</script> 
+<!-- MathJax -->
+
+<!-- Katex -->
+
+<!-- busuanzi  -->
+ 
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+ 
+<!-- ClickLove -->
+
+<!-- ClickBoom1 -->
+
+<!-- ClickBoom2 -->
+ 
+<script src="/js/clickBoom2.js"></script>
+ 
+<!-- CodeCopy -->
+ 
+<link rel="stylesheet" href="/css/clipboard.css">
+ <script src="https://cdn.staticfile.org/clipboard.js/2.0.10/clipboard.min.js"></script>
+<script>
+  function wait(callback, seconds) {
+    var timelag = null;
+    timelag = window.setTimeout(callback, seconds);
+  }
+  !function (e, t, a) {
+    var initCopyCode = function(){
+      var copyHtml = '';
+      copyHtml += '<button class="btn-copy" data-clipboard-snippet="">';
+      copyHtml += '<i class="ri-file-copy-2-line"></i><span>COPY</span>';
+      copyHtml += '</button>';
+      $(".highlight .code pre").before(copyHtml);
+      $(".article pre code").before(copyHtml);
+      var clipboard = new ClipboardJS('.btn-copy', {
+        target: function(trigger) {
+          return trigger.nextElementSibling;
+        }
+      });
+      clipboard.on('success', function(e) {
+        let $btn = $(e.trigger);
+        $btn.addClass('copied');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-checkbox-circle-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPIED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-checkbox-circle-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+      clipboard.on('error', function(e) {
+        e.clearSelection();
+        let $btn = $(e.trigger);
+        $btn.addClass('copy-failed');
+        let $icon = $($btn.find('i'));
+        $icon.removeClass('ri-file-copy-2-line');
+        $icon.addClass('ri-time-line');
+        let $span = $($btn.find('span'));
+        $span[0].innerText = 'COPY FAILED';
+        
+        wait(function () { // 等待两秒钟后恢复
+          $icon.removeClass('ri-time-line');
+          $icon.addClass('ri-file-copy-2-line');
+          $span[0].innerText = 'COPY';
+        }, 2000);
+      });
+    }
+    initCopyCode();
+  }(window, document);
+</script>
+ 
+<!-- CanvasBackground -->
+ 
+<script src="/js/dz.js"></script>
+ 
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ theme: "forest" });
+  }
+</script>
+
+
+    
+    
+
+  </div>
+</body>
+
+</html>
